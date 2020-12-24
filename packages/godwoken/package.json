@@ -1,0 +1,13 @@
+{
+  "name": "godwoken",
+  "version": "0.0.1",
+  "description": "Godwoken utils",
+  "main": "lib/index.js",
+  "repository": "https://github.com/nervosnetwork/godwoken-examples",
+  "author": "Linfeng Qian <thewawar@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12"
+  }
+}

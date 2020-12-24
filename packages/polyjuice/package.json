@@ -1,0 +1,10 @@
+{
+  "name": "polyjuice",
+  "version": "0.0.1",
+  "description": "Client library to interactive with godwoken polyjuice",
+  "main": "lib/index.js",
+  "repository": "https://github.com/nervosnetwork/godwoken-examples",
+  "author": "Linfeng Qian <thewawar@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
