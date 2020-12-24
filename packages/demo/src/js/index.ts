@@ -1,63 +1,96 @@
 import { DeploymentConfig } from "./base";
 import { CellDep, HexString, Script } from "@ckb-lumos/base";
-import { DepositionLockArgs, generateDepositionLock, send, serializeArgs } from "./transaction";
+import { DepositionLockArgs, generateDepositionLock, initPWCore, send, serializeArgs } from "./transaction";
+import { Address, AddressType } from "@lay2/pw-core"
+import runnerConfig from "../configs/runner_config.json";
+import { utils } from "../utils"
 
 console.log("something");
 
-async function test() {
-  console.log("test start");
+const deploymentConfig = runnerConfig.deploymentConfig;
+
+const config: DeploymentConfig = {
+  deposition_lock: deploymentConfig.deposition_lock as Script,
+  custodian_lock: deploymentConfig.custodian_lock as Script,
+  state_validator_lock: deploymentConfig.state_validator_lock as Script,
+  state_validator_type: deploymentConfig.state_validator_type as Script,
+
+  deposition_lock_dep: deploymentConfig.deposition_lock_dep as CellDep,
+  custodian_lock_dep: deploymentConfig.custodian_lock_dep as CellDep,
+  state_validator_lock_dep: deploymentConfig.state_validator_lock_dep as CellDep,
+  state_validator_type_dep: deploymentConfig.state_validator_type_dep as CellDep,
+}
+
+async function sendTx(amount: string) {
+  const lockScript: Script = await getCurrentLockScript();
+  const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
 
   const depositionLockArgs: DepositionLockArgs = {
-    owner_lock_hash: "0x1f2615a8dde4e28ca736ff763c2078aff990043f4cbf09eb4b3a58a140a0862d",
+    owner_lock_hash: ownerLockHash,
     layer2_lock: {
       code_hash: "0x" + "0".repeat(64),
       hash_type: "data",
       args: "0x",
     },
-    cancel_timeout: BigInt(10000),
+    cancel_timeout: "0xc00000000002a300", // relative timestamp, 2 days
   };
 
-  const rollup_type_hash = "0x" + "1".repeat(64);
+  console.log("depositionLockArgs:", depositionLockArgs);
+
+  const rollup_type_hash: HexString = getRollupTypeHash();
 
   const serializedArgs: HexString = serializeArgs(
     rollup_type_hash,
     depositionLockArgs,
   )
 
-  const mockScript: Script = {
-    code_hash: "0x" + "0".repeat(64),
-    hash_type: "data",
-    args: "0x",
-  };
-  const mockCellDep: CellDep = {
-    out_point: {
-      tx_hash: "0x" + "1".repeat(64),
-      index: "0x0",
-    },
-    dep_type: "code",
-  }
-
-  const config: DeploymentConfig = {
-    deposition_lock: mockScript,
-    custodian_lock: mockScript,
-    state_validator_lock: mockScript,
-    state_validator_type: mockScript,
-
-    deposition_lock_dep: mockCellDep,
-    custodian_lock_dep: mockCellDep,
-    state_validator_lock_dep: mockCellDep,
-    state_validator_type_dep: mockCellDep,
-  }
+  console.log("serializedArgs:", serializedArgs);
 
   const depositionLock: Script = generateDepositionLock(config, serializedArgs);
 
-  const txHash: HexString = await send(depositionLock, '200', 1000);
+  console.log("depositionLock:", depositionLock);
+
+  const txHash: HexString = await send(depositionLock, amount, 1000);
 
   console.log("txHash:", txHash);
 
   return txHash
 };
 
-setTimeout(async() => {
-  await test();
-}, 3000);
+async function getCurrentEthAccount(): Promise<string> {
+  const accounts = (await (window as any).ethereum.send('eth_requestAccounts')).result
+  // console.log("accounts:", accounts);
+  // console.log("???")
+
+  if (accounts.length === 0) {
+    console.error("No metamask accounts found!");
+  }
+
+  // const currentAccount: string = accounts[0]
+  return accounts[0];
+}
+
+async function getCurrentLockScript(): Promise<Script> {
+  await initPWCore();
+  const ethAddress: string = await getCurrentEthAccount();
+
+  const address: Address = new Address(ethAddress, AddressType.eth);
+
+  const script = address.toLockScript();
+
+  return {
+    code_hash: script.codeHash,
+    hash_type: script.hashType,
+    args: script.args,
+  }
+}
+
+
+function getRollupTypeHash(): HexString {
+  const rollupTypeScript: Script = runnerConfig.godwokenConfig.chain.rollup_type_script as Script;
+  const hash: HexString = utils.computeScriptHash(rollupTypeScript);
+
+  console.log("rollupTypeHash:", hash);
+
+  return hash;
+}
