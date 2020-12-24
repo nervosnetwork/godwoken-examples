@@ -1,5 +1,5 @@
 import { DeploymentConfig } from "./base";
-import { CellDep, HexString, Script } from "./base/lumos-types";
+import { CellDep, HexString, Script } from "@ckb-lumos/base";
 import { DepositionLockArgs, generateDepositionLock, send, serializeArgs } from "./transaction";
 
 console.log("something");
