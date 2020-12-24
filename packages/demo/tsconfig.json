@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./build/js",
+    "types": [],
+    "lib": ["es2020", "DOM"],
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "sourceMap": true
+  },
+  "exclude": ["**/node_modules", "**/tests", "**/build"],
+  "include": ["src/js"]
+}
