@@ -1,4 +1,4 @@
-import { CellDep, Script } from "./lumos-types";
+import { CellDep, Script } from "@ckb-lumos/base";
 
 export interface DeploymentConfig {
   deposition_lock: Script;

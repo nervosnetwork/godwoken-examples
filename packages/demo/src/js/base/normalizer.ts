@@ -1,5 +1,4 @@
-// import { Hash, HexNumber, Script } from "@ckb-lumos/base";
-import { Hash, HexNumber, Script } from "./lumos-types"
+import { Hash, HexNumber, Script } from "@ckb-lumos/base"
 import { normalizers, Reader } from "ckb-js-toolkit";
 
 // Taken for now from https://github.com/xxuejie/ckb-js-toolkit/blob/68f5ff709f78eb188ee116b2887a362123b016cc/src/normalizers.js#L17-L69,
