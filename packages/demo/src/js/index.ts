@@ -94,3 +94,24 @@ function getRollupTypeHash(): HexString {
 
   return hash;
 }
+
+function getValue(): string {
+  const amountInputValue = document.querySelector<HTMLInputElement>("#amount")?.value;
+  console.log("amountInputValue:", amountInputValue);
+
+  if (!amountInputValue) {
+    alert("must set amount!");
+  }
+
+  return amountInputValue as string;
+}
+
+async function submitAmountButton() {
+  const amount = getValue();
+  await sendTx(amount);
+}
+
+const button = document.querySelector<HTMLElement>("#submit-amount")
+if (button) {
+  button.onclick = submitAmountButton;
+}
