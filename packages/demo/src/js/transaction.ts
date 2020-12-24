@@ -2,13 +2,13 @@ import PWCore, { Address, Amount, Script as PwScript, HashType, EthProvider, PwC
 import { Reader } from "ckb-js-toolkit";
 import { SerializeDepositionLockArgs } from "../schemas/godwoken";
 import { DeploymentConfig } from "./base"
-import { Script, HexString, Hash } from "@ckb-lumos/base"
+import { Script, HexString, Hash, PackedSince } from "@ckb-lumos/base"
 import { NormalizeDepositionLockArgs } from "./base/normalizer"
 
 export interface DepositionLockArgs {
   owner_lock_hash: Hash,
   layer2_lock: Script,
-  cancel_timeout: bigint,
+  cancel_timeout: PackedSince,
 }
 
 export function serializeArgs(rollup_type_hash: Hash, args: DepositionLockArgs): HexString {
@@ -17,7 +17,7 @@ export function serializeArgs(rollup_type_hash: Hash, args: DepositionLockArgs):
   const serializedDepositionLockArgs: ArrayBuffer = SerializeDepositionLockArgs(NormalizeDepositionLockArgs({
     owner_lock_hash: args.owner_lock_hash,
     layer2_lock: args.layer2_lock,
-    cancel_timeout: "0x" + args.cancel_timeout.toString(16),
+    cancel_timeout: args.cancel_timeout,
   }));
 
   const depositionLockArgsStr: HexString = new Reader(serializedDepositionLockArgs).serializeJson();
@@ -46,6 +46,14 @@ function validateRollupTypeHash(rollup_type_hash: string) {
 function scriptToPwScript(script: Script): PwScript {
   const hash_type = script.hash_type === "type" ? HashType.type : HashType.data;
   return new PwScript(script.code_hash, script.args, hash_type);
+}
+
+export async function initPWCore() {
+  const pwcore = await new PWCore("http://localhost:8114").init(
+    new EthProvider(),
+    new PwCollector('https://cellapitest.ckb.pw'),
+  );
+  return pwcore;
 }
 
 // amount is ckb, like '61.1' means 61.1 CKB, 6_110_000_000 shannons
