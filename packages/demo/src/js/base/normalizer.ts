@@ -1,4 +1,4 @@
-import { Hash, HexNumber, Script } from "@ckb-lumos/base";
+import { Hash, HexNumber, HexString, Script } from "@ckb-lumos/base";
 import { normalizers, Reader } from "ckb-js-toolkit";
 
 // Taken for now from https://github.com/xxuejie/ckb-js-toolkit/blob/68f5ff709f78eb188ee116b2887a362123b016cc/src/normalizers.js#L17-L69,
@@ -125,5 +125,57 @@ export function NormalizeCustodianLockArgs(
     owner_lock_hash: normalizeRawData(32),
     deposition_block_hash: normalizeRawData(32),
     deposition_block_number: normalizeHexNumber(8),
+  });
+}
+
+export interface RawL2Transaction {
+  from_id: HexNumber;
+  to_id: HexNumber;
+  nonce: HexNumber;
+  args: HexString;
+}
+
+export function NormalizeRawL2Transaction(
+  rawL2Transaction: object,
+  { debugPath = "raw_l2_transaction" } = {}
+) {
+  return normalizeObject(debugPath, rawL2Transaction, {
+    from_id: normalizeHexNumber(4),
+    to_id: normalizeHexNumber(4),
+    nonce: normalizeHexNumber(4),
+    args: normalizeRawData(-1),
+  });
+}
+
+export interface L2Transaction {
+  raw: RawL2Transaction;
+  signature: HexString;
+}
+
+export function NormalizeL2Transaction(
+  l2Transaction: L2Transaction,
+  { debugPath = "l2_transaction" } = {}
+) {
+  return normalizeObject(debugPath, l2Transaction, {
+    raw: toNormalize(NormalizeRawL2Transaction),
+    signature: normalizeRawData(65),
+  });
+}
+
+export interface UnoinType {
+  type: string;
+  value: any;
+}
+
+export interface CreateAccount {
+  script: Script;
+}
+
+export function NormalizeCreateAccount(
+  createAccount: object,
+  { debugPath = "create_account" } = {}
+) {
+  return normalizeObject(debugPath, createAccount, {
+    script: toNormalize(normalizers.NormalizeScript),
   });
 }
