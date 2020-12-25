@@ -4,7 +4,6 @@ import { DeploymentConfig } from "../base";
 import { Script, HexString, Hash, PackedSince } from "@ckb-lumos/base";
 import { NormalizeDepositionLockArgs } from "../base/normalizer";
 import runnerConfig from "../../configs/runner_config.json";
-import { utils } from "../../utils";
 import layer2LockConfig from "../../configs/layer2_lock_config.json";
 
 export interface DepositionLockArgs {
@@ -13,8 +12,11 @@ export interface DepositionLockArgs {
   cancel_timeout: PackedSince;
 }
 
-export function serializeArgs(args: DepositionLockArgs): HexString {
-  const rollup_type_hash: Hash = getRollupTypeHash();
+export function serializeArgs(
+  args: DepositionLockArgs,
+  computeScriptHash: Function
+): HexString {
+  const rollup_type_hash: Hash = getRollupTypeHash(computeScriptHash);
 
   const serializedDepositionLockArgs: ArrayBuffer = SerializeDepositionLockArgs(
     NormalizeDepositionLockArgs(args)
@@ -55,10 +57,10 @@ export function getDepositionLockArgs(
   return depositionLockArgs;
 }
 
-function getRollupTypeHash(): HexString {
+function getRollupTypeHash(computeScriptHash: Function): HexString {
   const rollupTypeScript: Script = runnerConfig.godwokenConfig.chain
     .rollup_type_script as Script;
-  const hash: HexString = utils.computeScriptHash(rollupTypeScript);
+  const hash: HexString = computeScriptHash(rollupTypeScript);
 
   console.log("rollupTypeHash:", hash);
 

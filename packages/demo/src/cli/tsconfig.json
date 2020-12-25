@@ -3,7 +3,7 @@
     "target": "es2015",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./build",
+    "outDir": "../../build-cli",
     "types": ["node"],
     "lib": ["es2020", "DOM"],
     "moduleResolution": "node",
@@ -13,5 +13,5 @@
     "resolveJsonModule": true,
   },
   "exclude": ["**/node_modules", "**/tests", "**/build"],
-  "include": ["src/js"]
+  "include": ["."]
 }

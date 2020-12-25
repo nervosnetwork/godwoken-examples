@@ -104,3 +104,7 @@ dist
 .tern-port
 
 /docs/
+
+packages/demo/build-cli
+packages/demo/indexer-data
+packages/demo/src/cli/config.json
