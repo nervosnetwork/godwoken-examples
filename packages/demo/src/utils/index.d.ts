@@ -1,9 +1,8 @@
-
 import * as core from "./core";
 export { core };
 
 import { Reader } from "ckb-js-toolkit";
-import { Hash, HexString, Script } from "@ckb-lumos/base"
+import { Hash, HexString, Script } from "@ckb-lumos/base";
 
 declare class CKBHasher {
   update(data: string | Reader | ArrayBuffer): this;

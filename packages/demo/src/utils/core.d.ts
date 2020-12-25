@@ -71,7 +71,9 @@ export class Bytes {
   length(): number;
 }
 
-export function SerializeBytesOpt(value: CanCastToArrayBuffer | null): ArrayBuffer;
+export function SerializeBytesOpt(
+  value: CanCastToArrayBuffer | null
+): ArrayBuffer;
 export class BytesOpt {
   constructor(reader: CanCastToArrayBuffer, options?: CreateOptions);
   validate(compatible?: boolean): void;
@@ -79,7 +81,9 @@ export class BytesOpt {
   hasValue(): boolean;
 }
 
-export function SerializeBytesVec(value: Array<CanCastToArrayBuffer>): ArrayBuffer;
+export function SerializeBytesVec(
+  value: Array<CanCastToArrayBuffer>
+): ArrayBuffer;
 export class BytesVec {
   constructor(reader: CanCastToArrayBuffer, options?: CreateOptions);
   validate(compatible?: boolean): void;
@@ -87,7 +91,9 @@ export class BytesVec {
   length(): number;
 }
 
-export function SerializeByte32Vec(value: Array<CanCastToArrayBuffer>): ArrayBuffer;
+export function SerializeByte32Vec(
+  value: Array<CanCastToArrayBuffer>
+): ArrayBuffer;
 export class Byte32Vec {
   constructor(reader: CanCastToArrayBuffer, options?: CreateOptions);
   validate(compatible?: boolean): void;
@@ -103,7 +109,9 @@ export class ScriptOpt {
   hasValue(): boolean;
 }
 
-export function SerializeProposalShortId(value: CanCastToArrayBuffer): ArrayBuffer;
+export function SerializeProposalShortId(
+  value: CanCastToArrayBuffer
+): ArrayBuffer;
 export class ProposalShortId {
   constructor(reader: CanCastToArrayBuffer, options?: CreateOptions);
   validate(compatible?: boolean): void;
@@ -128,7 +136,9 @@ export class TransactionVec {
   length(): number;
 }
 
-export function SerializeProposalShortIdVec(value: Array<CanCastToArrayBuffer>): ArrayBuffer;
+export function SerializeProposalShortIdVec(
+  value: Array<CanCastToArrayBuffer>
+): ArrayBuffer;
 export class ProposalShortIdVec {
   constructor(reader: CanCastToArrayBuffer, options?: CreateOptions);
   validate(compatible?: boolean): void;
@@ -285,4 +295,3 @@ export class WitnessArgs {
   getInputType(): BytesOpt;
   getOutputType(): BytesOpt;
 }
-
