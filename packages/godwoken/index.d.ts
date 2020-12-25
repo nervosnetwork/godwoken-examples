@@ -5,7 +5,7 @@ export type Uint32 = number;
 export type Uint64 = number;
 export type Uint128 = number;
 
-import { HexString, Hash } from "@ckb-lumos/base";
+import { HexString, Hash, Script } from "@ckb-lumos/base";
 import { * as core } from "./schemas";
 export { core };
 
@@ -24,16 +24,20 @@ export interface RunResult {
     write_data: Map<Hash, HexString>;
     read_data: Map<Hash, Uint32>;
 }
-// export interface RawL2Transaction {
-//     from_id: Uint32;
-//     to_id: Uint32;
-//     nonce: Uint32;
-//     args: HexString;
-// }
-// export interface L2Transaction {
-//     raw: RawL2Transaction;
-//     signature: HexString;
-// }
+export interface RawL2Transaction {
+    from_id: Uint32;
+    to_id: Uint32;
+    nonce: Uint32;
+    args: HexString;
+}
+export interface L2Transaction {
+    raw: RawL2Transaction;
+    signature: HexString;
+}
+
+export interface CreateAccount {
+    script: Script;
+}
 
 // export interface HeaderInfo {
 //     number: Uint64;
@@ -49,14 +53,13 @@ export enum Status {
 export declare class Godwoken {
     constructor(url: string);
 
-    execute(l2tx: core.L2Transaction): Promise<RunResult>;
-    submitL2Transaction(l2tx: core.L2Transaction): Promise<RunResult>;
-    lastSynced(): Promise<core.HeaderInfo>;
-    getStorageAt(raw_key: Hash): Promise<Hash>;
-    tip(): Promise<core.L2Block>;
-    status(): Promise<Status>;
-
-    // High level method
-    createAccount(script: core.Script): Promise<Uint32>;
+    execute(l2tx: L2Transaction): Promise<RunResult>;
+    submitL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
+    getStorageAt(account_id: Uint32, key: Hash): Promise<Hash>;
     getSudtBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128>;
+    getNonce(account_id: Uint32): Promise<Uint32>;
+
+    // utils
+    signRawL2Transaction(raw_l2tx: RawL2Transaction, privkey: HexString): HexString;
+    createAccountRawL2Transaction(script: Script): RawL2Transaction;
 }
