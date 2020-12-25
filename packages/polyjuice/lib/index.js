@@ -2,11 +2,17 @@
 function encodeArgs(to_id, value, data) {
   const call_kind = to_id > 0 ? 1 : 3;
   const data_buf = Buffer.from(data.slice(2), "hex");
-  const value_buf = Buffer.from(value.slice(2), "hex");
+
+  const value_buf = Buffer.alloc(32);
+  value_buf.writeBigUInt64BE(value & BigInt("0xFFFFFFFFFFFFFFFF"), 24);
+  value_buf.writeBigUInt64BE(value >> BigInt(64), 16);
+
   const data_size_buf = Buffer.alloc(4);
   data_size_buf.writeUInt32LE(data_buf.length);
   const total_size = 40 + data_buf.length;
+
   const buf = Buffer.alloc(total_size);
+
   // depth = 0
   buf[0] = 0;
   buf[1] = 0;
@@ -18,6 +24,17 @@ function encodeArgs(to_id, value, data) {
   input_size_buf.copy(buf, 36);
   data_buf.copy(buf, 40);
   return `0x${buf.toString("hex")}`;
+}
+
+function numberToUInt32(value) {
+  const buf = Buffer.alloc(4);
+  buf.writeUInt32LE(value);
+  return `0x${buf.toString("hex")}`;
+}
+
+function UInt32ToNumber(hex) {
+  const buf = Buffer.from(hex.slice(2), "hex");
+  return buf.readUInt32LE(0);
 }
 
 class Polyjuice {
@@ -38,7 +55,12 @@ class Polyjuice {
   async _send(method, from_id, to_id, value, data, nonce, signature) {
     const args = encodeArgs(to_id, value, data);
     const real_to_id = to_id > 0 ? to_id : this.creator_account_id;
-    const raw = { from_id, to_id: real_to_id, nonce, args };
+    const raw = {
+      from_id: numberToUInt32(from_id),
+      to_id: numberToUInt32(real_to_id),
+      nonce: numberToUInt32(nonce),
+      args,
+    };
     const l2tx = { raw, signature };
     const run_result = await method(l2tx);
     return run_result.return_data;
@@ -59,13 +81,10 @@ class Polyjuice {
 
   // Utils functions
   accountIdToAddress(id) {
-    const buf = Buffer.alloc(4);
-    buf.writeUInt32LE(id);
-    return `0x${buf.toString("hex")}`;
+    return numberToUInt32(id);
   }
   addressToAccountId(address) {
-    const buf = Buffer.from(address.slice(2), "hex");
-    return buf.readUInt32LE(0);
+    return UInt32ToNumber(address);
   }
 
   // High level functions

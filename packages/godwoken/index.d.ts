@@ -3,31 +3,26 @@ import { Map } from "immutable";
 
 export type Uint32 = number;
 export type Uint64 = number;
-export type Uint128 = number;
+export type Uint128 = bigint;
 
-import { HexString, Hash, Script } from "@ckb-lumos/base";
+import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
 import { * as core } from "./schemas";
 export { core };
 
-
-// FIXME: todo
-export interface SyncParam {}
-// FIXME: todo
-export enum SyncEvent {}
 
 export interface RunResult {
     read_values: Map<Hash, Hash>;
     write_values: Map<Hash, Hash>;
     return_data: HexString;
-    account_count?: Uint32;
+    account_count?: HexNumber;
     new_scripts: Map<Hash, HexString>;
     write_data: Map<Hash, HexString>;
-    read_data: Map<Hash, Uint32>;
+    read_data: Map<Hash, HexNumber>;
 }
 export interface RawL2Transaction {
-    from_id: Uint32;
-    to_id: Uint32;
-    nonce: Uint32;
+    from_id: HexNumber;
+    to_id: HexNumber;
+    nonce: HexNumber;
     args: HexString;
 }
 export interface L2Transaction {

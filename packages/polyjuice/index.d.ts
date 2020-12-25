@@ -17,7 +17,7 @@ export declare class Polyjuice {
     ethCall(
         from_id: Uint32,
         to_id: Uint32,
-        value: U256,
+        value: Uint128,
         data: HexString,
         nonce: Uint32,
         signature: HexString,
@@ -25,7 +25,7 @@ export declare class Polyjuice {
     sendTransaction(
         from_id: Uint32,
         to_id: Uint32,
-        value: U256,
+        value: Uint128,
         data: HexString,
         nonce: Uint32,
         signature: HexString,

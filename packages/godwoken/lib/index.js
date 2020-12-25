@@ -8,8 +8,9 @@ class Godwoken {
   }
 
   async _send(l2tx, method) {
-    // FIXME: normalize L2Transaction first
-    const data = new Reader(core.SerializeL2Transaction(l2tx)).serializeJson();
+    const data = new Reader(core.SerializeL2Transaction(
+      core.NormalizeL2Transaction(l2tx)
+    )).serializeJson();
     return await method(data);
   }
 
@@ -30,7 +31,7 @@ class Godwoken {
   }
 
   signRawL2Transaction(raw_l2tx, privkey) {
-    const data = "FIXME: normalize raw_l2tx";
+    const data = core.SerializeRawL2Transaction(core.NormalizeRawL2Transaction(raw_l2tx));
     const message = utils.ckbHash(data);
     const signObject = secp256k1.ecdsaSign(
       new Uint8Array(new Reader(message).toArrayBuffer()),
@@ -44,9 +45,11 @@ class Godwoken {
   }
   createAccountRawL2Transaction(from_id, nonce, script) {
     const create_account = { script };
-    // FIXME: normalize createAccount;
     const enum_tag = "0x00000000";
-    const args = enum_tag + "normalize(create_account)";
+    const create_account_part = new Reader(core.SerializeCreateAccount(
+      core.NormalizeCreateAccount(create_account)
+    )).serializeJson();
+    const args = enum_tag + create_account_part.slice(2);
     return { from_id, to_id: 0, nonce, args };
   }
 }
