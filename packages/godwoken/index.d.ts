@@ -1,34 +1,28 @@
 
 import { Map } from "immutable";
 
-/**
- * HexString represents string starts with "0x" and followed by even number(including empty) of [0-9a-fA-F] characters.
- */
-export type HexString = string;
-
 export type Uint32 = number;
 export type Uint64 = number;
-export type Uint128 = number;
-export type Hash = HexString;
+export type Uint128 = bigint;
 
-// FIXME: todo
-export interface SyncParam {}
-// FIXME: todo
-export enum SyncEvent {}
+import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
+import { * as core } from "./schemas";
+export { core };
+
 
 export interface RunResult {
     read_values: Map<Hash, Hash>;
     write_values: Map<Hash, Hash>;
     return_data: HexString;
-    account_count?: Uint32;
+    account_count?: HexNumber;
     new_scripts: Map<Hash, HexString>;
     write_data: Map<Hash, HexString>;
-    read_data: Map<Hash, Uint32>;
+    read_data: Map<Hash, HexNumber>;
 }
 export interface RawL2Transaction {
-    from_id: Uint32;
-    to_id: Uint32;
-    nonce: Uint32;
+    from_id: HexNumber;
+    to_id: HexNumber;
+    nonce: HexNumber;
     args: HexString;
 }
 export interface L2Transaction {
@@ -36,12 +30,16 @@ export interface L2Transaction {
     signature: HexString;
 }
 
-export interface HeaderInfo {
-    number: Uint64;
-    block_hash: Hash;
+export interface CreateAccount {
+    script: Script;
 }
+
+// export interface HeaderInfo {
+//     number: Uint64;
+//     block_hash: Hash;
+// }
 // FIXME: todo
-export interface L2Block {}
+// export interface L2Block {}
 export enum Status {
     Running = "running",
     Halting = "halting",
@@ -50,12 +48,13 @@ export enum Status {
 export declare class Godwoken {
     constructor(url: string);
 
-    sync(param: SyncParam): SyncEvent;
-    execute(l2tx: L2Transaction): RunResult;
-    submitL2Transaction(l2tx: L2Transaction): RunResult;
-    lastSynced(): HeaderInfo;
-    getStorageAt(raw_key: Hash): Hash;
-    tip(): L2Block;
-    status(): Status;
-}
+    execute(l2tx: L2Transaction): Promise<RunResult>;
+    submitL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
+    getStorageAt(account_id: Uint32, key: Hash): Promise<Hash>;
+    getSudtBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128>;
+    getNonce(account_id: Uint32): Promise<Uint32>;
 
+    // utils
+    signRawL2Transaction(raw_l2tx: RawL2Transaction, privkey: HexString): HexString;
+    createAccountRawL2Transaction(script: Script): RawL2Transaction;
+}
