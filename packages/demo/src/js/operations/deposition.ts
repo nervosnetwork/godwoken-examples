@@ -56,7 +56,10 @@ export async function sendTx(
 
   console.log("depositionLockArgs:", depositionLockArgs);
 
-  const serializedArgs: HexString = serializeArgs(depositionLockArgs);
+  const serializedArgs: HexString = serializeArgs(
+    depositionLockArgs,
+    utils.computeScriptHash
+  );
 
   console.log("serializedArgs:", serializedArgs);
 
