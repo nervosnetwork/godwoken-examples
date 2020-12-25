@@ -13,6 +13,7 @@
   },
   "scripts": {
     "clean": "rm -rf build",
+    "fmt": "prettier --write \"src/**/*.ts\" package.json",
     "cp-files": "cp -r src/html build/html && cp -r src/schemas build/schemas && cp -r src/configs build/configs && cp -r src/utils build/utils",
     "build": "webpack --config webpack.dev.config.js && yarn run cp-files",
     "start": "webpack serve --config webpack.dev.config.js",
