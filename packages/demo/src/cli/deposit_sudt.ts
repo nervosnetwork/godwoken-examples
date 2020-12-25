@@ -29,7 +29,7 @@ program
   .requiredOption("-a, --address <address>", "inputs from")
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-m --amount <amount>", "sudt amount")
-  .requiredOption("-s --sudt-token <sudt token>", "sudt amount")
+  .requiredOption("-s --sudt-script-args <sudt script args>", "sudt amount")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .option("-l, --layer2-lock-args <args>", "layer2 lock args", "0x")
@@ -135,7 +135,7 @@ const run = async () => {
       indexer,
       program.privateKey,
       program.rpc,
-      program.sudtToken,
+      program.sudtScriptArgs,
       capacity
     );
 
