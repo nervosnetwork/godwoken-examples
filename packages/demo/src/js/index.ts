@@ -4,7 +4,7 @@ import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
-import { sendTransaction } from "./polyjuice";
+import { sendTransaction, getBalance } from "./polyjuice";
 
 console.log("something");
 
@@ -137,3 +137,49 @@ export async function sendPolyjuiceTx() {
   }
 }
 sendPolyjuiceTx();
+
+// balance
+export async function displayBalance() {
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#balance-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const sudtId: string = getRequiredInputValue("sudt-id");
+    console.log("sudt id:", sudtId);
+
+    const accountId: string = getRequiredInputValue("account-id");
+    console.log("account id:", accountId);
+
+    const balance: bigint = await getBalance(+sudtId, +accountId);
+
+    console.log("get balance:", balance);
+
+    const balanceElement = document.querySelector<HTMLElement>(
+      "#balance-value"
+    );
+    if (balanceElement) {
+      balanceElement.innerHTML = balance.toString();
+    }
+  };
+
+  const button = document.querySelector<HTMLElement>("#balance-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+displayBalance();
