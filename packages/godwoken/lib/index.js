@@ -34,6 +34,14 @@ function toBuffer(ab) {
   }
   return buf;
 }
+function toArrayBuffer(buf) {
+  var ab = new ArrayBuffer(buf.length);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buf.length; ++i) {
+    view[i] = buf[i];
+  }
+  return ab;
+}
 
 class Godwoken {
   constructor(url) {
@@ -59,7 +67,8 @@ class Godwoken {
     return;
   }
   async getBalance(sudt_id, account_id) {
-    const hex = await this.rpc.gw_getBalance(sudt_id, account_id);
+    // FIXME: swap later
+    const hex = await this.rpc.gw_getBalance(account_id, sudt_id);
     return BigInt(hex);
   }
   async getStorageAt(account_id, key) {
@@ -80,8 +89,7 @@ class Godwoken {
     };
   }
   async getScriptHash(account_id) {
-    // FIXME: todo
-    return "0x";
+    return await this.rpc.gw_getScriptHash(account_id);
   }
   async getData(data_hash) {
     // FIXME: todo
@@ -94,12 +102,17 @@ class Godwoken {
 }
 
 class GodwokenUtils {
-  constructor() {}
+  constructor(rollup_type_hash) {
+    this.rollup_type_hash = rollup_type_hash;
+  }
 
-  static generateTransactionMessageToSign(raw_l2tx) {
+  generateTransactionMessageToSign(raw_l2tx) {
     const raw_tx_data = core.SerializeRawL2Transaction(NormalizeRawL2Transaction(raw_l2tx));
-    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n${raw_tx_data.length}`);
-    const buf = Buffer.concat([prefix_buf, toBuffer(raw_tx_data)]);
+    const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
+    const data = toArrayBuffer(Buffer.concat([rollup_type_hash, toBuffer(raw_tx_data)]));
+    const message = utils.ckbHash(data).serializeJson();
+    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
+    const buf = Buffer.concat([prefix_buf, Buffer.from(message.slice(2), "hex")]);
     return `0x${keccak256(buf).toString("hex")}`;
   }
   static generateWithdrawalMessageToSign(raw_request) {
@@ -130,4 +143,5 @@ module.exports = {
   UInt32LEToNumber,
   u32ToHex,
   hexToU32,
+  toBuffer,
 };

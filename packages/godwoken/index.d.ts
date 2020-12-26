@@ -7,12 +7,14 @@ export type Uint128 = bigint;
 
 import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
 import * as core from "./schemas";
-export { core };
+import * as normalizer from "./normalizer";
+export { core, normalizer };
 
 export function numberToUInt32LE(value: number): HexString;
 export function UInt32LEToNumber(hex: HexString): number;
 export function hexToU32(hex: HexString): number;
 export function u32ToHex(value: number): HexString;
+export function toBuffer(ab: ArrayBuffer): Buffer ;
 
 export interface RunResult {
     read_values: Map<Hash, Hash>;
@@ -89,8 +91,8 @@ export declare class Godwoken {
 }
 
 export declare class GodwokenUtils {
-    constructor();
-    static generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
+    constructor(rollup_type_hash: Hash);
+    generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
     static generateWithdrawalMessageToSign(raw_request: RawWithdrawalRequest): Hash;
     static createAccountRawL2Transaction(
         from_id: Uint32,
