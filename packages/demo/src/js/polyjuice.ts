@@ -54,3 +54,12 @@ export async function sendTransaction(
 
   return runResult;
 }
+
+export async function getBalance(
+  sudtId: Uint32,
+  accountId: Uint32
+): Promise<bigint> {
+  const godwoken = new Godwoken(godwokenUrl);
+  const amount = await godwoken.getBalance(accountId, sudtId);
+  return amount;
+}

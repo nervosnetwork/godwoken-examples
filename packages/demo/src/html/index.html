@@ -19,6 +19,26 @@
       <input type="text" name="amount", id="amount" required>
       <button type="button" id="submit-amount" onclick="submitAmountButton()">Submit</button>
     </div>
+
+    <div>
+      <h3>Balance</h3>
+      <p>
+        <span>Your balance:</span>
+        <span id="balance-value"></span>
+      </p>
+      <form>
+        <div>
+          <label>sudt id:</label>
+          <input type="number" id="balance-sudt-id" value="1" required>
+        </div>
+        <div>
+          <label>account id:</label>
+          <input type="number" id="balance-account-id" required>
+        </div>
+
+        <button type="button" id="balance-submit">Submit</button>
+      </form>
+    </div>
   
     <h3>Polyjuice</h3>
     <div>
