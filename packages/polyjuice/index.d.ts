@@ -1,6 +1,6 @@
 
 import {Hash, HexString } from "@ckb-lumos/base"
-import { Uint32, Uint64, Uint128, Godwoken } from "@godwoken-examples/godwoken";
+import { Uint32, Uint64, Uint128, Godwoken, RawL2Transaction } from "@godwoken-examples/godwoken";
 
 export type U256 = HexString;
 export type ETHAddress = HexString;
