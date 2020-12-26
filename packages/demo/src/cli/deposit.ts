@@ -30,7 +30,7 @@ program
   .requiredOption("-m --amount <amount>", "amount in shannons")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
-  .option("-l, --layer2-lock-args <args>", "layer2 lock args", "0x");
+  .option("-l, --eth-address <args>", "Eth address (layer2 lock args)", "0x");
 
 program.parse(process.argv);
 
@@ -126,7 +126,7 @@ const run = async () => {
       deploymentConfig,
       program.address,
       program.amount,
-      program.layer2LockArgs,
+      program.ethAddress.toLowerCase(),
       indexer,
       program.privateKey,
       program.rpc
