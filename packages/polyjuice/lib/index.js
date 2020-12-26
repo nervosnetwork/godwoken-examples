@@ -97,4 +97,6 @@ class Polyjuice {
   }
 }
 
-module.exports = Polyjuice;
+module.exports = {
+  Polyjuice
+};
