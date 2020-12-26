@@ -116,20 +116,19 @@ export async function sendPolyjuiceTx() {
     const data: string = getRequiredInputValue("data");
     console.log("data:", data);
 
-    const args: string = getRequiredInputValue("args");
-    console.log("args:", args);
+    // const args: string = getRequiredInputValue("args");
+    // console.log("args:", args);
 
-    const txHash: Hash = await sendTransaction(
+    const runResult = await sendTransaction(
       +sudtId,
       +creatorAccountId,
       +fromId,
       +toId,
       BigInt(value),
-      data,
-      args
+      data
     );
 
-    console.log("send polyjuice txHash:", txHash);
+    console.log("send polyjuice runResult:", runResult);
   };
 
   const button = document.querySelector<HTMLElement>("#polyjuice-submit");

@@ -9,6 +9,7 @@ import {
 import Config from "../configs/config.json";
 import { HexString } from "@ckb-lumos/base";
 import { sign } from "./utils/eth_sign";
+import { L2Transaction } from "./base/normalizer";
 const polyjuiceConfig = Config.polyjuice;
 
 const godwokenUrl = "http://localhost:8119";
@@ -19,8 +20,7 @@ export async function sendTransaction(
   fromId: Uint32,
   toId: Uint32,
   value: Uint128,
-  data: HexString,
-  args: HexString
+  data: HexString
 ) {
   const godwoken = new Godwoken(godwokenUrl);
   const polyjuice = new Polyjuice(godwoken, {
@@ -31,12 +31,13 @@ export async function sendTransaction(
 
   const nonce: Uint32 = await godwoken.getNonce(fromId);
 
-  const rawL2Transaction: RawL2Transaction = {
-    from_id: "0x" + fromId.toString(16),
-    to_id: "0x" + toId.toString(16),
-    nonce: "0x" + nonce.toString(16),
-    args: args,
-  };
+  const rawL2Transaction: RawL2Transaction = polyjuice.generateTransaction(
+    fromId,
+    toId,
+    value,
+    data,
+    nonce
+  );
 
   const message = GodwokenUtils.generateTransactionMessageToSign(
     rawL2Transaction
@@ -44,14 +45,12 @@ export async function sendTransaction(
 
   const signature: HexString = await sign(message);
 
-  const txHash: HexString = await polyjuice.sendTransaction(
-    fromId,
-    toId,
-    value,
-    data,
-    nonce,
-    signature
-  );
+  const l2Transaction: L2Transaction = {
+    raw: rawL2Transaction,
+    signature,
+  };
 
-  return txHash;
+  const runResult = await godwoken.submitL2Transaction(l2Transaction);
+
+  return runResult;
 }
