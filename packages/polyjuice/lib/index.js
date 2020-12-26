@@ -1,5 +1,5 @@
 
-const { UInt32ToNumber, numberToUInt32 } = require("@godwoken-examples/godwoken");
+const { UInt32LEToNumber, numberToUInt32LE } = require("@godwoken-examples/godwoken");
 
 function encodeArgs(to_id, value, data) {
   const call_kind = to_id > 0 ? 1 : 3;
@@ -78,10 +78,10 @@ class Polyjuice {
 
   // Utils functions
   accountIdToAddress(id) {
-    return numberToUInt32(id);
+    return numberToUInt32LE(id);
   }
   addressToAccountId(address) {
-    return UInt32ToNumber(address);
+    return UInt32LEToNumber(address);
   }
 
   // High level functions

@@ -9,8 +9,10 @@ import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
 import * as core from "./schemas";
 export { core };
 
-export function numberToUInt32(value: number): HexString;
-export function UInt32ToNumber(hex: HexString): number;
+export function numberToUInt32LE(value: number): HexString;
+export function UInt32LEToNumber(hex: HexString): number;
+export function hexToU32(hex: HexString): number;
+export function u32ToHex(value: number): HexString;
 
 export interface RunResult {
     read_values: Map<Hash, Hash>;
