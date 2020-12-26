@@ -1,5 +1,6 @@
 
-import { Hash, HexString, Uint32, Uint64, Uint128, Godwoken } from "@godwoken-examples/godwoken";
+import {Hash, HexString } from "@ckb-lumos/base"
+import { Uint32, Uint64, Uint128, Godwoken } from "@godwoken-examples/godwoken";
 
 export type U256 = HexString;
 export type ETHAddress = HexString;
@@ -21,7 +22,7 @@ export declare class Polyjuice {
         data: HexString,
         nonce: Uint32,
         signature: HexString,
-    ): HexString;
+    ): Promise<HexString>;
     sendTransaction(
         from_id: Uint32,
         to_id: Uint32,
@@ -29,9 +30,9 @@ export declare class Polyjuice {
         data: HexString,
         nonce: Uint32,
         signature: HexString,
-    ): HexString;
+    ): Promise<HexString>;
     getBalance(account_id: Uint32): Uint128;
-    getCode(account_id: Uint32);
+    getCode(account_id: Uint32): any;
     getTransactionCount(account_id: Uint32): Uint32;
     getStorageAt(account_id: Uint32, key: Hash): Hash;
     // == Utils functions ==

@@ -1,9 +1,10 @@
 import PWCore, { EthProvider, PwCollector } from "@lay2/pw-core";
 import { DeploymentConfig } from "./base";
-import { CellDep, Script } from "@ckb-lumos/base";
+import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
+import { sendTransaction } from "./polyjuice";
 
 console.log("something");
 
@@ -70,3 +71,70 @@ function displayEthAddress(address: string) {
 }
 
 main();
+
+// sendPolyjuiceTx();
+
+export async function sendPolyjuiceTx() {
+  console.log("sendPolyjuiceTx");
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#polyjuice-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const sudtId: string = getRequiredInputValue("sudt-id");
+    console.log("sudt id:", sudtId);
+
+    const creatorAccountId: string = getRequiredInputValue(
+      "creator-account-id"
+    );
+    console.log("creatorAccountId:", creatorAccountId);
+
+    const fromId: string = getRequiredInputValue("from-id");
+    console.log("fromId:", fromId);
+
+    const toId: string = getRequiredInputValue("to-id");
+    console.log("toId:", toId);
+
+    const value: string = getRequiredInputValue("value");
+    console.log("value:", value);
+
+    const data: string = getRequiredInputValue("data");
+    console.log("data:", data);
+
+    const args: string = getRequiredInputValue("args");
+    console.log("args:", args);
+
+    const txHash: Hash = await sendTransaction(
+      +sudtId,
+      +creatorAccountId,
+      +fromId,
+      +toId,
+      BigInt(value),
+      data,
+      args
+    );
+
+    console.log("send polyjuice txHash:", txHash);
+  };
+
+  const button = document.querySelector<HTMLElement>("#polyjuice-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+sendPolyjuiceTx();

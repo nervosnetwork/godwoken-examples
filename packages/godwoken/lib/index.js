@@ -5,7 +5,7 @@ const {
   NormalizeL2Transaction,
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
-} = require("./normalizer");
+} = require("../normalizer");
 const core = require("../schemas");
 
 function numberToUInt32(value) {
