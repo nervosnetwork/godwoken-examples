@@ -1,5 +1,5 @@
 
-const { UInt32LEToNumber, numberToUInt32LE, GodwokenUtils } = require("@godwoken-examples/godwoken");
+const { u32ToHex, UInt32LEToNumber, numberToUInt32LE, GodwokenUtils } = require("@godwoken-examples/godwoken");
 
 function encodeArgs(to_id, value, data) {
   const call_kind = to_id > 0 ? 1 : 3;
@@ -23,7 +23,7 @@ function encodeArgs(to_id, value, data) {
   // not static call
   buf[3] = 0;
   value_buf.copy(buf, 4);
-  input_size_buf.copy(buf, 36);
+  data_size_buf.copy(buf, 36);
   data_buf.copy(buf, 40);
   return `0x${buf.toString("hex")}`;
 }
@@ -62,9 +62,9 @@ class Polyjuice {
     const args = encodeArgs(to_id, value, data);
     const real_to_id = to_id > 0 ? to_id : this.creator_account_id;
     return {
-      from_id: numberToUInt32(from_id),
-      to_id: numberToUInt32(real_to_id),
-      nonce: numberToUInt32(nonce),
+      from_id: u32ToHex(from_id),
+      to_id: u32ToHex(real_to_id),
+      nonce: u32ToHex(nonce),
       args,
     };
   }
