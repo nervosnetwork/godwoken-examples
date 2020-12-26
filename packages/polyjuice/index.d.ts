@@ -23,14 +23,17 @@ export declare class Polyjuice {
     addressToAccountId(address: ETHAddress): Uint32;
     accountIdToAddress(id: Uint32): ETHAddress;
 
-    // == High level functions ==
     generateTransaction(
+        // The sender account id
         from_id: Uint32,
+        // The target contract account id, 0 is for create contract
         to_id: Uint32,
+        // The value to transfer to `to_id`
         value: Uint128,
+        // The input data for `to_id` contract to execute
         data: HexString,
+        // The nonce
         nonce: Uint32,
-        signature: HexString,
     ): RawL2Transaction;
     // Generate a RawL2Transaction for creating polyjuice base account (for creating polyjuice layer 2 account)
     generateCreateCreatorAccountTransaction(from_id: Uint32, nonce: Uint32): RawL2Transaction;

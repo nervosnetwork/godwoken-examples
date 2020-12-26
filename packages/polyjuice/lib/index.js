@@ -43,12 +43,6 @@ class Polyjuice {
     this.creator_account_id = creator_account_id;
   }
 
-  async _send(method, from_id, to_id, value, data, nonce, signature) {
-    const l2tx = { raw, signature };
-    const run_result = await method(l2tx);
-    return run_result.return_data;
-  }
-
   async getBalance(account_id) {
     return await this.client.getBalance(this.sudt_id, account_id);
   }
@@ -64,8 +58,7 @@ class Polyjuice {
     return UInt32LEToNumber(address);
   }
 
-  // High level functions
-  generateTransaction(from_id, to_id, value, data, nonce, signature) {
+  generateTransaction(from_id, to_id, value, data, nonce) {
     const args = encodeArgs(to_id, value, data);
     const real_to_id = to_id > 0 ? to_id : this.creator_account_id;
     return {
