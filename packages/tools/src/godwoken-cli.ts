@@ -13,8 +13,8 @@ import {
     RawWithdrawalRequest,
     WithdrawalRequest,
     CreateAccount,
-    UInt32ToNumber,
-    numberToUInt32,
+    UInt32LEToNumber,
+    u32ToHex,
 } from "@godwoken-examples/godwoken";
 import * as secp256k1 from "secp256k1";
 
@@ -54,6 +54,13 @@ program
     .command("signMessage <message> <privkey>")
     .description("Sign the message use secp256k1")
     .action(signMessage)
+program
+    .command("getAccountIdByScriptHash <script_hash>")
+    .description("Get account id by script hash")
+    .action(getAccountIdByScriptHash)
+program
+    .command("deposite <privkey> <amount>")
+    .description("Deposite some value")
 
 program.parse(argv);
 
@@ -76,9 +83,9 @@ function _generateTransactionMessageToSign(
     args: string,
 ) {
     const raw_l2tx = {
-        from_id: numberToUInt32(from_id),
-        to_id: numberToUInt32(to_id),
-        nonce: numberToUInt32(nonce),
+        from_id: u32ToHex(from_id),
+        to_id: u32ToHex(to_id),
+        nonce: u32ToHex(nonce),
         args,
     };
     console.log("RawL2Transaction", raw_l2tx);
@@ -145,7 +152,8 @@ async function createAccount(
 
     const godwoken = new Godwoken(program.rpc);
     const run_result = await godwoken.submitL2Transaction(l2tx);
-    const new_account_id = UInt32ToNumber(run_result.return_data);
+    console.log("RunResult", run_result);
+    const new_account_id = UInt32LEToNumber(run_result.return_data);
     console.log("Created account id:", new_account_id);
 }
 async function send(
@@ -157,9 +165,9 @@ async function send(
     signature: string,
 ) {
     const raw_l2tx: RawL2Transaction = {
-        from_id: numberToUInt32(parseInt(from_id)),
-        to_id: numberToUInt32(parseInt(to_id)),
-        nonce: numberToUInt32(parseInt(nonce)),
+        from_id: u32ToHex(parseInt(from_id)),
+        to_id: u32ToHex(parseInt(to_id)),
+        nonce: u32ToHex(parseInt(nonce)),
         args,
     };
     const l2tx: L2Transaction = { raw: raw_l2tx, signature };
@@ -202,4 +210,10 @@ function _signMessage(message: string, privkey: string) {
 function signMessage(message: string, privkey: string) {
     const signature = _signMessage(message, privkey);
     console.log("signature:", signature);
+}
+
+async function getAccountIdByScriptHash(script_hash: string) {
+    const godwoken = new Godwoken(program.rpc);
+    const account_id = await godwoken.getAccountIdByScriptHash(script_hash);
+    console.log("Account id:", account_id);
 }

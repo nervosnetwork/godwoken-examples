@@ -5,18 +5,25 @@ const {
   NormalizeL2Transaction,
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
-} = require("../normalizer");
+} = require("./normalizer");
 const core = require("../schemas");
 
-function numberToUInt32(value) {
+function numberToUInt32LE(value) {
   const buf = Buffer.alloc(4);
   buf.writeUInt32LE(value);
   return `0x${buf.toString("hex")}`;
 }
 
-function UInt32ToNumber(hex) {
-  const buf = Buffer.from(hex.slice(2), "hex");
+function UInt32LEToNumber(hex) {
+  const buf = Buffer.from(hex.slice(2, 10), "hex");
   return buf.readUInt32LE(0);
+}
+
+function u32ToHex(value) {
+  return `0x${value.toString()}`;
+}
+function hexToU32(hex) {
+  return parseInt(hex.slice(2), "hex");
 }
 
 function toBuffer(ab) {
@@ -59,8 +66,7 @@ class Godwoken {
     return await this.rpc.gw_getStorageAt(account_id, key);
   }
   async getAccountIdByScriptHash(script_hash) {
-    // FIXME: todo
-    return 0;
+    return await this.rpc.gw_getAccountIdByScriptHash(script_hash);
   }
   async getNonce(account_id) {
     return await this.rpc.gw_getNonce(account_id);
@@ -108,9 +114,9 @@ class GodwokenUtils {
     )).serializeJson();
     const args = enum_tag + create_account_part.slice(2);
     return {
-      from_id: numberToUInt32(from_id),
-      to_id: numberToUInt32(0),
-      nonce: numberToUInt32(nonce),
+      from_id: u32ToHex(from_id),
+      to_id: u32ToHex(0),
+      nonce: u32ToHex(nonce),
       args,
     };
   }
@@ -120,6 +126,8 @@ class GodwokenUtils {
 module.exports = {
   Godwoken,
   GodwokenUtils,
-  numberToUInt32,
-  UInt32ToNumber,
+  numberToUInt32LE,
+  UInt32LEToNumber,
+  u32ToHex,
+  hexToU32,
 };
