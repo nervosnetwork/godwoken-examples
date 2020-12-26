@@ -3,6 +3,7 @@ import { DeploymentConfig } from "./base";
 import { CellDep, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
+import { getCurrentEthAccount } from "./utils/eth_account";
 
 console.log("something");
 
@@ -29,6 +30,10 @@ export async function initPWCore() {
 }
 
 async function main() {
+  const currentEthAccount: string = await getCurrentEthAccount();
+  console.log("current eth address:", currentEthAccount);
+  displayEthAddress(currentEthAccount);
+
   const pwcore = await initPWCore();
 
   const getValue = (): string => {
@@ -51,6 +56,16 @@ async function main() {
   const button = document.querySelector<HTMLElement>("#submit-amount");
   if (button) {
     button.onclick = submitAmountButton;
+  }
+}
+
+// display current eth address
+function displayEthAddress(address: string) {
+  const currentEthAddressElement = document.querySelector<HTMLElement>(
+    "#current-eth-address"
+  );
+  if (currentEthAddressElement) {
+    currentEthAddressElement.innerHTML = address;
   }
 }
 
