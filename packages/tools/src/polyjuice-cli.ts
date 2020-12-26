@@ -35,11 +35,11 @@ program
     .description("Deploy a EVM contract")
     .action(deploy)
 program
-    .command("call <account_id> <input_data> <privkey>")
+    .command("call <to_id> <input_data> <rollup_type_hash> <privkey>")
     .description("Call a EVM contract")
     .action(call)
 program
-    .command("staticCall <account_id> <input_data> <privkey>")
+    .command("staticCall <to_id> <input_data> <rollup_type_hash> <privkey>")
     .description("Static Call a EVM contract")
     .action(staticCall)
 program.parse(argv);
@@ -108,10 +108,57 @@ async function deploy(
     console.log("L2Transaction", l2tx);
     const run_result = await godwoken.submitL2Transaction(l2tx);
     console.log("RunResult", run_result);
+    const new_account_id = UInt32LEToNumber(run_result.return_data);
+    console.log("new account id:", new_account_id);
 }
 
-async function call(account_id: string, input_data: string, privkey: string) {
+async function _call(
+    method: Function,
+    to_id_str: string,
+    input_data: string,
+    rollup_type_hash: string,
+    privkey: string,
+) {
+    const godwoken = new Godwoken(program.rpc);
+    const polyjuice = new Polyjuice(godwoken, {
+        validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+        sudt_id: 1,
+        creator_account_id: 0,
+    });
+    const script_hash = accountScriptHash(privkey);
+    const from_id = await godwoken.getAccountIdByScriptHash(script_hash);
+    if (!from_id) {
+        console.log("Can not find account id by script_hash:", script_hash);
+        exit(-1);
+    }
+    const nonce = await godwoken.getNonce(from_id);
+    const raw_l2tx = polyjuice.generateTransaction(from_id, parseInt(to_id_str), 0n, input_data, nonce);
+    const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
+    const signature = _signMessage(message, privkey);
+    const l2tx: L2Transaction = { raw: raw_l2tx, signature };
+    console.log("L2Transaction", l2tx);
+    const run_result = await method(l2tx);
+    console.log("RunResult", run_result);
+    console.log("return data", run_result.return_data);
 }
-async function staticCall(account_id: string, input_data: string, privkey: string) {
+
+async function call(
+    to_id_str: string,
+    input_data: string,
+    rollup_type_hash: string,
+    privkey: string,
+) {
+    const godwoken = new Godwoken(program.rpc);
+    _call(godwoken.submitL2Transaction, to_id_str, input_data, rollup_type_hash, privkey);
+}
+
+async function staticCall(
+    to_id_str: string,
+    input_data: string,
+    rollup_type_hash: string,
+    privkey: string,
+) {
+    const godwoken = new Godwoken(program.rpc);
+    _call(godwoken.executeL2Transaction, to_id_str, input_data, rollup_type_hash, privkey);
 }
 
