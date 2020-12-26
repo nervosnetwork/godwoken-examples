@@ -15,22 +15,6 @@ export declare class Polyjuice {
         }
     );
 
-    ethCall(
-        from_id: Uint32,
-        to_id: Uint32,
-        value: Uint128,
-        data: HexString,
-        nonce: Uint32,
-        signature: HexString,
-    ): Promise<HexString>;
-    sendTransaction(
-        from_id: Uint32,
-        to_id: Uint32,
-        value: Uint128,
-        data: HexString,
-        nonce: Uint32,
-        signature: HexString,
-    ): Promise<HexString>;
     getBalance(account_id: Uint32): Uint128;
     getCode(account_id: Uint32): any;
     getTransactionCount(account_id: Uint32): Uint32;
@@ -40,6 +24,14 @@ export declare class Polyjuice {
     accountIdToAddress(id: Uint32): ETHAddress;
 
     // == High level functions ==
+    generateTransaction(
+        from_id: Uint32,
+        to_id: Uint32,
+        value: Uint128,
+        data: HexString,
+        nonce: Uint32,
+        signature: HexString,
+    ): RawL2Transaction;
     // Generate a RawL2Transaction for creating polyjuice base account (for creating polyjuice layer 2 account)
     generateCreateCreatorAccountTransaction(from_id: Uint32, nonce: Uint32): RawL2Transaction;
 }
