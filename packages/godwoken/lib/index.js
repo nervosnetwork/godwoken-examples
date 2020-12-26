@@ -5,7 +5,7 @@ const {
   NormalizeL2Transaction,
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
-} = require("../normalizer");
+} = require("./normalizer");
 const core = require("../schemas");
 
 function numberToUInt32LE(value) {
@@ -66,8 +66,7 @@ class Godwoken {
     return await this.rpc.gw_getStorageAt(account_id, key);
   }
   async getAccountIdByScriptHash(script_hash) {
-    // FIXME: todo
-    return 0;
+    return await this.rpc.gw_getAccountIdByScriptHash(script_hash);
   }
   async getNonce(account_id) {
     return await this.rpc.gw_getNonce(account_id);

@@ -55,8 +55,12 @@ program
     .description("Sign the message use secp256k1")
     .action(signMessage)
 program
+    .command("getAccountIdByScriptHash <script_hash>")
+    .description("Get account id by script hash")
+    .action(getAccountIdByScriptHash)
+program
     .command("deposite <privkey> <amount>")
-    .description("")
+    .description("Deposite some value")
 
 program.parse(argv);
 
@@ -206,4 +210,10 @@ function _signMessage(message: string, privkey: string) {
 function signMessage(message: string, privkey: string) {
     const signature = _signMessage(message, privkey);
     console.log("signature:", signature);
+}
+
+async function getAccountIdByScriptHash(script_hash: string) {
+    const godwoken = new Godwoken(program.rpc);
+    const account_id = await godwoken.getAccountIdByScriptHash(script_hash);
+    console.log("Account id:", account_id);
 }
