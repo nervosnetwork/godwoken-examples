@@ -31,6 +31,7 @@ function toBuffer(ab) {
 class Godwoken {
   constructor(url) {
     this.rpc = new RPC(url);
+    this.utils = new GodwokenUtils();
   }
 
   async _send(l2tx, method) {
@@ -40,7 +41,7 @@ class Godwoken {
     return await method(data);
   }
 
-  async execute(l2tx) {
+  async executeL2Transaction(l2tx) {
     return this._send(l2tx, this.rpc.gw_executeL2Tranaction);
   }
   async submitL2Transaction(l2tx) {
@@ -51,7 +52,8 @@ class Godwoken {
     return;
   }
   async getBalance(sudt_id, account_id) {
-    return await this.rpc.gw_getBalance(sudt_id, account_id);
+    const hex = await this.rpc.gw_getBalance(sudt_id, account_id);
+    return BigInt(hex);
   }
   async getStorageAt(account_id, key) {
     return await this.rpc.gw_getStorageAt(account_id, key);
@@ -83,18 +85,22 @@ class Godwoken {
     // FIXME: todo
     return false;
   }
+}
 
-  generateTransactionMessageToSign(raw_l2tx) {
+class GodwokenUtils {
+  constructor() {}
+
+  static generateTransactionMessageToSign(raw_l2tx) {
     const raw_tx_data = core.SerializeRawL2Transaction(NormalizeRawL2Transaction(raw_l2tx));
     const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n${raw_tx_data.length}`);
     const buf = Buffer.concat([prefix_buf, toBuffer(raw_tx_data)]);
     return `0x${keccak256(buf).toString("hex")}`;
   }
-  generateWithdrawalMessageToSign(raw_request) {
+  static generateWithdrawalMessageToSign(raw_request) {
     // FIXME: todo
     return "0x";
   }
-  createAccountRawL2Transaction(from_id, nonce, script) {
+  static createAccountRawL2Transaction(from_id, nonce, script) {
     const create_account = { script };
     const enum_tag = "0x00000000";
     const create_account_part = new Reader(core.SerializeCreateAccount(
@@ -110,8 +116,10 @@ class Godwoken {
   }
 }
 
+
 module.exports = {
   Godwoken,
+  GodwokenUtils,
   numberToUInt32,
   UInt32ToNumber,
 };

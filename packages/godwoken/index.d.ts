@@ -72,7 +72,7 @@ export enum Status {
 export declare class Godwoken {
     constructor(url: string);
 
-    execute(l2tx: L2Transaction): Promise<RunResult>;
+    executeL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
     submitL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
     submitWithdrawalRequest(request: WithdrawalRequest): void;
     getBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128>;
@@ -84,11 +84,13 @@ export declare class Godwoken {
     getData(data_hash: Hash): Promise<HexString>;
     // gw_getDataHash
     hasDataHash(data_hash: Hash): Promise<boolean>;
+}
 
-    // utils
-    generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
-    generateWithdrawalMessageToSign(raw_request: RawWithdrawalRequest): Hash;
-    createAccountRawL2Transaction(
+export declare class GodwokenUtils {
+    constructor();
+    static generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
+    static generateWithdrawalMessageToSign(raw_request: RawWithdrawalRequest): Hash;
+    static createAccountRawL2Transaction(
         from_id: Uint32,
         nonce: Uint32,
         script: Script,

@@ -58,10 +58,16 @@ class Polyjuice {
   }
 
   async ethCall(from_id, to_id, value, data, nonce, signature) {
-    return await this._send(this.client.execute, from_id, to_id, value, data, nonce, signature);
+    return await this._send(
+      this.client.executeL2Transaction,
+      from_id, to_id, value, data, nonce, signature,
+    );
   }
   async sendTransaction(from_id, to_id, value, data, nonce, signature) {
-    return await this._send(this.client.submitL2Transaction, from_id, to_id, value, data, nonce, signature);
+    return await this._send(
+      this.client.submitL2Transaction,
+      from_id, to_id, value, data, nonce, signature,
+    );
   }
   async getBalance(account_id) {
     return await this.client.getBalance(this.sudt_id, account_id);
