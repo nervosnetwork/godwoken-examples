@@ -1,7 +1,7 @@
 import { Reader } from "ckb-js-toolkit";
 import { SerializeDepositionLockArgs } from "../../schemas/godwoken";
 import { DeploymentConfig } from "../base";
-import { Script, HexString, Hash, PackedSince } from "@ckb-lumos/base";
+import { Script, HexString, Hash, PackedSince, utils } from "@ckb-lumos/base";
 import { NormalizeDepositionLockArgs } from "../base/normalizer";
 import runnerConfig from "../../configs/runner_config.json";
 import Config from "../../configs/config.json";
@@ -13,11 +13,8 @@ export interface DepositionLockArgs {
   cancel_timeout: PackedSince;
 }
 
-export function serializeArgs(
-  args: DepositionLockArgs,
-  computeScriptHash: Function
-): HexString {
-  const rollup_type_hash: Hash = getRollupTypeHash(computeScriptHash);
+export function serializeArgs(args: DepositionLockArgs): HexString {
+  const rollup_type_hash: Hash = getRollupTypeHash();
 
   const serializedDepositionLockArgs: ArrayBuffer = SerializeDepositionLockArgs(
     NormalizeDepositionLockArgs(args)
@@ -58,10 +55,10 @@ export function getDepositionLockArgs(
   return depositionLockArgs;
 }
 
-function getRollupTypeHash(computeScriptHash: Function): HexString {
+function getRollupTypeHash(): HexString {
   const rollupTypeScript: Script = runnerConfig.godwokenConfig.chain
     .rollup_type_script as Script;
-  const hash: HexString = computeScriptHash(rollupTypeScript);
+  const hash: HexString = utils.computeScriptHash(rollupTypeScript);
 
   console.log("rollupTypeHash:", hash);
 

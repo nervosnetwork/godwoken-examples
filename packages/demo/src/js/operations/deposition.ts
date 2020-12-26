@@ -5,8 +5,7 @@ import PWCore, {
   Amount,
   AddressType,
 } from "@lay2/pw-core";
-import { Script, HexString } from "@ckb-lumos/base";
-import { utils } from "../../utils";
+import { Script, HexString, utils } from "@ckb-lumos/base";
 import {
   DepositionLockArgs,
   generateDepositionLock,
@@ -56,10 +55,7 @@ export async function sendTx(
 
   console.log("depositionLockArgs:", depositionLockArgs);
 
-  const serializedArgs: HexString = serializeArgs(
-    depositionLockArgs,
-    utils.computeScriptHash
-  );
+  const serializedArgs: HexString = serializeArgs(depositionLockArgs);
 
   console.log("serializedArgs:", serializedArgs);
 
