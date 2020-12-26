@@ -1,5 +1,12 @@
 import { Hash, HexNumber, HexString, Script } from "@ckb-lumos/base";
 import { normalizers, Reader } from "ckb-js-toolkit";
+import {
+    L2Transaction,
+    RawL2Transaction,
+    CreateAccount,
+    RawWithdrawalRequest,
+    WithdrawalRequest,
+} from "@godwoken-examples/godwoken";
 
 // Taken for now from https://github.com/xxuejie/ckb-js-toolkit/blob/68f5ff709f78eb188ee116b2887a362123b016cc/src/normalizers.js#L17-L69,
 // later we can think about exposing those functions directly.
@@ -128,13 +135,6 @@ export function NormalizeCustodianLockArgs(
   });
 }
 
-export interface RawL2Transaction {
-  from_id: HexNumber;
-  to_id: HexNumber;
-  nonce: HexNumber;
-  args: HexString;
-}
-
 export function NormalizeRawL2Transaction(
   rawL2Transaction: object,
   { debugPath = "raw_l2_transaction" } = {}
@@ -147,11 +147,6 @@ export function NormalizeRawL2Transaction(
   });
 }
 
-export interface L2Transaction {
-  raw: RawL2Transaction;
-  signature: HexString;
-}
-
 export function NormalizeL2Transaction(
   l2Transaction: L2Transaction,
   { debugPath = "l2_transaction" } = {}
@@ -162,13 +157,36 @@ export function NormalizeL2Transaction(
   });
 }
 
+export function NormalizeRawWithdrawalRequest(
+    raw_request: object,
+    { debugPath = "raw_withdrawal_request" } = {}
+) {
+    return normalizeObject(debugPath, raw_request, {
+        nonce: normalizeHexNumber(4),
+        capacity: normalizeHexNumber(8),
+        amount: normalizeHexNumber(16),
+        sudt_script_hash: normalizeRawData(32),
+        account_script_hash: normalizeRawData(32),
+        sell_amount: normalizeHexNumber(16),
+        sell_capacity: normalizeHexNumber(8),
+        owner_lock_hash: normalizeRawData(32),
+        payment_lock_hash: normalizeRawData(32),
+    });
+}
+
+export function NormalizeWithdrawalRequest(
+    request: WithdrawalRequest,
+    { debugPath = "withdrawal_request" } = {}
+) {
+    return normalizeObject(debugPath, request, {
+        raw: toNormalize(NormalizeRawWithdrawalRequest),
+        signature: normalizeRawData(65),
+    });
+}
+
 export interface UnoinType {
   type: string;
   value: any;
-}
-
-export interface CreateAccount {
-  script: Script;
 }
 
 export function NormalizeCreateAccount(

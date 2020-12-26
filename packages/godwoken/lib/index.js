@@ -6,6 +6,7 @@ const {
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
 } = require("./normalizer");
+const core = require("../schemas");
 
 function numberToUInt32(value) {
   const buf = Buffer.alloc(4);
@@ -16,6 +17,15 @@ function numberToUInt32(value) {
 function UInt32ToNumber(hex) {
   const buf = Buffer.from(hex.slice(2), "hex");
   return buf.readUInt32LE(0);
+}
+
+function toBuffer(ab) {
+  var buf = Buffer.alloc(ab.byteLength);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buf.length; ++i) {
+    buf[i] = view[i];
+  }
+  return buf;
 }
 
 class Godwoken {
@@ -36,21 +46,53 @@ class Godwoken {
   async submitL2Transaction(l2tx) {
     return this._send(l2tx, this.rpc.gw_submitL2Transaction);
   }
+  async submitWithdrawalRequest(request) {
+    // FIXME: todo
+    return;
+  }
+  async getBalance(sudt_id, account_id) {
+    return await this.rpc.gw_getBalance(sudt_id, account_id);
+  }
   async getStorageAt(account_id, key) {
     return await this.rpc.gw_getStorageAt(account_id, key);
   }
-  async getSudtBalance(sudt_id, account_id) {
-    return await this.rpc.gw_getBalance(sudt_id, account_id);
+  async getAccountIdByScriptHash(script_hash) {
+    // FIXME: todo
+    return 0;
   }
   async getNonce(account_id) {
     return await this.rpc.gw_getNonce(account_id);
   }
+  async getScript(script_hash) {
+    // FIXME: todo
+    return {
+      code_hash: "0x",
+      hash_type: "data",
+      args: "0x",
+    };
+  }
+  async getScriptHash(account_id) {
+    // FIXME: todo
+    return "0x";
+  }
+  async getData(data_hash) {
+    // FIXME: todo
+    return "0x";
+  }
+  async hasDataHash(data_hash) {
+    // FIXME: todo
+    return false;
+  }
 
-  generateMessageToSign(raw_l2tx, privkey) {
-    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n${raw_tx_data.length}`);
+  generateTransactionMessageToSign(raw_l2tx) {
     const raw_tx_data = core.SerializeRawL2Transaction(NormalizeRawL2Transaction(raw_l2tx));
-    const buf = Buffer.concat([prefix_buf, raw_tx_data]);
+    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n${raw_tx_data.length}`);
+    const buf = Buffer.concat([prefix_buf, toBuffer(raw_tx_data)]);
     return `0x${keccak256(buf).toString("hex")}`;
+  }
+  generateWithdrawalMessageToSign(raw_request) {
+    // FIXME: todo
+    return "0x";
   }
   createAccountRawL2Transaction(from_id, nonce, script) {
     const create_account = { script };

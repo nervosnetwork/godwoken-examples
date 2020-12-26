@@ -64,7 +64,7 @@ class Polyjuice {
     return await this._send(this.client.submitL2Transaction, from_id, to_id, value, data, nonce, signature);
   }
   async getBalance(account_id) {
-    return await this.client.getSudtBalance(this.sudt_id, account_id);
+    return await this.client.getBalance(this.sudt_id, account_id);
   }
   async getTransactionCount(account_id) {
     return await this.client.getNonce(account_id);
