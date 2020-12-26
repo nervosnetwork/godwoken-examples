@@ -4,7 +4,8 @@ import { DeploymentConfig } from "../base";
 import { Script, HexString, Hash, PackedSince } from "@ckb-lumos/base";
 import { NormalizeDepositionLockArgs } from "../base/normalizer";
 import runnerConfig from "../../configs/runner_config.json";
-import layer2LockConfig from "../../configs/layer2_lock_config.json";
+import Config from "../../configs/config.json";
+const layer2LockConfig = Config.layer2_lock;
 
 export interface DepositionLockArgs {
   owner_lock_hash: Hash;
