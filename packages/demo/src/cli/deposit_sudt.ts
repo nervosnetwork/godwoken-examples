@@ -56,10 +56,7 @@ async function sendTx(
     ownerLockHash,
     layer2LockArgs
   );
-  const serializedArgs: HexString = serializeArgs(
-    depositionLockArgs,
-    utils.computeScriptHash
-  );
+  const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
     deploymentConfig,
     serializedArgs
