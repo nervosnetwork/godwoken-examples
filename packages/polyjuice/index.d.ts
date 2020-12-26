@@ -1,5 +1,5 @@
 
-import { Hash, HexString, Uint32, Uint64, Uint128, Godwoken } from "../godwoken";
+import { Hash, HexString, Uint32, Uint64, Uint128, Godwoken } from "@godwoken-examples/godwoken";
 
 export type U256 = HexString;
 export type ETHAddress = HexString;
@@ -34,9 +34,11 @@ export declare class Polyjuice {
     getCode(account_id: Uint32);
     getTransactionCount(account_id: Uint32): Uint32;
     getStorageAt(account_id: Uint32, key: Hash): Hash;
-    // Utils functions
+    // == Utils functions ==
     addressToAccountId(address: ETHAddress): Uint32;
     accountIdToAddress(id: Uint32): ETHAddress;
-    // High level functions
-    createCreatorAccount(privkey: HexString): Uint32;
+
+    // == High level functions ==
+    // Generate a RawL2Transaction for creating polyjuice base account (for creating polyjuice layer 2 account)
+    generateCreateCreatorAccountTransaction(from_id: Uint32, nonce: Uint32): RawL2Transaction;
 }
