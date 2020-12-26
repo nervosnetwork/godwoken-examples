@@ -2,13 +2,15 @@
 import { Map } from "immutable";
 
 export type Uint32 = number;
-export type Uint64 = number;
+export type Uint64 = bigint;
 export type Uint128 = bigint;
 
 import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
-import { * as core } from "./schemas";
+import * as core from "./schemas";
 export { core };
 
+export function numberToUInt32(value: number): HexString;
+export function UInt32ToNumber(hex: HexString): number;
 
 export interface RunResult {
     read_values: Map<Hash, Hash>;
@@ -55,6 +57,10 @@ export declare class Godwoken {
     getNonce(account_id: Uint32): Promise<Uint32>;
 
     // utils
-    signRawL2Transaction(raw_l2tx: RawL2Transaction, privkey: HexString): HexString;
-    createAccountRawL2Transaction(script: Script): RawL2Transaction;
+    generateMessageToSign(raw_l2tx: RawL2Transaction): Hash;
+    createAccountRawL2Transaction(
+        from_id: Uint32,
+        nonce: Uint32,
+        script: Script,
+    ): RawL2Transaction;
 }

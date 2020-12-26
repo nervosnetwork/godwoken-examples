@@ -1,5 +1,5 @@
 {
-  "name": "godwoken",
+  "name": "@godwoken-examples/godwoken",
   "version": "0.0.1",
   "description": "Godwoken utils",
   "main": "lib/index.js",
@@ -8,6 +8,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "immutable": "^4.0.0-rc.12"
+    "@ckb-lumos/base": "^0.14.2-rc2",
+    "ckb-js-toolkit": "^0.9.3",
+    "immutable": "^4.0.0-rc.12",
+    "keccak256": "^1.0.2"
   }
 }

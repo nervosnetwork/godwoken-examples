@@ -1,0 +1,13 @@
+{
+  "name": "@godwoken-examples/tools",
+  "version": "0.0.1",
+  "description": "Tools for godwoken",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@godwoken-examples/godwoken": "^0.0.1",
+    "@types/secp256k1": "^4.0.1",
+    "commander": "^6.2.1"
+  }
+}
