@@ -15,7 +15,7 @@ program
     .description("Get nonce from account")
     .action(async (account_id) => {
         const godwoken = new Godwoken(program.rpc);
-        const nonce = await godwoken.getNonce(account_id);
-        console.log(`nonce: ${nonce}`);
+        const nonce = await godwoken.getNonce(parseInt(account_id));
+        console.log("nonce:", nonce);
     });
 program.parse(argv);
