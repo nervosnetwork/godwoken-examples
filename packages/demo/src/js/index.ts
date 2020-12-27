@@ -4,7 +4,7 @@ import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
-import { sendTransaction, getBalance } from "./polyjuice";
+import { sendTransaction, getBalanceByEthAddress } from "./polyjuice";
 
 console.log("something");
 
@@ -140,6 +140,8 @@ sendPolyjuiceTx();
 
 // balance
 export async function displayBalance() {
+  const currentEthAddress: string = await getCurrentEthAccount();
+
   const getInputValue = (id: string): string | undefined => {
     return document.querySelector<HTMLInputElement>(`#balance-${id}`)?.value;
   };
@@ -162,10 +164,10 @@ export async function displayBalance() {
     const sudtId: string = getRequiredInputValue("sudt-id");
     console.log("sudt id:", sudtId);
 
-    const accountId: string = getRequiredInputValue("account-id");
-    console.log("account id:", accountId);
-
-    const balance: bigint = await getBalance(+sudtId, +accountId);
+    const balance: bigint = await getBalanceByEthAddress(
+      +sudtId,
+      currentEthAddress
+    );
 
     console.log("get balance:", balance);
 
