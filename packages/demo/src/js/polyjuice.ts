@@ -7,9 +7,11 @@ import {
   GodwokenUtils,
 } from "@godwoken-examples/godwoken";
 import Config from "../configs/config.json";
-import { HexString } from "@ckb-lumos/base";
+import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import { sign } from "./utils/eth_sign";
 import { L2Transaction } from "./base/normalizer";
+import { getRollupTypeHash } from "./transactions/deposition";
+const layer2LockConfig = Config.layer2_lock;
 const polyjuiceConfig = Config.polyjuice;
 
 const godwokenUrl = "http://localhost:8119";
@@ -39,7 +41,9 @@ export async function sendTransaction(
     nonce
   );
 
-  const message = GodwokenUtils.generateTransactionMessageToSign(
+  const rollupTypeHash: Hash = getRollupTypeHash();
+  const godwokenUtils = new GodwokenUtils(rollupTypeHash);
+  const message = godwokenUtils.generateTransactionMessageToSign(
     rawL2Transaction
   );
 
@@ -55,11 +59,40 @@ export async function sendTransaction(
   return runResult;
 }
 
+function getLayer2LockScript(ethAddress: string): Script {
+  return {
+    code_hash: layer2LockConfig.code_hash,
+    hash_type: layer2LockConfig.hash_type as "data" | "type",
+    args: ethAddress,
+  };
+}
+
+function getLayer2LockHash(ethAddress: string): Hash {
+  return utils.computeScriptHash(getLayer2LockScript(ethAddress));
+}
+
+async function getAccountId(layer2LockHash: Hash): Promise<Uint32> {
+  const godwoken = new Godwoken(godwokenUrl);
+  const accountId = await godwoken.getAccountIdByScriptHash(layer2LockHash);
+  return accountId;
+}
+
 export async function getBalance(
   sudtId: Uint32,
   accountId: Uint32
 ): Promise<bigint> {
   const godwoken = new Godwoken(godwokenUrl);
-  const amount = await godwoken.getBalance(accountId, sudtId);
+  const amount = await godwoken.getBalance(sudtId, accountId);
   return amount;
+}
+
+export async function getBalanceByEthAddress(
+  sudtId: Uint32,
+  ethAddress: string
+): Promise<bigint> {
+  const layer2LockHash: Hash = getLayer2LockHash(ethAddress);
+  const accountId = await getAccountId(layer2LockHash);
+  console.log("accountId:", accountId);
+  const balance: bigint = await getBalance(sudtId, accountId);
+  return balance;
 }
