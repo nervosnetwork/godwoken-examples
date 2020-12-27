@@ -52,7 +52,7 @@ class Polyjuice {
 
   // Utils functions
   accountIdToAddress(id) {
-    return numberToUInt32LE(id);
+    return numberToUInt32LE(id) + "0".repeat(32);
   }
   addressToAccountId(address) {
     return UInt32LEToNumber(address);
