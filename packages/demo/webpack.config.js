@@ -23,6 +23,10 @@ module.exports = {
       "crypto": require.resolve("crypto-browserify"),
       "stream": require.resolve("stream-browserify"),
       "assert": require.resolve("assert/"),
+    },
+    alias: {
+      buffer: path.join(__dirname, './node_modules/buffer'),
+      Buffer: path.join(__dirname, './node_modules/buffer'),
     }
   },
   output: {
