@@ -17,7 +17,7 @@ import {
     u32ToHex,
 } from "@godwoken-examples/godwoken";
 import * as secp256k1 from "secp256k1";
-import { _generateTransactionMessageToSign, _signMessage } from "./common";
+import { _createAccountRawL2Transaction, _generateTransactionMessageToSign, _signMessage } from "./common";
 
 const program = new Command();
 program
@@ -98,19 +98,6 @@ function generateTransactionMessageToSign(
     console.log("message:", message);
 }
 
-function _createAccountRawL2Transaction(
-    from_id: number,
-    nonce: number,
-    script_code_hash: string,
-    script_args: string,
-) {
-    const script: Script = {
-        code_hash: script_code_hash,
-        hash_type: "data",
-        args: script_args
-    };
-    return GodwokenUtils.createAccountRawL2Transaction(from_id, nonce, script);
-}
 function createAccountRawL2Transaction(
     from_id_str: string,
     nonce_str: string,

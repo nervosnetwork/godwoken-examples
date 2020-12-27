@@ -7,7 +7,11 @@ import { Command } from "commander";
 import { core as base_core, Script, utils } from "@ckb-lumos/base";
 import { scriptToAddress } from "@ckb-lumos/helpers";
 import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
-import { _signMessage, _generateTransactionMessageToSign } from "./common";
+import {
+    _signMessage,
+    _generateTransactionMessageToSign,
+    _createAccountRawL2Transaction,
+} from "./common";
 
 import {
     core,
@@ -20,6 +24,7 @@ import {
     WithdrawalRequest,
     CreateAccount,
     UInt32LEToNumber,
+    numberToUInt32LE,
     u32ToHex,
 } from "@godwoken-examples/godwoken";
 import { Polyjuice } from "@godwoken-examples/polyjuice";
@@ -30,6 +35,10 @@ const program = new Command();
 program
     .option("-r, --rpc <rpc>", "Godwoken jsonrpc url", "http://127.0.0.1:8119");
 
+program
+    .command("createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>")
+    .description("Create account id for create polyjuice contract account (the `creator_account_id` config)")
+    .action(createCreatorAccount)
 program
     .command("deploy <creator_account_id> <init_code> <rollup_type_hash> <privkey>")
     .description("Deploy a EVM contract")
@@ -44,41 +53,30 @@ program
     .action(staticCall)
 program.parse(argv);
 
-function ckbAddress(privateKey: any) {
-    initializeConfig();
-    const privateKeyBuffer = new Reader(privateKey).toArrayBuffer();
-    const publicKeyArray = secp256k1.publicKeyCreate(
-        new Uint8Array(privateKeyBuffer)
-    );
-    const publicKeyHash = utils
-        .ckbHash(publicKeyArray.buffer)
-        .serializeJson()
-        .substr(0, 42);
-    const scriptConfig = getConfig().SCRIPTS.SECP256K1_BLAKE160!;
-    const script = {
-        code_hash: scriptConfig.CODE_HASH,
-        hash_type: scriptConfig.HASH_TYPE,
-        args: publicKeyHash,
-    };
-    return scriptToAddress(script);
-}
+const validator_code_hash = "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9";
 
-function ethAddress(privkey: any) {
-    const privateKeyBuffer = new Reader(privkey).toArrayBuffer();
-    const publicKeyArray = secp256k1.publicKeyCreate(
-        new Uint8Array(privateKeyBuffer)
+async function createCreatorAccount(
+    from_id_str: string,
+    sudt_id_str: string,
+    rollup_type_hash: string,
+    privkey: string
+) {
+    const godwoken = new Godwoken(program.rpc);
+    const from_id = parseInt(from_id_str);
+    const nonce = await godwoken.getNonce(from_id);
+    const script_args = numberToUInt32LE(parseInt(sudt_id_str));
+    const raw_l2tx = _createAccountRawL2Transaction(
+        from_id, nonce, validator_code_hash, script_args,
     );
-    const addr = `0x${keccak256(toBuffer(publicKeyArray.buffer)).slice(12).toString("hex")}`;
-    console.log("EthAddress:", addr);
-    return addr;
-}
-function accountScriptHash(privkey: any) {
-    const script: Script = {
-        code_hash: "0x0000000000000000000000000000000000000000000000000000000000000001",
-        hash_type: "data",
-        args: ethAddress(privkey),
-    };
-    return utils.ckbHash(base_core.SerializeScript(normalizers.NormalizeScript(script))).serializeJson();
+    const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
+    const signature = _signMessage(message, privkey);
+    console.log("message", message);
+    console.log("signature", signature);
+    const l2tx: L2Transaction = { raw: raw_l2tx, signature };
+    const run_result = await godwoken.submitL2Transaction(l2tx);
+    console.log("RunResult", run_result);
+    const new_account_id = UInt32LEToNumber(run_result.return_data);
+    console.log("Created account id:", new_account_id);
 }
 
 async function deploy(
@@ -90,7 +88,7 @@ async function deploy(
     const creator_account_id = parseInt(creator_account_id_str);
     const godwoken = new Godwoken(program.rpc);
     const polyjuice = new Polyjuice(godwoken, {
-        validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+        validator_code_hash,
         sudt_id: 1,
         creator_account_id,
     });
@@ -121,7 +119,7 @@ async function _call(
 ) {
     const godwoken = new Godwoken(program.rpc);
     const polyjuice = new Polyjuice(godwoken, {
-        validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+        validator_code_hash,
         sudt_id: 1,
         creator_account_id: 0,
     });
@@ -162,3 +160,40 @@ async function staticCall(
     _call(godwoken.executeL2Transaction, to_id_str, input_data, rollup_type_hash, privkey);
 }
 
+
+function ckbAddress(privateKey: any) {
+    initializeConfig();
+    const privateKeyBuffer = new Reader(privateKey).toArrayBuffer();
+    const publicKeyArray = secp256k1.publicKeyCreate(
+        new Uint8Array(privateKeyBuffer)
+    );
+    const publicKeyHash = utils
+        .ckbHash(publicKeyArray.buffer)
+        .serializeJson()
+        .substr(0, 42);
+    const scriptConfig = getConfig().SCRIPTS.SECP256K1_BLAKE160!;
+    const script = {
+        code_hash: scriptConfig.CODE_HASH,
+        hash_type: scriptConfig.HASH_TYPE,
+        args: publicKeyHash,
+    };
+    return scriptToAddress(script);
+}
+
+function ethAddress(privkey: any) {
+    const privateKeyBuffer = new Reader(privkey).toArrayBuffer();
+    const publicKeyArray = secp256k1.publicKeyCreate(
+        new Uint8Array(privateKeyBuffer)
+    );
+    const addr = `0x${keccak256(toBuffer(publicKeyArray.buffer)).slice(12).toString("hex")}`;
+    console.log("EthAddress:", addr);
+    return addr;
+}
+function accountScriptHash(privkey: any) {
+    const script: Script = {
+        code_hash: "0x0000000000000000000000000000000000000000000000000000000000000001",
+        hash_type: "data",
+        args: ethAddress(privkey),
+    };
+    return utils.ckbHash(base_core.SerializeScript(normalizers.NormalizeScript(script))).serializeJson();
+}

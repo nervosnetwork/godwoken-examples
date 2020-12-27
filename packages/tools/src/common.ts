@@ -60,3 +60,17 @@ export function ckbAddress(privateKey: any) {
     };
     return scriptToAddress(script);
 }
+
+export function _createAccountRawL2Transaction(
+    from_id: number,
+    nonce: number,
+    script_code_hash: string,
+    script_args: string,
+) {
+    const script: Script = {
+        code_hash: script_code_hash,
+        hash_type: "data",
+        args: script_args
+    };
+    return GodwokenUtils.createAccountRawL2Transaction(from_id, nonce, script);
+}
