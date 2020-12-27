@@ -37,7 +37,9 @@ You can get the script hash when deposition finished.
 $ node packages/tools/lib/polyjuice-cli.js deploy <creator_account_id> <init_code> <rollup_type_hash> <privkey>
 ```
 
-This will output the account id
+This will output the account id.
+
+The `<init_code>` sample, please see sample-contracts/SimpleStorage.bin .
 
 ## Call an ethereum contract
 
@@ -46,3 +48,5 @@ $ node packages/tools/lib/polyjuice-cli.js call call <to_id> <input_data> <rollu
 ```
 
 `<to_id>` is the account created in deploy step.
+
+The `<input_data>` sample, please see sample-contracts/SimpleStorage.calls.md .
