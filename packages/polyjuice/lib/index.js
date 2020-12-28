@@ -4,7 +4,7 @@ const base = require("@ckb-lumos/base");
 const { u32ToHex, UInt32LEToNumber, numberToUInt32LE, GodwokenUtils } = require("@godwoken-examples/godwoken");
 
 function encodeArgs(to_id, value, data) {
-  const call_kind = to_id > 0 ? 1 : 3;
+  const call_kind = to_id > 0 ? 0 : 3;
   const data_buf = Buffer.from(data.slice(2), "hex");
 
   const value_buf = Buffer.alloc(32);
@@ -109,6 +109,9 @@ class SimpleStorage {
     return _setMethod() + valueHex.slice(2);
   }
   static getValue() { return "0x6d4ce63c"; }
+  static parseReturnData(hex) {
+    return BitInt(hex);
+  }
 }
 
 module.exports = {
