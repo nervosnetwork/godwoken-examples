@@ -123,7 +123,7 @@ async function _call(
 ) {
     const godwoken = new Godwoken(program.rpc);
     const polyjuice = new Polyjuice(godwoken, {
-        validator_code_hash,
+        validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
         sudt_id: 1,
         creator_account_id: 0,
     });
@@ -151,7 +151,10 @@ async function call(
     privkey: string,
 ) {
     const godwoken = new Godwoken(program.rpc);
-    _call(godwoken.submitL2Transaction, to_id_str, input_data, rollup_type_hash, privkey);
+    _call(
+        godwoken.submitL2Transaction.bind(godwoken),
+        to_id_str, input_data, rollup_type_hash, privkey,
+    );
 }
 
 async function staticCall(
@@ -161,7 +164,10 @@ async function staticCall(
     privkey: string,
 ) {
     const godwoken = new Godwoken(program.rpc);
-    _call(godwoken.executeL2Transaction, to_id_str, input_data, rollup_type_hash, privkey);
+    _call(
+        godwoken.executeL2Transaction.bind(godwoken),
+        to_id_str, input_data, rollup_type_hash, privkey,
+    );
 }
 
 

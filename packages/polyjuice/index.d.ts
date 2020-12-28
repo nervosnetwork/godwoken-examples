@@ -48,4 +48,5 @@ export declare class SimpleStorage {
     // set value use uint256 hex string
     static setValueHex(hexValue: HexString): HexString;
     static getValue(): HexString;
+    static parseReturnData(hexValue: HexString): Uint256;
 }
