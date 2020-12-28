@@ -21,7 +21,7 @@ function UInt32LEToNumber(hex) {
 }
 
 function u32ToHex(value) {
-  return `0x${value.toString()}`;
+  return `0x${value.toString(16)}`;
 }
 function hexToU32(hex) {
   return parseInt(hex.slice(2), "hex");

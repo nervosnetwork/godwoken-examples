@@ -5,12 +5,14 @@ import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
 import {
-  sendTransaction,
   getBalanceByEthAddress,
   getAccountIdByEthAddress,
+  executeL2Transaction,
+  submitL2Transaction,
+  deployContract,
 } from "./polyjuice";
 import Config from "../configs/config.json";
-import { Polyjuice } from "@godwoken-examples/polyjuice";
+import { Polyjuice, SimpleStorage } from "@godwoken-examples/polyjuice";
 import { Godwoken } from "@godwoken-examples/godwoken";
 
 const polyjuiceConfig = Config.polyjuice;
@@ -140,7 +142,7 @@ export async function sendPolyjuiceTx() {
     // const args: string = getRequiredInputValue("args");
     // console.log("args:", args);
 
-    const runResult = await sendTransaction(
+    const runResult = await submitL2Transaction(
       +sudtId,
       +creatorAccountId,
       +fromId,
@@ -195,16 +197,14 @@ export async function deploySimpleStorage() {
       "creator-account-id"
     );
     const fromId = currentAccountID;
-    const toId = 0;
     const value: string = getRequiredInputValue("value");
-    const data: string =
-      "0x60806040525b607b60006000508190909055505b610018565b60db806100266000396000f3fe60806040526004361060295760003560e01c806360fe47b114602f5780636d4ce63c14605b576029565b60006000fd5b60596004803603602081101560445760006000fd5b81019080803590602001909291905050506084565b005b34801560675760006000fd5b50606e6094565b6040518082815260200191505060405180910390f35b8060006000508190909055505b50565b6000600060005054905060a2565b9056fea2646970667358221220044daf4e34adffc61c3bb9e8f40061731972d32db5b8c2bc975123da9e988c3e64736f6c63430006060033";
+    const data: string = SimpleStorage.initCode();
 
     console.log("Deploy SimpleStorage Parmas:", {
       sudt_id: sudtId,
       creator_account_id: creatorAccountId,
       from_id: fromId,
-      to_id: toId,
+      to_id: 0,
       value: value,
       data: data,
     });
@@ -213,11 +213,10 @@ export async function deploySimpleStorage() {
       _runResult,
       deployedScriptHash,
       contractAccountId,
-    ] = await sendTransaction(
+    ] = await deployContract(
       +sudtId,
       +creatorAccountId,
       fromId,
-      +toId,
       BigInt(value),
       data
     );
@@ -316,3 +315,157 @@ function fillSelectOptions(elementId: string, options: any): void {
   }
   element.innerHTML = optionsHtml;
 }
+
+export async function simpleStorageSet() {
+  console.log("SimpleStorage Set");
+
+  fillSelectOptions("#ss-set-sudt-id", polyjuiceConfig.sudt_ids);
+  fillSelectOptions(
+    "#ss-set-creator-account-id",
+    polyjuiceConfig.creator_account_ids
+  );
+  document.querySelector<HTMLInputElement>(
+    "#ss-set-to-id"
+  )!.value = Config.polyjuice.simple_storage_account_id.toString();
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#ss-set-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const sudtId: string = getRequiredInputValue("sudt-id");
+    const creatorAccountId: string = getRequiredInputValue(
+      "creator-account-id"
+    );
+    const fromId = currentAccountID;
+    const toId = getRequiredInputValue("to-id");
+    const value: string = getRequiredInputValue("value");
+    const dataValue: string = getRequiredInputValue("data-value");
+    const data: string = SimpleStorage.setValue(BigInt(dataValue));
+
+    console.log("SimpleStorage Set Parmas:", {
+      sudt_id: sudtId,
+      creator_account_id: creatorAccountId,
+      from_id: fromId,
+      to_id: toId,
+      value: value,
+      data: data,
+    });
+
+    const runResult = await submitL2Transaction(
+      +sudtId,
+      +creatorAccountId,
+      fromId,
+      +toId,
+      BigInt(value),
+      data
+    );
+  };
+
+  const button = document.querySelector<HTMLElement>("#ss-set-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+simpleStorageSet();
+
+export async function simpleStorageGet() {
+  console.log("SimpleStorage Set");
+
+  fillSelectOptions("#ss-get-sudt-id", polyjuiceConfig.sudt_ids);
+  fillSelectOptions(
+    "#ss-get-creator-account-id",
+    polyjuiceConfig.creator_account_ids
+  );
+  document.querySelector<HTMLInputElement>(
+    "#ss-get-to-id"
+  )!.value = Config.polyjuice.simple_storage_account_id.toString();
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#ss-get-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const sudtId: string = getRequiredInputValue("sudt-id");
+    const creatorAccountId: string = getRequiredInputValue(
+      "creator-account-id"
+    );
+    const fromId = currentAccountID;
+    const toId = getRequiredInputValue("to-id");
+    const value: bigint = BigInt(0);
+    const data: string = SimpleStorage.getValue();
+
+    console.log("SimpleStorage Get Parmas:", {
+      sudt_id: +sudtId,
+      creator_account_id: +creatorAccountId,
+      from_id: fromId,
+      to_id: +toId,
+      value: value,
+      data: data,
+    });
+
+    const runResult = await executeL2Transaction(
+      +sudtId,
+      +creatorAccountId,
+      fromId,
+      +toId,
+      value,
+      data
+    );
+
+    if ((runResult as any).message) {
+      alert((runResult as any).message);
+    }
+
+    const returnData = runResult?.return_data;
+    if (returnData) {
+      const parsedData = SimpleStorage.parseReturnData(returnData);
+      document.querySelector<HTMLElement>(
+        "#ss-get-result"
+      )!.innerHTML = parsedData.toString();
+    } else {
+      document.querySelector<HTMLElement>("#ss-get-result")!.innerHTML =
+        "failed";
+    }
+  };
+
+  const button = document.querySelector<HTMLElement>("#ss-get-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+simpleStorageGet();

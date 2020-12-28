@@ -11,7 +11,8 @@
     "sudt_ids": {
       "CKB (1)": 1,
       "sUDT (2)": 2
-    }
+    },
+    "simple_storage_account_id": 5
   },
   "godwoken": {
     "rpc": "http://localhost:8119"

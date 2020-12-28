@@ -102,15 +102,15 @@ class SimpleStorage {
   }
   static _setMethod() { return "0x60fe47b1"; }
   static setValue(value) {
-    const valueBigInt = BitInt(value);
-    return _setMethod() + value.toString(16).padStart(64, '0');
+    const valueBigInt = BigInt(value);
+    return SimpleStorage._setMethod() + value.toString(16).padStart(64, '0');
   }
   static setValueHex(valueHex) {
-    return _setMethod() + valueHex.slice(2);
+    return SimpleStorage._setMethod() + valueHex.slice(2);
   }
   static getValue() { return "0x6d4ce63c"; }
   static parseReturnData(hex) {
-    return BitInt(hex);
+    return BigInt(hex);
   }
 }
 
