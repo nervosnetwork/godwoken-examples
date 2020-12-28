@@ -159,7 +159,7 @@ export async function sendPolyjuiceTx() {
     button.onclick = submitButton;
   }
 }
-sendPolyjuiceTx();
+// sendPolyjuiceTx();
 
 export async function deploySimpleStorage() {
   console.log("Deploy SimpleStorage");
