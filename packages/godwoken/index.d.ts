@@ -4,6 +4,7 @@ import { Map } from "immutable";
 export type Uint32 = number;
 export type Uint64 = bigint;
 export type Uint128 = bigint;
+export type Uint256 = bigint;
 
 import { HexNumber, HexString, Hash, Script } from "@ckb-lumos/base";
 import * as core from "./schemas";
