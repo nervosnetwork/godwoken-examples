@@ -19,7 +19,7 @@ const godwokenConfig = Config.godwoken;
 
 const godwokenUrl = godwokenConfig.rpc;
 
-export async function sendTransaction(
+export async function submitL2Transaction(
   sudtId: Uint32,
   creatorAccountId: Uint32,
   fromId: Uint32,
@@ -27,7 +27,108 @@ export async function sendTransaction(
   value: Uint128,
   data: HexString
 ): Promise<[RunResult, Hash, Uint32]> {
-  console.log("--- send polyjuice transaction ---");
+  console.log("--- polyjuice submit L2 transaction ---");
+
+  const [
+    l2Transaction,
+    nonce,
+    godwoken,
+    polyjuice,
+  ] = await generateL2Transaction(
+    sudtId,
+    creatorAccountId,
+    fromId,
+    toId,
+    value,
+    data
+  );
+
+  const runResult = await godwoken.submitL2Transaction(l2Transaction);
+  console.log("runResult:", runResult);
+
+  const scriptHash = polyjuice.calculateScriptHash(fromId, nonce);
+  console.log("deployed script hash:", scriptHash);
+  const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  console.log("contract account id:", contractAccountId);
+
+  console.log("--- polyjuice submit L2 transaction finished ---");
+  return [runResult, scriptHash, contractAccountId];
+}
+
+export async function executeL2Transaction(
+  sudtId: Uint32,
+  creatorAccountId: Uint32,
+  fromId: Uint32,
+  toId: Uint32,
+  value: Uint128,
+  data: HexString
+): Promise<RunResult> {
+  console.log("--- execute polyjuice transaction ---");
+
+  const [
+    l2Transaction,
+    nonce,
+    godwoken,
+    polyjuice,
+  ] = await generateL2Transaction(
+    sudtId,
+    creatorAccountId,
+    fromId,
+    toId,
+    value,
+    data
+  );
+
+  const runResult = await godwoken.executeL2Transaction(l2Transaction);
+  console.log("runResult:", runResult);
+
+  console.log("--- execute polyjuice transaction finished ---");
+  return runResult;
+}
+
+export async function deployContract(
+  sudtId: Uint32,
+  creatorAccountId: Uint32,
+  fromId: Uint32,
+  value: Uint128,
+  data: HexString
+): Promise<[RunResult, Hash, Uint32]> {
+  console.log("--- polyjuice deploy contract ---");
+
+  const [
+    l2Transaction,
+    nonce,
+    godwoken,
+    polyjuice,
+  ] = await generateL2Transaction(
+    sudtId,
+    creatorAccountId,
+    fromId,
+    0,
+    value,
+    data
+  );
+
+  const runResult = await godwoken.submitL2Transaction(l2Transaction);
+  console.log("runResult:", runResult);
+
+  const scriptHash = polyjuice.calculateScriptHash(fromId, nonce);
+  console.log("deployed script hash:", scriptHash);
+  const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  console.log("contract account id:", contractAccountId);
+
+  console.log("--- polyjuice deploy contract finished ---");
+  return [runResult, scriptHash, contractAccountId];
+}
+
+async function generateL2Transaction(
+  sudtId: Uint32,
+  creatorAccountId: Uint32,
+  fromId: Uint32,
+  toId: Uint32,
+  value: Uint128,
+  data: HexString
+): Promise<[L2Transaction, Uint32, Godwoken, Polyjuice]> {
   const godwoken = new Godwoken(godwokenUrl);
   const polyjuice = new Polyjuice(godwoken, {
     validator_code_hash: polyjuiceConfig.validator_code_hash,
@@ -59,16 +160,9 @@ export async function sendTransaction(
     signature,
   };
 
-  const runResult = await godwoken.submitL2Transaction(l2Transaction);
-  console.log("runResult:", runResult);
+  console.log("l2 transaction:", l2Transaction);
 
-  const scriptHash = polyjuice.calculateScriptHash(fromId, nonce);
-  console.log("deployed script hash:", scriptHash);
-  const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
-  console.log("contract account id:", contractAccountId);
-
-  console.log("--- send polyjuice transaction finished ---");
-  return [runResult, scriptHash, contractAccountId];
+  return [l2Transaction, nonce, godwoken, polyjuice];
 }
 
 function getLayer2LockScript(ethAddress: string): Script {
