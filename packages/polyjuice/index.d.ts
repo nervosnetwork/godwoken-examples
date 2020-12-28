@@ -15,13 +15,14 @@ export declare class Polyjuice {
         }
     );
 
-    getBalance(account_id: Uint32): Uint128;
-    getCode(account_id: Uint32): any;
-    getTransactionCount(account_id: Uint32): Uint32;
-    getStorageAt(account_id: Uint32, key: Hash): Hash;
+    getBalance(account_id: Uint32): Promise<Uint128>;
+    getCode(account_id: Uint32): Promise<HexString>;
+    getTransactionCount(account_id: Uint32): Promise<Uint32>;
+    getStorageAt(account_id: Uint32, key: Hash): Promise<Hash>;
     // == Utils functions ==
     addressToAccountId(address: ETHAddress): Uint32;
     accountIdToAddress(id: Uint32): ETHAddress;
+    calculateScriptHash(from_id: Uint32, nonce: Uint32): Hash;
 
     generateTransaction(
         // The sender account id
