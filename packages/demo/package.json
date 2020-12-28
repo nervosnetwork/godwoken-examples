@@ -11,6 +11,7 @@
     "@ckb-lumos/hd": "^0.14.2-rc3",
     "@ckb-lumos/helpers": "^0.14.2-rc3",
     "@ckb-lumos/indexer": "^0.14.2-rc3",
+    "@godwoken-examples/godwoken": "0.0.1",
     "@lay2/pw-core": "^0.3.21",
     "blake2b": "^2.1.3",
     "buffer": "^6.0.3",
@@ -21,11 +22,11 @@
   "scripts": {
     "clean": "rm -rf build",
     "fmt": "prettier --write \"src/**/*.ts\" package.json",
-    "cp-files": "cp -r src/html build/html && cp -r src/schemas build/schemas && cp -r src/configs build/configs",
+    "cp-files": "cp -r src/html build/html",
     "build": "webpack --config webpack.dev.config.js && yarn run cp-files",
     "start": "webpack serve --config webpack.dev.config.js",
     "build:prod": "export NODE_ENV=production && webpack --config webpack.prod.config.js && yarn run cp-files",
-    "build-cli": "tsc --build tsconfig.json ./src/cli && cp -r src/schemas build-cli/schemas",
+    "build-cli": "tsc --build tsconfig.json ./src/cli",
     "clean-cli": "rm -rf build-cli"
   },
   "devDependencies": {
