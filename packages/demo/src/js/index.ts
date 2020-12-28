@@ -4,7 +4,14 @@ import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
-import { sendTransaction, getBalanceByEthAddress } from "./polyjuice";
+import {
+  sendTransaction,
+  getBalanceByEthAddress,
+  getAccountIdByEthAddress,
+} from "./polyjuice";
+import Config from "../configs/config.json";
+
+const polyjuiceConfig = Config.polyjuice;
 
 console.log("something");
 
@@ -76,6 +83,18 @@ main();
 
 export async function sendPolyjuiceTx() {
   console.log("sendPolyjuiceTx");
+
+  fillSelectOptions("#polyjuice-sudt-id", polyjuiceConfig.sudt_ids);
+  fillSelectOptions(
+    "#polyjuice-creator-account-id",
+    polyjuiceConfig.creator_account_ids
+  );
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+  document.querySelector<HTMLInputElement>(
+    `#polyjuice-from-id`
+  )!.value = currentAccountID.toString();
 
   const getInputValue = (id: string): string | undefined => {
     return document.querySelector<HTMLInputElement>(`#polyjuice-${id}`)?.value;
@@ -160,6 +179,8 @@ export async function displayBalance() {
     return value as string;
   };
 
+  fillSelectOptions(`#balance-sudt-id`, polyjuiceConfig.sudt_ids);
+
   const submitButton = async () => {
     const sudtId: string = getRequiredInputValue("sudt-id");
     console.log("sudt id:", sudtId);
@@ -185,3 +206,17 @@ export async function displayBalance() {
   }
 }
 displayBalance();
+
+function fillSelectOptions(elementId: string, options: any): void {
+  const element = document.querySelector<HTMLElement>(elementId);
+  if (element === undefined || element === null) {
+    throw new Error(`element: ${elementId} not found!`);
+  }
+
+  let optionsHtml = "";
+  for (const key in options) {
+    const value = options[key];
+    optionsHtml += `<option value="${value}">${key}</option>\n`;
+  }
+  element.innerHTML = optionsHtml;
+}
