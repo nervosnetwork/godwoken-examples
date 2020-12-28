@@ -88,7 +88,7 @@ async function deploy(
     const creator_account_id = parseInt(creator_account_id_str);
     const godwoken = new Godwoken(program.rpc);
     const polyjuice = new Polyjuice(godwoken, {
-        validator_code_hash,
+        validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
         sudt_id: 1,
         creator_account_id,
     });
@@ -106,8 +106,10 @@ async function deploy(
     console.log("L2Transaction", l2tx);
     const run_result = await godwoken.submitL2Transaction(l2tx);
     console.log("RunResult", run_result);
-    const new_account_id = godwoken.getAccountIdByScriptHash(
-        polyjuice.calculateScriptHash(from_id, nonce)
+    const new_script_hash = polyjuice.calculateScriptHash(from_id, nonce);
+    console.log("new script hash", new_script_hash);
+    const new_account_id = await godwoken.getAccountIdByScriptHash(
+        new_script_hash
     );
     console.log("new account id:", new_account_id);
 }
