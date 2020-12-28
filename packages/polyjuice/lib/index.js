@@ -60,8 +60,8 @@ class Polyjuice {
   }
   calculateScriptHash(from_id, nonce) {
     const args = numberToUInt32LE(this.sudt_id)
-          + numberToUInt32LE(from_id)
-          + numberToUInt32LE(nonce);
+          + numberToUInt32LE(from_id).slice(2)
+          + numberToUInt32LE(nonce).slice(2);
     const script = {
       code_hash: this.validator_code_hash,
       hash_type: "data",
