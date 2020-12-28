@@ -1,5 +1,6 @@
 
-import { core as base_core, Script, utils } from "@ckb-lumos/base";
+const { normalizers } = require("ckb-js-toolkit");
+const base = require("@ckb-lumos/base");
 const { u32ToHex, UInt32LEToNumber, numberToUInt32LE, GodwokenUtils } = require("@godwoken-examples/godwoken");
 
 function encodeArgs(to_id, value, data) {
@@ -67,8 +68,8 @@ class Polyjuice {
       hash_type: "data",
       args,
     };
-    return utils.ckbHash(
-      base_core.SerializeScript(normalizers.NormalizeScript(script))
+    return base.utils.ckbHash(
+      base.core.SerializeScript(normalizers.NormalizeScript(script))
     ).serializeJson();
   }
 
