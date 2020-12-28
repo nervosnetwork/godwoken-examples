@@ -1,6 +1,6 @@
 
 import {Hash, HexString } from "@ckb-lumos/base"
-import { Uint32, Uint64, Uint128, Godwoken, RawL2Transaction } from "@godwoken-examples/godwoken";
+import { Uint32, Uint64, Uint128, Uint256, Godwoken, RawL2Transaction } from "@godwoken-examples/godwoken";
 
 export type U256 = HexString;
 export type ETHAddress = HexString;
@@ -38,4 +38,14 @@ export declare class Polyjuice {
     ): RawL2Transaction;
     // Generate a RawL2Transaction for creating polyjuice base account (for creating polyjuice layer 2 account)
     generateCreateCreatorAccountTransaction(from_id: Uint32, nonce: Uint32): RawL2Transaction;
+}
+
+export declare class SimpleStorage {
+    constructor();
+
+    static initCode(): HexString;
+    static setValue(value: Uint256): HexString;
+    // set value use uint256 hex string
+    static setValueHex(hexValue: HexString): HexString;
+    static getValue(): HexString;
 }
