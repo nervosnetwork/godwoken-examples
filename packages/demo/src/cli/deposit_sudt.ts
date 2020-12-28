@@ -20,22 +20,52 @@ import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
 import { getDeploymentConfig } from "../js/utils/deployment_config";
 import path from "path";
-import { initializeConfig } from "@ckb-lumos/config-manager";
+import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
+import crypto from "crypto";
+import keccak256 from "keccak256";
 
 const program = new Command();
 program.version("0.0.1");
 
 program
-  .requiredOption("-a, --address <address>", "inputs from")
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-m --amount <amount>", "sudt amount")
   .requiredOption("-s --sudt-script-args <sudt script args>", "sudt amount")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
-  .option("-l, --eth-address <args>", "Eth address (layer2 lock args)", "0x")
+  .option(
+    "-l, --eth-address <args>",
+    "Eth address (layer2 lock args, using --private-key value to calculate if not provided)"
+  )
   .option("-c, --capacity <capacity>", "capacity in shannons", "");
 
 program.parse(process.argv);
+
+function privateKeyToCkbAddress(privateKey: HexString): string {
+  const publicKey = key.privateToPublic(privateKey);
+  const publicKeyHash = key.publicKeyToBlake160(publicKey);
+  const scriptConfig = getConfig().SCRIPTS.SECP256K1_BLAKE160!;
+  const script = {
+    code_hash: scriptConfig.CODE_HASH,
+    hash_type: scriptConfig.HASH_TYPE,
+    args: publicKeyHash,
+  };
+  const address = generateAddress(script);
+  return address;
+}
+
+function privateKeyToEthAddress(privateKey: HexString) {
+  const ecdh = crypto.createECDH(`secp256k1`);
+  ecdh.generateKeys();
+  ecdh.setPrivateKey(Buffer.from(privateKey.slice(2), "hex"));
+  const publicKey: string = "0x" + ecdh.getPublicKey("hex", "uncompressed");
+  const ethAddress =
+    "0x" +
+    keccak256(Buffer.from(publicKey.slice(4), "hex"))
+      .slice(12)
+      .toString("hex");
+  return ethAddress;
+}
 
 async function sendTx(
   deploymentConfig: DeploymentConfig,
@@ -121,16 +151,21 @@ const run = async () => {
 
   const deploymentConfig: DeploymentConfig = getDeploymentConfig();
 
+  const privateKey = program.privateKey;
+  const ckbAddress = privateKeyToCkbAddress(privateKey);
+  const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
+  console.log("using eth address:", ethAddress);
+
   const capacity: bigint | undefined =
     program.capacity === "" ? undefined : BigInt(program.capacity);
   try {
     const txHash: Hash = await sendTx(
       deploymentConfig,
-      program.address,
+      ckbAddress,
       program.amount,
-      program.ethAddress.toLowerCase(),
+      ethAddress.toLowerCase(),
       indexer,
-      program.privateKey,
+      privateKey,
       program.rpc,
       program.sudtScriptArgs,
       capacity

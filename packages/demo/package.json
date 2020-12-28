@@ -17,6 +17,7 @@
     "buffer": "^6.0.3",
     "ckb-js-toolkit": "^0.9.3",
     "commander": "^6.2.1",
+    "keccak256": "^1.0.2",
     "process": "^0.11.10"
   },
   "scripts": {
