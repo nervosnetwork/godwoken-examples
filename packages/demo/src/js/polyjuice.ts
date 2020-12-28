@@ -11,10 +11,12 @@ import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import { sign } from "./utils/eth_sign";
 import { L2Transaction } from "./base/normalizer";
 import { getRollupTypeHash } from "./transactions/deposition";
+
 const layer2LockConfig = Config.layer2_lock;
 const polyjuiceConfig = Config.polyjuice;
+const godwokenConfig = Config.godwoken;
 
-const godwokenUrl = "http://localhost:8119";
+const godwokenUrl = godwokenConfig.rpc;
 
 export async function sendTransaction(
   sudtId: Uint32,
@@ -84,6 +86,11 @@ export async function getBalance(
   const godwoken = new Godwoken(godwokenUrl);
   const amount = await godwoken.getBalance(sudtId, accountId);
   return amount;
+}
+
+export function getAccountIdByEthAddress(ethAddress: string): Promise<Uint32> {
+  const layer2LockHash: Hash = getLayer2LockHash(ethAddress);
+  return getAccountId(layer2LockHash);
 }
 
 export async function getBalanceByEthAddress(

@@ -4,6 +4,16 @@
     "hash_type": "data"
   },
   "polyjuice": {
-    "validator_code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    "validator_code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "creator_account_ids": {
+      "4": 4
+    },
+    "sudt_ids": {
+      "CKB (1)": 1,
+      "sUDT (2)": 2
+    }
+  },
+  "godwoken": {
+    "rpc": "http://localhost:8119"
   }
 }
