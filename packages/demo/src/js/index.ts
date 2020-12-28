@@ -157,6 +157,74 @@ export async function sendPolyjuiceTx() {
 }
 sendPolyjuiceTx();
 
+export async function deploySimpleStorage() {
+  console.log("Deploy SimpleStorage");
+
+  fillSelectOptions("#deploy-sudt-id", polyjuiceConfig.sudt_ids);
+  fillSelectOptions(
+    "#deploy-creator-account-id",
+    polyjuiceConfig.creator_account_ids
+  );
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#deploy-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const sudtId: string = getRequiredInputValue("sudt-id");
+    const creatorAccountId: string = getRequiredInputValue(
+      "creator-account-id"
+    );
+    const toId = 0;
+    const value: string = getRequiredInputValue("value");
+    const data: string =
+      "0x60806040525b607b60006000508190909055505b610018565b60db806100266000396000f3fe60806040526004361060295760003560e01c806360fe47b114602f5780636d4ce63c14605b576029565b60006000fd5b60596004803603602081101560445760006000fd5b81019080803590602001909291905050506084565b005b34801560675760006000fd5b50606e6094565b6040518082815260200191505060405180910390f35b8060006000508190909055505b50565b6000600060005054905060a2565b9056fea2646970667358221220044daf4e34adffc61c3bb9e8f40061731972d32db5b8c2bc975123da9e988c3e64736f6c63430006060033";
+
+    console.log("Deploy SimpleStorage Parmas:", {
+      sudt_id: sudtId,
+      creator_account_id: creatorAccountId,
+      from_id: currentAccountID,
+      to_id: toId,
+      value: value,
+      data: data,
+    });
+
+    const runResult = await sendTransaction(
+      +sudtId,
+      +creatorAccountId,
+      currentAccountID,
+      +toId,
+      BigInt(value),
+      data
+    );
+
+    console.log("Deploy SimpleStorage runResult:", runResult);
+  };
+
+  const button = document.querySelector<HTMLElement>("#deploy-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+deploySimpleStorage();
+
 // balance
 export async function displayBalance() {
   const currentEthAddress: string = await getCurrentEthAccount();
