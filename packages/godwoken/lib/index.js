@@ -5,6 +5,7 @@ const {
   NormalizeL2Transaction,
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
+  NormalizeWithdrawalRequest,
 } = require("./normalizer");
 const core = require("../schemas");
 
@@ -63,11 +64,13 @@ class Godwoken {
     return this._send(l2tx, this.rpc.gw_submitL2Transaction);
   }
   async submitWithdrawalRequest(request) {
-    // FIXME: todo
-    return;
+    const data = new Reader(core.SerializeWithdrawalRequest(
+      NormalizeWithdrawalRequest(request)
+    )).serializeJson();
+    return await this.rpc.gw_submitWithdrawalRequest(data);
   }
   async getBalance(sudt_id, account_id) {
-    // FIXME: swap later
+    // TODO: maybe swap params later?
     const hex = await this.rpc.gw_getBalance(account_id, sudt_id);
     return BigInt(hex);
   }
@@ -81,23 +84,16 @@ class Godwoken {
     return await this.rpc.gw_getNonce(account_id);
   }
   async getScript(script_hash) {
-    // FIXME: todo
-    return {
-      code_hash: "0x",
-      hash_type: "data",
-      args: "0x",
-    };
+    return await this.rpc.gw_getScript(script_hash);
   }
   async getScriptHash(account_id) {
     return await this.rpc.gw_getScriptHash(account_id);
   }
   async getData(data_hash) {
-    // FIXME: todo
-    return "0x";
+    return await this.rpc.gw_getData(data_hash);
   }
   async hasDataHash(data_hash) {
-    // FIXME: todo
-    return false;
+    return await this.rpc.gw_getDataHash(data_hash);
   }
 }
 

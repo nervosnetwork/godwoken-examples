@@ -106,7 +106,9 @@ async function deploy(
     console.log("L2Transaction", l2tx);
     const run_result = await godwoken.submitL2Transaction(l2tx);
     console.log("RunResult", run_result);
-    const new_account_id = UInt32LEToNumber(run_result.return_data);
+    const new_account_id = godwoken.getAccountIdByScriptHash(
+        polyjuice.calculateScriptHash(from_id, nonce)
+    );
     console.log("new account id:", new_account_id);
 }
 

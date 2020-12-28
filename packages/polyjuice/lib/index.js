@@ -1,4 +1,5 @@
 
+import { core as base_core, Script, utils } from "@ckb-lumos/base";
 const { u32ToHex, UInt32LEToNumber, numberToUInt32LE, GodwokenUtils } = require("@godwoken-examples/godwoken");
 
 function encodeArgs(to_id, value, data) {
@@ -56,6 +57,19 @@ class Polyjuice {
   }
   addressToAccountId(address) {
     return UInt32LEToNumber(address);
+  }
+  calculateScriptHash(from_id, nonce) {
+    const args = numberToUInt32LE(this.sudt_id)
+          + numberToUInt32LE(from_id)
+          + numberToUInt32LE(nonce);
+    const script = {
+      code_hash: this.validator_code_hash,
+      hash_type: "data",
+      args,
+    };
+    return utils.ckbHash(
+      base_core.SerializeScript(normalizers.NormalizeScript(script))
+    ).serializeJson();
   }
 
   generateTransaction(from_id, to_id, value, data, nonce) {
