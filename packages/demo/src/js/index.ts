@@ -10,6 +10,8 @@ import {
   getAccountIdByEthAddress,
 } from "./polyjuice";
 import Config from "../configs/config.json";
+import { Polyjuice } from "@godwoken-examples/polyjuice";
+import { Godwoken } from "@godwoken-examples/godwoken";
 
 const polyjuiceConfig = Config.polyjuice;
 
@@ -192,6 +194,7 @@ export async function deploySimpleStorage() {
     const creatorAccountId: string = getRequiredInputValue(
       "creator-account-id"
     );
+    const fromId = currentAccountID;
     const toId = 0;
     const value: string = getRequiredInputValue("value");
     const data: string =
@@ -200,22 +203,47 @@ export async function deploySimpleStorage() {
     console.log("Deploy SimpleStorage Parmas:", {
       sudt_id: sudtId,
       creator_account_id: creatorAccountId,
-      from_id: currentAccountID,
+      from_id: fromId,
       to_id: toId,
       value: value,
       data: data,
     });
 
-    const runResult = await sendTransaction(
+    const [
+      _runResult,
+      deployedScriptHash,
+      contractAccountId,
+    ] = await sendTransaction(
       +sudtId,
       +creatorAccountId,
-      currentAccountID,
+      fromId,
       +toId,
       BigInt(value),
       data
     );
 
-    console.log("Deploy SimpleStorage runResult:", runResult);
+    document.querySelector(
+      "#deployed-script-hash"
+    )!.innerHTML = deployedScriptHash?.toString();
+
+    const setContractAccountId = (accountId: number | null) => {
+      const str = accountId
+        ? accountId.toString()
+        : "Still null, please click here to query later :D";
+      document.querySelector("#deployed-account-id")!.innerHTML = str;
+    };
+
+    setContractAccountId(contractAccountId);
+
+    document.querySelector<HTMLElement>(
+      "#deployed-account-id"
+    )!.onclick = async () => {
+      const godwoken = new Godwoken(Config.godwoken.rpc);
+      const accountId = await godwoken.getAccountIdByScriptHash(
+        deployedScriptHash
+      );
+      setContractAccountId(accountId);
+    };
   };
 
   const button = document.querySelector<HTMLElement>("#deploy-submit");

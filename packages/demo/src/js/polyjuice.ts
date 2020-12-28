@@ -5,6 +5,7 @@ import {
   Uint128,
   RawL2Transaction,
   GodwokenUtils,
+  RunResult,
 } from "@godwoken-examples/godwoken";
 import Config from "../configs/config.json";
 import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
@@ -25,7 +26,8 @@ export async function sendTransaction(
   toId: Uint32,
   value: Uint128,
   data: HexString
-) {
+): Promise<[RunResult, Hash, Uint32]> {
+  console.log("--- send polyjuice transaction ---");
   const godwoken = new Godwoken(godwokenUrl);
   const polyjuice = new Polyjuice(godwoken, {
     validator_code_hash: polyjuiceConfig.validator_code_hash,
@@ -34,6 +36,7 @@ export async function sendTransaction(
   });
 
   const nonce: Uint32 = await godwoken.getNonce(fromId);
+  console.log("nonce:", nonce);
 
   const rawL2Transaction: RawL2Transaction = polyjuice.generateTransaction(
     fromId,
@@ -57,8 +60,15 @@ export async function sendTransaction(
   };
 
   const runResult = await godwoken.submitL2Transaction(l2Transaction);
+  console.log("runResult:", runResult);
 
-  return runResult;
+  const scriptHash = polyjuice.calculateScriptHash(fromId, nonce);
+  console.log("deployed script hash:", scriptHash);
+  const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  console.log("contract account id:", contractAccountId);
+
+  console.log("--- send polyjuice transaction finished ---");
+  return [runResult, scriptHash, contractAccountId];
 }
 
 function getLayer2LockScript(ethAddress: string): Script {
