@@ -12,10 +12,10 @@ import {
   deployContract,
 } from "./polyjuice";
 import Config from "../configs/config.json";
-import { Polyjuice, SimpleStorage } from "@godwoken-examples/polyjuice";
+import { SimpleStorage } from "@godwoken-examples/polyjuice";
 import { Godwoken } from "@godwoken-examples/godwoken";
 import { query, transfer } from "./godwoken";
-import { allowedNodeEnvironmentFlags } from "process";
+import { ckbUrl, pwCollectorUrl, godwokenUrl } from "./url";
 
 const polyjuiceConfig = Config.polyjuice;
 
@@ -36,9 +36,9 @@ const config: DeploymentConfig = {
 };
 
 export async function initPWCore() {
-  const pwcore = await new PWCore("http://localhost:8114").init(
+  const pwcore = await new PWCore(ckbUrl).init(
     new EthProvider(),
-    new PwCollector("https://cellapitest.ckb.pw")
+    new PwCollector(pwCollectorUrl)
   );
   return pwcore;
 }
@@ -244,7 +244,7 @@ export async function deploySimpleStorage() {
     document.querySelector<HTMLElement>(
       "#deployed-account-id"
     )!.onclick = async () => {
-      const godwoken = new Godwoken(Config.godwoken.rpc);
+      const godwoken = new Godwoken(godwokenUrl);
       const accountId = await godwoken.getAccountIdByScriptHash(
         deployedScriptHash
       );
