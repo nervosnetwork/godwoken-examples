@@ -14,6 +14,7 @@ import {
 import Config from "../configs/config.json";
 import { Polyjuice, SimpleStorage } from "@godwoken-examples/polyjuice";
 import { Godwoken } from "@godwoken-examples/godwoken";
+import { query } from "./godwoken";
 
 const polyjuiceConfig = Config.polyjuice;
 
@@ -469,3 +470,68 @@ export async function simpleStorageGet() {
   }
 }
 simpleStorageGet();
+
+export async function godwokenQuerySudt() {
+  console.log("godwokenQuerySudt");
+
+  fillSelectOptions("#query-sudt-to-id", polyjuiceConfig.sudt_ids);
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  document.querySelector<HTMLInputElement>(
+    "#query-sudt-account-id"
+  )!.value = currentAccountID.toString();
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#query-sudt-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const fromId = currentAccountID;
+    const toId = +getRequiredInputValue("to-id");
+    const accountId = +getRequiredInputValue("account-id");
+
+    console.log("Godwoken Query SUDT Params:", {
+      from_id: fromId,
+      to_id: toId,
+      account_id: accountId,
+    });
+
+    let sudtBalance: bigint | undefined;
+    try {
+      sudtBalance = await query(fromId, toId, accountId);
+    } catch (e) {
+      alert(e.message);
+    }
+
+    if (sudtBalance !== undefined && sudtBalance !== null) {
+      document.querySelector<HTMLElement>(
+        "#query-sudt-result"
+      )!.innerHTML = sudtBalance.toString();
+    } else {
+      document.querySelector<HTMLElement>("#query-sudt-result")!.innerHTML =
+        "failed";
+    }
+  };
+
+  const button = document.querySelector<HTMLElement>("#query-sudt-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+godwokenQuerySudt();
