@@ -4,6 +4,8 @@ import PWCore, {
   Address,
   Amount,
   AddressType,
+  SUDT,
+  AmountUnit,
 } from "@lay2/pw-core";
 import { Script, HexString, utils } from "@ckb-lumos/base";
 import {
@@ -39,6 +41,33 @@ export async function send(
   return txHash;
 }
 
+export async function sendSudt(
+  pwcore: PWCore,
+  targetLock: Script,
+  amount: string,
+  sudtScriptArgs: HexString,
+  feeRate?: number
+): Promise<HexString> {
+  const pwLock: PwScript = scriptToPwScript(targetLock);
+
+  const address: Address = Address.fromLockScript(pwLock);
+
+  const sudt: SUDT = new SUDT(sudtScriptArgs);
+
+  console.log("sudt: SUDT:", sudt.toTypeScript());
+
+  const txHash: HexString = await pwcore.sendSUDT(
+    sudt,
+    address,
+    new Amount(amount, AmountUnit.shannon),
+    true,
+    undefined,
+    feeRate
+  );
+
+  return txHash;
+}
+
 export async function sendTx(
   pwcore: PWCore,
   deploymentConfig: DeploymentConfig,
@@ -67,6 +96,47 @@ export async function sendTx(
   console.log("depositionLock:", depositionLock);
 
   const txHash: HexString = await send(pwcore, depositionLock, amount, 1000);
+
+  console.log("txHash:", txHash);
+
+  return txHash;
+}
+
+export async function sendSudtTx(
+  pwcore: PWCore,
+  deploymentConfig: DeploymentConfig,
+  amount: string,
+  sudtScriptArgs: HexString,
+  layer2LockArgs: HexString = "0x"
+): Promise<HexString> {
+  const lockScript: Script = await getCurrentLockScript();
+  const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
+
+  const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
+    ownerLockHash,
+    layer2LockArgs
+  );
+
+  console.log("depositionLockArgs:", depositionLockArgs);
+
+  const serializedArgs: HexString = serializeArgs(depositionLockArgs);
+
+  console.log("serializedArgs:", serializedArgs);
+
+  const depositionLock: Script = generateDepositionLock(
+    deploymentConfig,
+    serializedArgs
+  );
+
+  console.log("depositionLock:", depositionLock);
+
+  const txHash: HexString = await sendSudt(
+    pwcore,
+    depositionLock,
+    amount,
+    sudtScriptArgs,
+    1000
+  );
 
   console.log("txHash:", txHash);
 
