@@ -286,10 +286,9 @@
     "@ethersproject/properties" "^5.0.3"
     "@ethersproject/strings" "^5.0.4"
 
-"@lay2/pw-core@^0.3.21":
+"@lay2/pw-core@classicalliu/pw-core#12ec75c86be8f95a1440a1b7622f0489892745ed":
   version "0.3.21"
-  resolved "https://registry.yarnpkg.com/@lay2/pw-core/-/pw-core-0.3.21.tgz#466b299f56ee9e85592009f7a7b69f30fbff7913"
-  integrity sha512-LGDgh1HLepc5EBGxjZCDq8S++p9mUfanEe9M1ehCCkilREiNRI4ibFn1EPz3VV5qDijwR7I7RuOrwvGzWLe76A==
+  resolved "https://codeload.github.com/classicalliu/pw-core/tar.gz/12ec75c86be8f95a1440a1b7622f0489892745ed"
   dependencies:
     "@ckb-lumos/types" "^0.2.4"
     "@nervosnetwork/ckb-sdk-utils" "^0.32.0"

@@ -2,7 +2,7 @@ import PWCore, { EthProvider, PwCollector } from "@lay2/pw-core";
 import { DeploymentConfig } from "./base";
 import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
-import { sendTx } from "./operations/deposition";
+import { sendSudtTx, sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
 import {
   getBalanceByEthAddress,
@@ -64,10 +64,57 @@ async function main() {
 
   const submitAmountButton = async () => {
     const amount = getValue();
-    await sendTx(pwcore, config, amount);
+    await sendTx(pwcore, config, amount, currentEthAccount.toLowerCase());
   };
 
   const button = document.querySelector<HTMLElement>("#submit-amount");
+  if (button) {
+    button.onclick = submitAmountButton;
+  }
+
+  depositSudt(pwcore, currentEthAccount);
+}
+
+async function depositSudt(pwcore: PWCore, ethAddress: string) {
+  const getValue = (): string => {
+    const amountInputValue = document.querySelector<HTMLInputElement>(
+      "#deposit-sudt-amount"
+    )?.value;
+    console.log("amountInputValue:", amountInputValue);
+
+    if (!amountInputValue) {
+      alert("must set amount!");
+    }
+
+    return amountInputValue as string;
+  };
+
+  const getSudtArgs = (): string => {
+    const inputValue = document.querySelector<HTMLInputElement>(
+      "#deposit-sudt-script-args"
+    )?.value;
+    console.log("sudt script args:", inputValue);
+
+    if (!inputValue) {
+      alert("must set sudt script args!");
+    }
+
+    return inputValue as string;
+  };
+
+  const submitAmountButton = async () => {
+    const amount = getValue();
+    const scriptArgs = getSudtArgs();
+    await sendSudtTx(
+      pwcore,
+      config,
+      amount,
+      scriptArgs,
+      ethAddress.toLowerCase()
+    );
+  };
+
+  const button = document.querySelector<HTMLElement>("#deposit-sudt-submit");
   if (button) {
     button.onclick = submitAmountButton;
   }
