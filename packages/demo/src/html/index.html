@@ -4,51 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <link rel="stylesheet" href="https://unpkg.com/mvp.css">
-  <!-- <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-  <link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+  <!-- <link rel="stylesheet" href="https://unpkg.com/mvp.css"> -->
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
 
   <style>
     html, body, pre, code, kbd, samp {
         font-family: "Press Start 2P";
     }
-  </style> -->
+
+    .container {
+      margin: 10px;
+      margin-top: 50px;
+    }
+
+    .submit-button {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
   <main>
-    <h2>Please excuse us for the programmer level design skills :P</h2>
-
-    <img src="./images/fireworks.jpg" />
-
-    <div>
-      <label>Eth address:</label>
+    <div class="container">
+      <h2>Please excuse us for the programmer level design skills :P</h2>
+      <img src="./images/fireworks.jpg" />
+    </div>
+    
+    <div class="nes-container with-title container">
+      <p class="title">Eth address:</p>
       <p id="current-eth-address"></p>
     </div>
   
-    <div>
-      <label>Enter your amount:</label>
-      <input type="text" name="amount", id="amount" required>
-      <button type="button" id="submit-amount" onclick="submitAmountButton()">Submit</button>
+    <div class="nes-container with-title container">
+      <p class="title">Deposit</p>
+      <div class="nes-field">
+        <label>amount:</label>
+        <input type="text" name="amount" id="amount" class="nes-input" required>
+      </div>
+      <button type="button" id="submit-amount" class="nes-btn is-primary submit-button" onclick="submitAmountButton()">Submit</button>
     </div>
 
-    <div>
-      <h3>Balance</h3>
+    <div class="nes-container with-title container">
+      <p class="title">Balance</p>
       <p>
         <span>Your balance:</span>
         <span id="balance-value"></span>
       </p>
       <form>
-        <div>
+        <div class="nes-select">
           <select id="balance-sudt-id">
           </select>
         </div>
 
-        <button type="button" id="balance-submit">Get</button>
+        <button type="button" id="balance-submit" class="nes-btn is-primary submit-button">Get</button>
       </form>
     </div>
   
+    <br/>
     <h3>Polyjuice</h3>
+    <br/>
     <!-- <div>
       <label>send_transaction</label>
       <form>
@@ -81,8 +96,8 @@
       </form>
     </div> -->
 
-    <div>
-      <h4>Deploy SimpleStorage</h4>
+    <div class="nes-container with-title container">
+      <p class="title">Deploy SimpleStorage</p>
 
       <div>
         <label>Deployed script hash:</label>
@@ -94,114 +109,122 @@
       </div>
 
       <form>
-        <div>
+        <div class="nes-select">
           <label>sudt id:</label>
           <select id="deploy-sudt-id"></select>
         </div>
-        <div>
+        <div class="nes-select">
           <label>creator account id:</label>
           <select id="deploy-creator-account-id"></select>
         </div>
-        <div>
+        <div class="nes-field">
           <label>value:</label>
-          <input type="text" id="deploy-value" required>
+          <input type="text" id="deploy-value" class="nes-input" required>
         </div>
   
-        <button type="button" id="deploy-submit">Deploy</button>
+        <button type="button" id="deploy-submit" class="nes-btn is-primary submit-button">Deploy</button>
       </form>
     </div>
 
-    <div>
-      <h4>SimpleStorage Set</h4>
+    <br/>
+
+    <div class="nes-container with-title container">
+      <p class="title">SimpleStorage Set</p>
 
       <form>
-        <div>
+        <div class="nes-select">
           <label>sudt id:</label>
           <select id="ss-set-sudt-id"></select>
         </div>
-        <div>
+        <div class="nes-select">
           <label>creator account id:</label>
           <select id="ss-set-creator-account-id"></select>
         </div>
-        <div>
+        <div class="nes-select">
           <labal>contract account id:</labal>
-          <input type="text" id="ss-set-to-id" required>
+          <input type="text" id="ss-set-to-id" class="nes-input" required>
         </div>
-        <div>
+        <div class="nes-field">
           <label>value:</label>
-          <input type="text" id="ss-set-value" value="0" required>
+          <input type="text" id="ss-set-value" value="0" class="nes-input" required>
         </div>
-        <div>
+        <div class="nes-field">
           <label>set value:</label>
-          <input type="number" id="ss-set-data-value" required>
+          <input type="number" id="ss-set-data-value" class="nes-input" required>
         </div>
   
-        <button type="button" id="ss-set-submit">Set</button>
+        <button type="button" id="ss-set-submit" class="nes-btn is-primary submit-button">Set</button>
       </form>
     </div>
 
-    <div>
-      <h4>SimpleStorage Get</h4>
+    <br/>
+
+    <div class="nes-container with-title container">
+      <p class="title">SimpleStorage Get</p>
 
       <form>
-        <div>
+        <div class="nes-select">
           <label>sudt id:</label>
           <select id="ss-get-sudt-id"></select>
         </div>
-        <div>
+        <div class="nes-select">
           <label>creator account id:</label>
           <select id="ss-get-creator-account-id"></select>
         </div>
-        <div>
+        <div class="nes-field">
           <labal>contract account id:</labal>
-          <input type="text" id="ss-get-to-id" required>
+          <input type="text" id="ss-get-to-id" class="nes-input" required>
         </div>
   
-        <button type="button" id="ss-get-submit">Get</button>
+        <button type="button" id="ss-get-submit" class="nes-btn is-primary submit-button">Get</button>
         <span id="ss-get-result"></span>
       </form>
     </div>
 
-    <div>
-      <h4>Godwoken Query SUDT</h4>
+    <br/>
+
+    <div class="nes-container with-title container">
+      <p class="title">Godwoken Query SUDT</p>
 
       <form>
-        <div>
+        <div class="nes-select">
           <label>to id:</label>
           <select id="query-sudt-to-id"></select>
         </div>
-        <div>
+        <div class="nes-select">
           <label>account id:</label>
-          <input type="number" id="query-sudt-account-id" required>
+          <input type="number" id="query-sudt-account-id" class="nes-input" required>
         </div>
   
-        <button type="button" id="query-sudt-submit" class="nes-btn is-primary">Get</button>
+        <button type="button" id="query-sudt-submit" class="nes-btn is-primary submit-button">Get</button>
         <span id="query-sudt-result"></span>
       </form>
     </div>
 
-    <div>
-      <h4>Godwoken Query Transfer</h4>
+    <br/>
+
+    <div class="nes-container with-title container">
+      <p class="title">Godwoken Query Transfer</p>
 
       <form>
-        <div>
+        <div class="nes-select">
           <label>sudt id:</label>
           <select id="transfer-sudt-sudt-id"></select>
         </div>
-        <div>
+        <div class="nes-field">
           <label>to id:</label>
-          <input type="number" id="transfer-sudt-to-id" required>
+          <input type="number" id="transfer-sudt-to-id" class="nes-input" required>
         </div>
-        <div>
+        <div class="nes-field">
           <label>amount:</label>
-          <input type="number" id="transfer-sudt-amount" required>
+          <input type="number" id="transfer-sudt-amount" class="nes-input" required>
         </div>
-        <div>
+        <div class="nes-field">
           <label>fee:</label>
-          <input type="number" id="transfer-sudt-fee" required>
+          <input type="number" id="transfer-sudt-fee" class="nes-input" required>
         </div>
   
-        <button type="button" id="transfer-sudt-submit" class="nes-btn is-primary">Submit</button>
+        <button type="button" id="transfer-sudt-submit" class="nes-btn is-primary submit-button">Submit</button>
         <span id="transfer-sudt-result"></span>
       </form>
     </div>
