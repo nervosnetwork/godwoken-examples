@@ -14,7 +14,8 @@ import {
 import Config from "../configs/config.json";
 import { Polyjuice, SimpleStorage } from "@godwoken-examples/polyjuice";
 import { Godwoken } from "@godwoken-examples/godwoken";
-import { query } from "./godwoken";
+import { query, transfer } from "./godwoken";
+import { allowedNodeEnvironmentFlags } from "process";
 
 const polyjuiceConfig = Config.polyjuice;
 
@@ -535,3 +536,69 @@ export async function godwokenQuerySudt() {
   }
 }
 godwokenQuerySudt();
+
+export async function godwokenSudtTransfer() {
+  console.log("godwokenSudtTransfer");
+
+  fillSelectOptions("#transfer-sudt-sudt-id", polyjuiceConfig.sudt_ids);
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#transfer-sudt-${id}`)
+      ?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const fromId = currentAccountID;
+    const sudtId = +getRequiredInputValue("sudt-id");
+    const toId = +getRequiredInputValue("to-id");
+    const amount = BigInt(getRequiredInputValue("amount"));
+    const fee = BigInt(getRequiredInputValue("fee"));
+
+    console.log("Godwoken SUDT Transafer Params:", {
+      from_id: fromId,
+      to_id: toId,
+      sudtId: sudtId,
+      amount: amount,
+      fee: fee,
+    });
+
+    try {
+      await transfer(fromId, toId, sudtId, amount, fee);
+      alert("transfer success!");
+    } catch (e) {
+      alert(e.message);
+    }
+
+    // if (sudtBalance !== undefined && sudtBalance !== null) {
+    //   document.querySelector<HTMLElement>(
+    //     "#query-sudt-result"
+    //   )!.innerHTML = sudtBalance.toString();
+    // } else {
+    //   document.querySelector<HTMLElement>("#query-sudt-result")!.innerHTML =
+    //     "failed";
+    // }
+  };
+
+  const button = document.querySelector<HTMLElement>("#transfer-sudt-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+godwokenSudtTransfer();
