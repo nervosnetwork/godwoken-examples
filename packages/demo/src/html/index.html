@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+
+  <style>
+    html, body, pre, code, kbd, samp {
+        font-family: "Press Start 2P";
+    }
+  </style> -->
 </head>
 <body>
 
@@ -151,6 +159,24 @@
   
         <button type="button" id="ss-get-submit">Get</button>
         <span id="ss-get-result"></span>
+      </form>
+    </div>
+
+    <div>
+      <h4>Godwoken Query SUDT</h4>
+
+      <form>
+        <div>
+          <label>to id:</label>
+          <select id="query-sudt-to-id"></select>
+        </div>
+        <div>
+          <label>account id:</label>
+          <input type="number" id="query-sudt-account-id" required>
+        </div>
+  
+        <button type="button" id="query-sudt-submit" class="nes-btn is-primary">Get</button>
+        <span id="query-sudt-result"></span>
       </form>
     </div>
   </main>

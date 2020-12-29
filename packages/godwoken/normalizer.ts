@@ -197,3 +197,33 @@ export function NormalizeCreateAccount(
     script: toNormalize(normalizers.NormalizeScript),
   });
 }
+
+export interface SUDTQuery {
+  account_id: HexNumber,
+}
+
+export function NormalizeSUDTQuery(
+  sudt_query: object,
+  { debugPath = "sudt_query" } = {}
+) {
+  return normalizeObject(debugPath, sudt_query, {
+    account_id: normalizeHexNumber(4),
+  })
+}
+
+export interface SUDTTransfer {
+  to: HexNumber,
+  amount: HexNumber,
+  fee: HexNumber,
+}
+
+export function NormalizeSUDTTransfer(
+  sudt_transfer: object,
+  { debugPath = "sudt_transfer" } = {}
+) {
+  return normalizeObject(debugPath, sudt_transfer, {
+    to: normalizeHexNumber(4),
+    amount: normalizeHexNumber(16),
+    fee: normalizeHexNumber(16),
+  })
+}
