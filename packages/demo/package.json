@@ -12,7 +12,7 @@
     "@ckb-lumos/helpers": "^0.14.2-rc3",
     "@ckb-lumos/indexer": "^0.14.2-rc3",
     "@godwoken-examples/godwoken": "0.0.1",
-    "@lay2/pw-core": "classicalliu/pw-core#28134a36646548e440cd25be31892485be6e692a",
+    "@lay2/pw-core": "classicalliu/pw-core#d8f0fa19d9dd45eebd167b5acdd21d7c285f978f",
     "blake2b": "^2.1.3",
     "buffer": "^6.0.3",
     "ckb-js-toolkit": "^0.9.3",

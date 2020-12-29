@@ -21,7 +21,7 @@ program
   .requiredOption("-m --amount <amount>", "sudt amount")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
-  .option("-c, --capacity <capacity>", "capacity in issued cell")
+  .option("-c, --capacity <capacity>", "capacity in issued cell");
 
 program.parse(process.argv);
 
@@ -56,8 +56,8 @@ async function issueToken(
     txSkeleton,
     address,
     BigInt(amount),
-    capacity,
-  )
+    capacity
+  );
 
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,
@@ -103,7 +103,7 @@ const run = async () => {
       indexer,
       privateKey,
       program.rpc,
-      program.capacity,
+      program.capacity
     );
 
     console.log("txHash:", txHash);
