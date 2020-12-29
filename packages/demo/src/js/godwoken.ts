@@ -16,12 +16,9 @@ import {
 } from "@godwoken-examples/godwoken/normalizer";
 import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/schemas";
 import { Reader } from "ckb-js-toolkit";
-import Config from "../configs/config.json";
 import { getRollupTypeHash } from "./transactions/deposition";
 import { sign } from "./utils/eth_sign";
-
-const godwokenConfig = Config.godwoken;
-const godwokenUrl: string = godwokenConfig.rpc;
+import { godwokenUrl } from "./url";
 
 /**
  *

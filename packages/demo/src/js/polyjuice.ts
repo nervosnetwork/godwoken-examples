@@ -12,12 +12,10 @@ import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import { sign } from "./utils/eth_sign";
 import { L2Transaction } from "./base/normalizer";
 import { getRollupTypeHash } from "./transactions/deposition";
+import { godwokenUrl } from "./url";
 
 const layer2LockConfig = Config.layer2_lock;
 const polyjuiceConfig = Config.polyjuice;
-const godwokenConfig = Config.godwoken;
-
-const godwokenUrl = godwokenConfig.rpc;
 
 export async function submitL2Transaction(
   sudtId: Uint32,
