@@ -286,9 +286,9 @@
     "@ethersproject/properties" "^5.0.3"
     "@ethersproject/strings" "^5.0.4"
 
-"@lay2/pw-core@classicalliu/pw-core#28134a36646548e440cd25be31892485be6e692a":
+"@lay2/pw-core@classicalliu/pw-core#d8f0fa19d9dd45eebd167b5acdd21d7c285f978f":
   version "0.3.21"
-  resolved "https://codeload.github.com/classicalliu/pw-core/tar.gz/28134a36646548e440cd25be31892485be6e692a"
+  resolved "https://codeload.github.com/classicalliu/pw-core/tar.gz/d8f0fa19d9dd45eebd167b5acdd21d7c285f978f"
   dependencies:
     "@ckb-lumos/types" "^0.2.4"
     "@nervosnetwork/ckb-sdk-utils" "^0.32.0"

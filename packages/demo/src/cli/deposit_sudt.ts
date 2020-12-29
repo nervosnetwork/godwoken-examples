@@ -37,7 +37,7 @@ program
     "-l, --eth-address <args>",
     "Eth address (layer2 lock args, using --private-key value to calculate if not provided)"
   )
-  .option("-c, --capacity <capacity>", "capacity in shannons", "");
+  .option("-c, --capacity <capacity>", "capacity in shannons", "40000000000");
 
 program.parse(process.argv);
 
@@ -156,8 +156,10 @@ const run = async () => {
   const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
   console.log("using eth address:", ethAddress);
 
-  const capacity: bigint | undefined =
-    program.capacity === "" ? undefined : BigInt(program.capacity);
+  const capacity: bigint = BigInt(program.capacity);
+  if (capacity < BigInt(40000000000)) {
+    throw new Error("capacity can't less than 400 CKB");
+  }
   try {
     const txHash: Hash = await sendTx(
       deploymentConfig,
