@@ -9,6 +9,7 @@ Firstly, copy your godwoken `runner_config.json` to `packages/demo/src/configs/r
 ### Compile
 
 ```
+yarn workspace @godwoken-examples/godwoken tsc
 yarn workspace @godwoken-examples/demo clean && yarn workspace @godwoken-examples/demo build
 ```
 
@@ -20,7 +21,7 @@ yarn workspace @godwoken-examples/demo start
 
 ### Open in browser
 
-Open `http://lcoalhost:9000/build/index.html`
+Open `http://lcoalhost:9000/html/index.html`
 
 
 ## Demo CLI
@@ -28,6 +29,7 @@ Open `http://lcoalhost:9000/build/index.html`
 ### Compile
 
 ```
+yarn workspace @godwoken-examples/godwoken tsc
 yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-examples/demo build-cli
 ```
 
