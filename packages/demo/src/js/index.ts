@@ -212,7 +212,7 @@ export async function deploySimpleStorage() {
     });
 
     const [
-      _runResult,
+      runResult,
       deployedScriptHash,
       contractAccountId,
     ] = await deployContract(
@@ -222,6 +222,11 @@ export async function deploySimpleStorage() {
       BigInt(value),
       data
     );
+
+    const errorMessage: string | undefined = (runResult as any).message;
+    if (errorMessage) {
+      alert(errorMessage);
+    }
 
     document.querySelector(
       "#deployed-script-hash"
