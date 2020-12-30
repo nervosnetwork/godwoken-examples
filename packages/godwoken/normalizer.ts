@@ -227,3 +227,35 @@ export function NormalizeSUDTTransfer(
     fee: normalizeHexNumber(16),
   })
 }
+
+export function NormalizeWithdrawalLockArgs(
+  withdrawal_lock_args: object,
+  { debugPath = "withdrawal_lock_args" } = {}
+) {
+  return normalizeObject(debugPath, withdrawal_lock_args, {
+    // the original deposition info
+    // used for helping programs generate reverted custodian cell
+    deposition_block_hash: normalizeRawData(32),
+    deposition_block_number: normalizeHexNumber(8),
+    // the original custodian lock hash
+    withdrawal_block_hash: normalizeRawData(32),
+    withdrawal_block_number: normalizeHexNumber(8),
+    // buyer can pay sell_amount token to unlock
+    sudt_script_hash: normalizeRawData(32),
+    sell_amount: normalizeHexNumber(16),
+    sell_capacity: normalizeHexNumber(8),
+    // layer1 lock to withdraw after challenge period
+    owner_lock_hash: normalizeRawData(32),
+    // layer1 lock to receive the payment, must exists on the chain
+    payment_lock_hash: normalizeRawData(32),
+  });
+}
+
+export function NormalizeUnlockWithdrawalViaFinalize(
+  unlock_withdrawal_finalize: object,
+  { debugPath = "unlock_withdrawal_finalize" } = {}
+) {
+  return normalizeObject(debugPath, unlock_withdrawal_finalize, {
+    block_proof: normalizeRawData(-1),
+  });
+}

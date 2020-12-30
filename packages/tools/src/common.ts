@@ -23,7 +23,7 @@ import {
 import * as secp256k1 from "secp256k1";
 const keccak256 = require('keccak256');
 
-export function ckbAddress(privateKey: any) {
+export function generateLockScript(privateKey: any) {
     initializeConfig();
     const privateKeyBuffer = new Reader(privateKey).toArrayBuffer();
     const publicKeyArray = secp256k1.publicKeyCreate(
@@ -39,6 +39,11 @@ export function ckbAddress(privateKey: any) {
         hash_type: scriptConfig.HASH_TYPE,
         args: publicKeyHash,
     };
+    return script;
+}
+
+export function ckbAddress(privateKey: any) {
+    const script = generateLockScript(privateKey);
     return scriptToAddress(script);
 }
 
