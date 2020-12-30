@@ -32,6 +32,11 @@ program
   .requiredOption("-m --amount <amount>", "sudt amount")
   .requiredOption("-s --sudt-script-args <sudt script args>", "sudt amount")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
+  .option(
+    "-g, --godwoken-rpc <rpc>",
+    "godwoken rpc path",
+    "http://127.0.0.1:8119"
+  )
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .option(
     "-l, --eth-address <args>",
@@ -86,6 +91,13 @@ async function sendTx(
     ownerLockHash,
     layer2LockArgs
   );
+
+  console.log(
+    `Layer 2 lock script hash: ${utils.computeScriptHash(
+      depositionLockArgs.layer2_lock
+    )}`
+  );
+
   const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
     deploymentConfig,
@@ -110,6 +122,23 @@ async function sendTx(
     BigInt(amount),
     undefined,
     capacity
+  );
+
+  const sudtScriptHash = utils.computeScriptHash(
+    txSkeleton.get("outputs").get(0)!.cell_output.type!
+  );
+  console.log(`Layer 1 sudt script hash:`, sudtScriptHash);
+
+  const godwokenRpc = new RPC(program.godwokenRpc);
+  const scriptHash = await godwokenRpc.gw_getScriptHash(1);
+  const script = await godwokenRpc.gw_getScript(scriptHash);
+  console.log(
+    `Layer 2 sudt script hash:`,
+    utils.computeScriptHash({
+      code_hash: script.code_hash,
+      hash_type: script.hash_type,
+      args: sudtScriptHash,
+    })
   );
 
   txSkeleton = await common.payFeeByFeeRate(
