@@ -65,7 +65,11 @@ program
     .action(getScriptHash)
 program
     .command("deposite <privkey> <amount>")
-    .description("Deposite some value")
+    .description("Deposite some value [TODO]")
+program
+    .command("unlockWithdraw <privkey>")
+    .description("Unlock withdraw cells")
+    .action(unlockWithdraw)
 
 program.parse(argv);
 
@@ -191,4 +195,7 @@ async function getScriptHash(account_id: string) {
     const godwoken = new Godwoken(program.rpc);
     const script_hash = await godwoken.getScriptHash(parseInt(account_id));
     console.log("script hash:", script_hash);
+}
+
+async function unlockWithdraw(privkey: string) {
 }
