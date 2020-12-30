@@ -39,7 +39,7 @@
     <div class="nes-container with-title container">
       <p class="title">Deposit</p>
       <div class="nes-field">
-        <label>amount:</label>
+        <label>amount (CKB):</label>
         <input type="text" name="amount" id="amount" class="nes-input" required>
       </div>
       <button type="button" id="submit-amount" class="nes-btn is-primary submit-button">Submit</button>
@@ -74,41 +74,6 @@
       </form>
     </div>
   
-    <br/>
-    <h3>Polyjuice</h3>
-    <br/>
-    <!-- <div>
-      <label>send_transaction</label>
-      <form>
-        <div>
-          <label>sudt id:</label>
-          <select id="polyjuice-sudt-id"></select>
-        </div>
-        <div>
-          <label>creator account id:</label>
-          <select id="polyjuice-creator-account-id"></select>
-        </div>
-        <div>
-          <label>from id:</label>
-          <input type="number" id="polyjuice-from-id" required>
-        </div>
-        <div>
-          <label>to id:</label>
-          <input type="number" id="polyjuice-to-id" required>
-        </div>
-        <div>
-          <label>value:</label>
-          <input type="text" id="polyjuice-value" required>
-        </div>
-        <div>
-          <label>data:</label>
-          <textarea cols="40" rows="5" id="polyjuice-data"></textarea>
-        </div>
-  
-        <button type="button" id="polyjuice-submit">Submit</button>
-      </form>
-    </div> -->
-
     <div class="nes-container with-title container">
       <p class="title">Deploy SimpleStorage</p>
 
@@ -153,7 +118,7 @@
           <label>creator account id:</label>
           <select id="ss-set-creator-account-id"></select>
         </div>
-        <div class="nes-select">
+        <div class="nes-field">
           <labal>contract account id:</labal>
           <input type="text" id="ss-set-to-id" class="nes-input" required>
         </div>
@@ -201,12 +166,12 @@
 
       <form>
         <div class="nes-select">
-          <label>to id:</label>
+          <label>sudt id:</label>
           <select id="query-sudt-to-id"></select>
         </div>
-        <div class="nes-select">
-          <label>account id:</label>
-          <input type="number" id="query-sudt-account-id" class="nes-input" required>
+        <div class="nes-field">
+          <label>eth address:</label>
+          <input type="text" id="query-sudt-account-id-eth-address" class="nes-input" required>
         </div>
   
         <button type="button" id="query-sudt-submit" class="nes-btn is-primary submit-button">Get</button>
@@ -225,8 +190,8 @@
           <select id="transfer-sudt-sudt-id"></select>
         </div>
         <div class="nes-field">
-          <label>to id:</label>
-          <input type="number" id="transfer-sudt-to-id" class="nes-input" required>
+          <label>to address:</label>
+          <input type="number" id="transfer-sudt-to-id-eth-address" class="nes-input" required>
         </div>
         <div class="nes-field">
           <label>amount:</label>
@@ -247,8 +212,8 @@
 
       <form>
         <div class="nes-field">
-          <label>capacity (shannon):</label>
-          <input type="number" id="withdrawal-capacity" class="nes-input" value="10000000000" required>
+          <label>capacity (CKB):</label>
+          <input type="number" id="withdrawal-capacity" class="nes-input" value="400" required>
         </div>
         <div class="nes-field">
           <label>amount:</label>
@@ -257,10 +222,6 @@
         <div class="nes-select">
           <label>sudt script hash:</label>
           <select type="text" id="withdrawal-sudt-script-hash"></select>
-        </div>
-        <div class="nes-field">
-          <label>eth address:</label>
-          <input type="text" id="withdrawal-eth-address" class="nes-input" required>
         </div>
         <div class="nes-field">
           <label>owner lock hash (<span>For the least amount of trouble when using the demo, it's best if you withdraw to a single signed plain ckb address</span>):</label>

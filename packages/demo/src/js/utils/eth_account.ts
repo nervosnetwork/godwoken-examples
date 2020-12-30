@@ -14,3 +14,12 @@ export async function getCurrentEthAccount(): Promise<string> {
 
   return accounts[0];
 }
+
+let currentAddress: string | undefined;
+
+export async function currentEthAddress(): Promise<string> {
+  if (!currentAddress) {
+    currentAddress = await getCurrentEthAccount();
+  }
+  return currentAddress;
+}
