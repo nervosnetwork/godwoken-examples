@@ -78,7 +78,7 @@ export declare class Godwoken {
 
   executeL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
   submitL2Transaction(l2tx: L2Transaction): Promise<RunResult>;
-  submitWithdrawalRequest(request: WithdrawalRequest): void;
+  submitWithdrawalRequest(request: WithdrawalRequest): Promise<void>;
   getBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128>;
   getStorageAt(account_id: Uint32, key: Hash): Promise<Hash>;
   getAccountIdByScriptHash(script_hash: Hash): Promise<Uint32>;
@@ -93,7 +93,7 @@ export declare class Godwoken {
 export declare class GodwokenUtils {
   constructor(rollup_type_hash: Hash);
   generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
-  static generateWithdrawalMessageToSign(
+  generateWithdrawalMessageToSign(
     raw_request: RawWithdrawalRequest
   ): Hash;
   static createAccountRawL2Transaction(

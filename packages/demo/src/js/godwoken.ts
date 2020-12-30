@@ -6,6 +6,7 @@ import {
   RawL2Transaction,
   GodwokenUtils,
   L2Transaction,
+  WithdrawalRequest,
 } from "@godwoken-examples/godwoken";
 import {
   NormalizeSUDTQuery,
@@ -146,4 +147,51 @@ export async function transfer(
 
   console.log("--- godwoken sudt transfer finished ---");
   return;
+}
+
+export async function withdraw(
+  fromId: Uint32,
+  capacity: bigint,
+  amount: bigint,
+  sudtScriptHash: Hash,
+  accountScriptHash: Hash,
+  ownerLockHash: Hash
+) {
+  console.log("--- godwoken withdraw ---");
+
+  const godwoken = new Godwoken(godwokenUrl);
+  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  console.log("nonce:", nonce);
+
+  const rawWithdrawalRequest = GodwokenUtils.createRawWithdrawalRequest(
+    nonce,
+    capacity,
+    amount,
+    sudtScriptHash,
+    accountScriptHash,
+    BigInt(0),
+    BigInt(100 * 10 ** 8),
+    ownerLockHash,
+    "0x" + "0".repeat(64)
+  );
+
+  const godwokenUtils = new GodwokenUtils(getRollupTypeHash());
+  const message = godwokenUtils.generateWithdrawalMessageToSign(
+    rawWithdrawalRequest
+  );
+
+  const signature: HexString = await sign(message);
+
+  const withdrawalRequest: WithdrawalRequest = {
+    raw: rawWithdrawalRequest,
+    signature: signature,
+  };
+
+  console.log("withdrawalRequest:", withdrawalRequest);
+
+  const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
+  console.log("result:", result);
+
+  console.log("--- godwoken withdraw finished ---");
+  return result;
 }

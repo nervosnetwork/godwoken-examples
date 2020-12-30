@@ -1,6 +1,11 @@
-import PWCore, { EthProvider, PwCollector } from "@lay2/pw-core";
+import PWCore, {
+  EthProvider,
+  LumosConfigs,
+  parseAddress,
+  PwCollector,
+} from "@lay2/pw-core";
 import { DeploymentConfig } from "./base";
-import { CellDep, Hash, HexString, Script } from "@ckb-lumos/base";
+import { CellDep, Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import runnerConfig from "../configs/runner_config.json";
 import { sendSudtTx, sendTx } from "./operations/deposition";
 import { getCurrentEthAccount } from "./utils/eth_account";
@@ -10,11 +15,12 @@ import {
   executeL2Transaction,
   submitL2Transaction,
   deployContract,
+  getLayer2LockHash,
 } from "./polyjuice";
 import Config from "../configs/config.json";
 import { SimpleStorage } from "@godwoken-examples/polyjuice";
 import { Godwoken } from "@godwoken-examples/godwoken";
-import { query, transfer } from "./godwoken";
+import { query, transfer, withdraw } from "./godwoken";
 import { ckbUrl, pwCollectorUrl, godwokenUrl } from "./url";
 
 const polyjuiceConfig = Config.polyjuice;
@@ -654,3 +660,99 @@ export async function godwokenSudtTransfer() {
   }
 }
 godwokenSudtTransfer();
+
+export async function godwokenWithdraw() {
+  console.log("godwokenWithdraw");
+
+  fillSelectOptions(
+    "#withdrawal-sudt-script-hash",
+    Config.godwoken.sudt_script_hashes
+  );
+
+  const currentEthAddress: string = await getCurrentEthAccount();
+  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+
+  document.querySelector<HTMLInputElement>(
+    "#withdrawal-eth-address"
+  )!.value = currentEthAddress;
+
+  const getInputValue = (id: string): string | undefined => {
+    return document.querySelector<HTMLInputElement>(`#withdrawal-${id}`)?.value;
+  };
+
+  const checkValue = (name: string, value: string | undefined) => {
+    if (!value) {
+      const msg = `${name} is required!`;
+      alert(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const getRequiredInputValue = (id: string): string => {
+    const value: string | undefined = getInputValue(id);
+    checkValue(id, value);
+    return value as string;
+  };
+
+  const submitButton = async () => {
+    const fromId = currentAccountID;
+    const capacity: bigint = BigInt(getRequiredInputValue("capacity"));
+    const amount: bigint = BigInt(getRequiredInputValue("amount"));
+    const sudtScriptHash: Hash = getRequiredInputValue("sudt-script-hash");
+    const ethAddress: string = getRequiredInputValue(
+      "eth-address"
+    ).toLowerCase();
+    const l2LockHash: Hash = getLayer2LockHash(ethAddress);
+
+    const ownerCkbAddress: string = getRequiredInputValue("owner-ckb-address");
+    // TODO: using testnet config in default, if not script in genesis, may cause error in dev chain
+    const lockScript = parseAddress(ownerCkbAddress, {
+      config: LumosConfigs[1],
+    });
+    console.log("lockscript ---:", lockScript);
+    const ownerLockHash: Hash = utils.computeScriptHash({
+      code_hash: lockScript.code_hash,
+      hash_type: lockScript.hash_type as "data" | "type",
+      args: lockScript.args,
+    });
+
+    console.log("Godwoken Withdrawal Params:", {
+      from_id: fromId,
+      capacity: capacity,
+      amount,
+      sudt_script_hash: sudtScriptHash,
+      l2_lock_hash: l2LockHash,
+      owner_lock_hash: ownerLockHash,
+    });
+
+    try {
+      await withdraw(
+        fromId,
+        capacity,
+        amount,
+        sudtScriptHash,
+        l2LockHash,
+        ownerLockHash
+      );
+      alert("withdraw success!");
+    } catch (e) {
+      alert(e.message);
+      throw e;
+    }
+
+    // if (sudtBalance !== undefined && sudtBalance !== null) {
+    //   document.querySelector<HTMLElement>(
+    //     "#query-sudt-result"
+    //   )!.innerHTML = sudtBalance.toString();
+    // } else {
+    //   document.querySelector<HTMLElement>("#query-sudt-result")!.innerHTML =
+    //     "failed";
+    // }
+  };
+
+  const button = document.querySelector<HTMLElement>("#withdrawal-submit");
+  if (button) {
+    button.onclick = submitButton;
+  }
+}
+godwokenWithdraw();
