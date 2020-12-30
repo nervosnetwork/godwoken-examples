@@ -6,9 +6,9 @@ const {
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
   NormalizeWithdrawalRequest,
+  NormalizeRawWithdrawalRequest,
 } = require("./normalizer");
 const core = require("../schemas");
-const { NormalizeRawWithdrawalRequest } = require("../normalizer");
 
 function numberToUInt32LE(value) {
   const buf = Buffer.alloc(4);
