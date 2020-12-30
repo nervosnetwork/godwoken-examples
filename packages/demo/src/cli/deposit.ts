@@ -18,7 +18,7 @@ import {
 import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
-import { getDeploymentConfig } from "../js/utils/deployment_config";
+import { deploymentConfig } from "../js/utils/deployment_config";
 import path from "path";
 import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
 import crypto from "crypto";
@@ -147,8 +147,6 @@ const run = async () => {
   console.log("waiting for sync ...");
   await indexer.waitForSync();
   console.log("synced ...");
-
-  const deploymentConfig: DeploymentConfig = getDeploymentConfig();
 
   const privateKey = program.privateKey;
   const ckbAddress = privateKeyToCkbAddress(privateKey);
