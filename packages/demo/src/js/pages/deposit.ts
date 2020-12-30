@@ -2,7 +2,7 @@ import { HexString } from "@ckb-lumos/base";
 import PWCore from "@lay2/pw-core";
 import { sendSudtTx, sendTx } from "../operations/deposition";
 import { deploymentConfig } from "../utils/deployment_config";
-import { createGetRequiredInputValue } from "./helpers";
+import { createGetRequiredInputValue, SUBMIT_SUCCESS_MESSAGE } from "./helpers";
 
 export async function depositCKB(pwcore: PWCore, currentEthAddress: string) {
   console.log("depositCKB");
@@ -18,16 +18,15 @@ export async function depositCKB(pwcore: PWCore, currentEthAddress: string) {
         amount,
         currentEthAddress.toLowerCase()
       );
-      alert(`deposit tx hash: ${txHash}`);
+      alert(`Deposit in tx hash: ${txHash}. ${SUBMIT_SUCCESS_MESSAGE}`);
     } catch (e) {
       alert(e.message);
     }
   };
 
-  const button = document.querySelector<HTMLElement>("#submit-amount");
-  if (button) {
-    button.onclick = submitAmountButton;
-  }
+  document.querySelector<HTMLElement>(
+    "#submit-amount"
+  )!.onclick = submitAmountButton;
 }
 
 export async function depositSudt(pwcore: PWCore, ethAddress: string) {
@@ -46,14 +45,13 @@ export async function depositSudt(pwcore: PWCore, ethAddress: string) {
         ethAddress.toLowerCase()
       );
 
-      alert(`deposit tx hash: ${txHash}`);
+      alert(`Deposit in tx hash: ${txHash}. ${SUBMIT_SUCCESS_MESSAGE}`);
     } catch (e) {
       alert(e.message);
     }
   };
 
-  const button = document.querySelector<HTMLElement>("#deposit-sudt-submit");
-  if (button) {
-    button.onclick = submitAmountButton;
-  }
+  document.querySelector<HTMLElement>(
+    "#deposit-sudt-submit"
+  )!.onclick = submitAmountButton;
 }

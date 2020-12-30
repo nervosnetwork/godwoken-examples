@@ -20,6 +20,7 @@ import { Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./transactions/deposition";
 import { sign } from "./utils/eth_sign";
 import { godwokenUrl } from "./url";
+import { LocalNonce } from "./utils/nonce";
 
 /**
  *
@@ -34,7 +35,8 @@ export async function query(
 ): Promise<Uint128> {
   console.log("--- godwoken sudt query ---");
   const godwoken = new Godwoken(godwokenUrl);
-  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  // const nonce: Uint32 = await godwoken.getNonce(fromId);
+  const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
 
   const sudtQuery: SUDTQuery = {
     account_id: "0x" + accountId.toString(16),
@@ -97,7 +99,7 @@ export async function transfer(
 ) {
   console.log("--- godwoken sudt transfer ---");
   const godwoken = new Godwoken(godwokenUrl);
-  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
 
   const sudtTransfer: SUDTTransfer = {
     to: "0x" + toId.toString(16),
@@ -145,6 +147,8 @@ export async function transfer(
     throw new Error(errorMessage);
   }
 
+  LocalNonce.increaseNonce();
+
   console.log("--- godwoken sudt transfer finished ---");
   return;
 }
@@ -160,7 +164,8 @@ export async function withdraw(
   console.log("--- godwoken withdraw ---");
 
   const godwoken = new Godwoken(godwokenUrl);
-  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  // const nonce: Uint32 = await godwoken.getNonce(fromId);
+  const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
   console.log("nonce:", nonce);
 
   const rawWithdrawalRequest = GodwokenUtils.createRawWithdrawalRequest(
@@ -191,6 +196,13 @@ export async function withdraw(
 
   const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
   console.log("result:", result);
+
+  const errorMessage = (result as any).message;
+  if (errorMessage !== undefined && errorMessage !== null) {
+    throw new Error(errorMessage);
+  }
+
+  LocalNonce.increaseNonce();
 
   console.log("--- godwoken withdraw finished ---");
   return result;

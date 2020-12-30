@@ -35,3 +35,6 @@ export function createGetRequiredInputValue(prefix: string) {
     return getRequiredInputValue(prefix + id);
   };
 }
+
+export const SUBMIT_SUCCESS_MESSAGE =
+  "Your transaction has been sent to godwoken, please wait for ~ 120 seconds for the tx to land on chain.";

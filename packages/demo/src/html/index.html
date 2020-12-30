@@ -88,12 +88,12 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt id:</label>
+          <label>sudt type:</label>
           <select id="deploy-sudt-id"></select>
         </div>
-        <div class="nes-select">
+        <div class="nes-field">
           <label>creator account id:</label>
-          <select id="deploy-creator-account-id"></select>
+          <input type="text" id="deploy-creator-account-id" class="nes-input" required>
         </div>
         <div class="nes-field">
           <label>value:</label>
@@ -111,12 +111,8 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt id:</label>
+          <label>sudt type:</label>
           <select id="ss-set-sudt-id"></select>
-        </div>
-        <div class="nes-select">
-          <label>creator account id:</label>
-          <select id="ss-set-creator-account-id"></select>
         </div>
         <div class="nes-field">
           <labal>contract account id:</labal>
@@ -142,12 +138,8 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt id:</label>
+          <label>sudt type:</label>
           <select id="ss-get-sudt-id"></select>
-        </div>
-        <div class="nes-select">
-          <label>creator account id:</label>
-          <select id="ss-get-creator-account-id"></select>
         </div>
         <div class="nes-field">
           <labal>contract account id:</labal>
@@ -166,7 +158,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt id:</label>
+          <label>sudt type:</label>
           <select id="query-sudt-to-id"></select>
         </div>
         <div class="nes-field">
@@ -186,11 +178,11 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt id:</label>
+          <label>sudt type:</label>
           <select id="transfer-sudt-sudt-id"></select>
         </div>
         <div class="nes-field">
-          <label>to address:</label>
+          <label>to address (eth address):</label>
           <input type="text" id="transfer-sudt-to-id-eth-address" class="nes-input" required>
         </div>
         <div class="nes-field">
@@ -224,7 +216,7 @@
           <select type="text" id="withdrawal-sudt-script-hash"></select>
         </div>
         <div class="nes-field">
-          <label>owner lock hash (<span>For the least amount of trouble when using the demo, it's best if you withdraw to a single signed plain ckb address</span>):</label>
+          <label>owner CKB address (<span>For the least amount of trouble when using the demo, it's best if you withdraw to a single signed plain ckb address</span>):</label>
           <input type="text" id="withdrawal-owner-ckb-address" class="nes-input" required>
         </div>
   

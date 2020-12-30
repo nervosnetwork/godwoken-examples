@@ -14,18 +14,19 @@ export async function displayBalance(currentEthAddress: string) {
     const sudtId: string = getRequiredInputValue("sudt-id");
     console.log("sudt id:", sudtId);
 
-    const balance: bigint = await getBalanceByEthAddress(
-      +sudtId,
-      currentEthAddress
-    );
-
-    console.log("get balance:", balance);
-
     const balanceElement = document.querySelector<HTMLElement>(
       "#balance-value"
-    );
-    if (balanceElement) {
+    )!;
+    try {
+      const balance: bigint = await getBalanceByEthAddress(
+        +sudtId,
+        currentEthAddress
+      );
+      console.log("get balance:", balance);
       balanceElement.innerHTML = balance.toString();
+    } catch (e) {
+      balanceElement.innerHTML = "Not Created.";
+      alert(e.message);
     }
   };
 

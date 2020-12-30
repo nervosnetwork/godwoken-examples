@@ -1,4 +1,8 @@
-import { createGetRequiredInputValue, fillSelectOptions } from "./helpers";
+import {
+  createGetRequiredInputValue,
+  fillSelectOptions,
+  SUBMIT_SUCCESS_MESSAGE,
+} from "./helpers";
 import Config from "../../configs/config.json";
 import { getAccountIdByEthAddress } from "../polyjuice";
 import { transfer } from "../godwoken";
@@ -36,7 +40,7 @@ export async function godwokenSudtTransfer(currentEthAddress: string) {
 
     try {
       await transfer(fromId, toId, sudtId, amount, fee);
-      alert("transfer success!");
+      alert(SUBMIT_SUCCESS_MESSAGE);
     } catch (e) {
       alert(e.message);
       throw e;
