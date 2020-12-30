@@ -1,4 +1,8 @@
-import { createGetRequiredInputValue, fillSelectOptions } from "./helpers";
+import {
+  createGetRequiredInputValue,
+  fillSelectOptions,
+  SUBMIT_SUCCESS_MESSAGE,
+} from "./helpers";
 import Config from "../../configs/config.json";
 import { getAccountIdByEthAddress, getLayer2LockHash } from "../polyjuice";
 import { Hash, utils } from "@ckb-lumos/base";
@@ -66,7 +70,7 @@ export async function godwokenWithdraw(currentEthAddress: string) {
       if (message !== undefined && message !== null) {
         alert(message);
       } else {
-        alert("withdraw success!");
+        alert(SUBMIT_SUCCESS_MESSAGE);
       }
     } catch (e) {
       alert(e.message);

@@ -1,4 +1,8 @@
-import { fillSelectOptions, createGetRequiredInputValue } from "./helpers";
+import {
+  fillSelectOptions,
+  createGetRequiredInputValue,
+  SUBMIT_SUCCESS_MESSAGE,
+} from "./helpers";
 import Config from "../../configs/config.json";
 import {
   deployContract,
@@ -7,8 +11,9 @@ import {
   submitL2Transaction,
 } from "../polyjuice";
 import { SimpleStorage } from "@godwoken-examples/polyjuice";
-import { Godwoken } from "@godwoken-examples/godwoken";
+import { Godwoken, RunResult } from "@godwoken-examples/godwoken";
 import { godwokenUrl } from "../url";
+import { Hash } from "@ckb-lumos/base";
 
 const polyjuiceConfig = Config.polyjuice;
 
@@ -18,12 +23,12 @@ export async function deploySimpleStorage(currentEthAddress: string) {
   const prefix = "#deploy-";
 
   fillSelectOptions("#deploy-sudt-id", polyjuiceConfig.sudt_ids);
-  fillSelectOptions(
-    "#deploy-creator-account-id",
+  const createAccountIdsStr: string = Object.values(
     polyjuiceConfig.creator_account_ids
-  );
-
-  const currentAccountID = await getAccountIdByEthAddress(currentEthAddress);
+  ).join(", ");
+  document.querySelector<HTMLInputElement>(
+    "#deploy-creator-account-id"
+  )!.placeholder = `try ${createAccountIdsStr} for a deployed example account.`;
 
   const getRequiredInputValue = createGetRequiredInputValue(prefix);
   const submitButton = async () => {
@@ -31,7 +36,12 @@ export async function deploySimpleStorage(currentEthAddress: string) {
     const creatorAccountId: string = getRequiredInputValue(
       "creator-account-id"
     );
-    const fromId = currentAccountID;
+    const fromId = await getAccountIdByEthAddress(currentEthAddress);
+    if (fromId === undefined || fromId === null) {
+      const message = "Please deposit to create a godwoken account first.";
+      alert(message);
+      throw new Error(message);
+    }
     const value: string = getRequiredInputValue("value");
     const data: string = SimpleStorage.initCode();
 
@@ -44,21 +54,29 @@ export async function deploySimpleStorage(currentEthAddress: string) {
       data: data,
     });
 
-    const [
-      runResult,
-      deployedScriptHash,
-      contractAccountId,
-    ] = await deployContract(
-      +sudtId,
-      +creatorAccountId,
-      fromId,
-      BigInt(value),
-      data
-    );
+    let deployResult: [RunResult, Hash, number] | undefined;
+    try {
+      deployResult = await deployContract(
+        +sudtId,
+        +creatorAccountId,
+        fromId,
+        BigInt(value),
+        data
+      );
+    } catch (e) {
+      alert(e.message);
+      throw e;
+    }
+
+    const runResult: RunResult = deployResult![0];
+    const deployedScriptHash = deployResult![1];
+    const contractAccountId = deployResult![2];
 
     const errorMessage: string | undefined = (runResult as any).message;
-    if (errorMessage) {
+    if (errorMessage !== undefined && errorMessage !== null) {
       alert(errorMessage);
+    } else {
+      alert(SUBMIT_SUCCESS_MESSAGE);
     }
 
     document.querySelector(
@@ -95,10 +113,6 @@ export async function simpleStorageSet(currentEthAddress: string) {
   console.log("SimpleStorage Set");
 
   fillSelectOptions("#ss-set-sudt-id", polyjuiceConfig.sudt_ids);
-  fillSelectOptions(
-    "#ss-set-creator-account-id",
-    polyjuiceConfig.creator_account_ids
-  );
   document.querySelector<HTMLInputElement>(
     "#ss-set-to-id"
   )!.value = Config.polyjuice.simple_storage_account_id.toString();
@@ -110,9 +124,7 @@ export async function simpleStorageSet(currentEthAddress: string) {
 
   const submitButton = async () => {
     const sudtId: string = getRequiredInputValue("sudt-id");
-    const creatorAccountId: string = getRequiredInputValue(
-      "creator-account-id"
-    );
+    const creatorAccountId: number = 0;
     const fromId = currentAccountID;
     const toId = getRequiredInputValue("to-id");
     const value: string = getRequiredInputValue("value");
@@ -128,7 +140,7 @@ export async function simpleStorageSet(currentEthAddress: string) {
       data: data,
     });
 
-    const runResult = await submitL2Transaction(
+    const [runResult] = await submitL2Transaction(
       +sudtId,
       +creatorAccountId,
       fromId,
@@ -136,6 +148,13 @@ export async function simpleStorageSet(currentEthAddress: string) {
       BigInt(value),
       data
     );
+
+    const message = (runResult as any).message;
+    if (message !== undefined && message !== null) {
+      alert(message);
+    } else {
+      alert(SUBMIT_SUCCESS_MESSAGE);
+    }
   };
 
   const button = document.querySelector<HTMLElement>("#ss-set-submit");
@@ -148,10 +167,6 @@ export async function simpleStorageGet(currentEthAddress: string) {
   console.log("SimpleStorage Set");
 
   fillSelectOptions("#ss-get-sudt-id", polyjuiceConfig.sudt_ids);
-  fillSelectOptions(
-    "#ss-get-creator-account-id",
-    polyjuiceConfig.creator_account_ids
-  );
   document.querySelector<HTMLInputElement>(
     "#ss-get-to-id"
   )!.value = Config.polyjuice.simple_storage_account_id.toString();
@@ -163,9 +178,7 @@ export async function simpleStorageGet(currentEthAddress: string) {
 
   const submitButton = async () => {
     const sudtId: string = getRequiredInputValue("sudt-id");
-    const creatorAccountId: string = getRequiredInputValue(
-      "creator-account-id"
-    );
+    const creatorAccountId: number = 0;
     const fromId = currentAccountID;
     const toId = getRequiredInputValue("to-id");
     const value: bigint = BigInt(0);
@@ -173,7 +186,7 @@ export async function simpleStorageGet(currentEthAddress: string) {
 
     console.log("SimpleStorage Get Parmas:", {
       sudt_id: +sudtId,
-      creator_account_id: +creatorAccountId,
+      creator_account_id: creatorAccountId,
       from_id: fromId,
       to_id: +toId,
       value: value,
@@ -182,7 +195,7 @@ export async function simpleStorageGet(currentEthAddress: string) {
 
     const runResult = await executeL2Transaction(
       +sudtId,
-      +creatorAccountId,
+      creatorAccountId,
       fromId,
       +toId,
       value,

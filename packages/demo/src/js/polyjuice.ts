@@ -13,6 +13,7 @@ import { sign } from "./utils/eth_sign";
 import { L2Transaction } from "./base/normalizer";
 import { getRollupTypeHash } from "./transactions/deposition";
 import { godwokenUrl } from "./url";
+import { LocalNonce } from "./utils/nonce";
 
 const layer2LockConfig = Config.layer2_lock;
 const polyjuiceConfig = Config.polyjuice;
@@ -48,6 +49,13 @@ export async function submitL2Transaction(
   console.log("deployed script hash:", scriptHash);
   const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
   console.log("contract account id:", contractAccountId);
+
+  const errorMessage = (runResult as any).message;
+  if (errorMessage !== undefined && errorMessage !== null) {
+    throw new Error(errorMessage);
+  }
+
+  LocalNonce.increaseNonce();
 
   console.log("--- polyjuice submit L2 transaction finished ---");
   return [runResult, scriptHash, contractAccountId];
@@ -115,6 +123,13 @@ export async function deployContract(
   const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
   console.log("contract account id:", contractAccountId);
 
+  const errorMessage = (runResult as any).message;
+  if (errorMessage !== undefined && errorMessage !== null) {
+    throw new Error(errorMessage);
+  }
+
+  LocalNonce.increaseNonce();
+
   console.log("--- polyjuice deploy contract finished ---");
   return [runResult, scriptHash, contractAccountId];
 }
@@ -134,7 +149,7 @@ async function generateL2Transaction(
     creator_account_id: creatorAccountId,
   });
 
-  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
   console.log("nonce:", nonce);
 
   const rawL2Transaction: RawL2Transaction = polyjuice.generateTransaction(
@@ -204,6 +219,9 @@ export async function getBalanceByEthAddress(
   const layer2LockHash: Hash = getLayer2LockHash(ethAddress);
   const accountId = await getAccountId(layer2LockHash);
   console.log("accountId:", accountId);
+  if (accountId === undefined || accountId === null) {
+    throw new Error("Please deposit to create a godwoken account first.");
+  }
   const balance: bigint = await getBalance(sudtId, accountId);
   return balance;
 }
