@@ -1,11 +1,12 @@
 const { RPC, Reader } = require("ckb-js-toolkit");
 const { utils } = require("@ckb-lumos/base");
-const keccak256 = require('keccak256');
+const keccak256 = require("keccak256");
 const {
   NormalizeL2Transaction,
   NormalizeRawL2Transaction,
   NormalizeCreateAccount,
   NormalizeWithdrawalRequest,
+  NormalizeRawWithdrawalRequest,
 } = require("./normalizer");
 const core = require("../schemas");
 
@@ -51,9 +52,9 @@ class Godwoken {
   }
 
   async _send(l2tx, method) {
-    const data = new Reader(core.SerializeL2Transaction(
-      NormalizeL2Transaction(l2tx)
-    )).serializeJson();
+    const data = new Reader(
+      core.SerializeL2Transaction(NormalizeL2Transaction(l2tx))
+    ).serializeJson();
     return await method(data);
   }
 
@@ -64,9 +65,9 @@ class Godwoken {
     return this._send(l2tx, this.rpc.gw_submitL2Transaction);
   }
   async submitWithdrawalRequest(request) {
-    const data = new Reader(core.SerializeWithdrawalRequest(
-      NormalizeWithdrawalRequest(request)
-    )).serializeJson();
+    const data = new Reader(
+      core.SerializeWithdrawalRequest(NormalizeWithdrawalRequest(request))
+    ).serializeJson();
     return await this.rpc.gw_submitWithdrawalRequest(data);
   }
   async getBalance(sudt_id, account_id) {
@@ -103,24 +104,43 @@ class GodwokenUtils {
   }
 
   generateTransactionMessageToSign(raw_l2tx) {
-    const raw_tx_data = core.SerializeRawL2Transaction(NormalizeRawL2Transaction(raw_l2tx));
+    const raw_tx_data = core.SerializeRawL2Transaction(
+      NormalizeRawL2Transaction(raw_l2tx)
+    );
     const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
-    const data = toArrayBuffer(Buffer.concat([rollup_type_hash, toBuffer(raw_tx_data)]));
+    const data = toArrayBuffer(
+      Buffer.concat([rollup_type_hash, toBuffer(raw_tx_data)])
+    );
     const message = utils.ckbHash(data).serializeJson();
     const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
-    const buf = Buffer.concat([prefix_buf, Buffer.from(message.slice(2), "hex")]);
+    const buf = Buffer.concat([
+      prefix_buf,
+      Buffer.from(message.slice(2), "hex"),
+    ]);
     return `0x${keccak256(buf).toString("hex")}`;
   }
   static generateWithdrawalMessageToSign(raw_request) {
-    // FIXME: todo
-    return "0x";
+    const raw_request_data = core.SerializeRawWithdrawalRequest(
+      NormalizeRawWithdrawalRequest(raw_request)
+    );
+    const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
+    const data = toArrayBuffer(
+      Buffer.concat([rollup_type_hash, toBuffer(raw_request_data)])
+    );
+    const message = utils.ckbHash(data).serializeJson();
+    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
+    const buf = Buffer.concat([
+      prefix_buf,
+      Buffer.from(message.slice(2), "hex"),
+    ]);
+    return `0x${keccak256(buf).toString("hex")}`;
   }
   static createAccountRawL2Transaction(from_id, nonce, script) {
     const create_account = { script };
     const enum_tag = "0x00000000";
-    const create_account_part = new Reader(core.SerializeCreateAccount(
-      NormalizeCreateAccount(create_account)
-    )).serializeJson();
+    const create_account_part = new Reader(
+      core.SerializeCreateAccount(NormalizeCreateAccount(create_account))
+    ).serializeJson();
     const args = enum_tag + create_account_part.slice(2);
     return {
       from_id: u32ToHex(from_id),
@@ -129,8 +149,31 @@ class GodwokenUtils {
       args,
     };
   }
-}
 
+  static createRawWithdrawalRequest(
+    nonce,
+    capacity,
+    amount,
+    sudt_script_hash,
+    account_script_hash,
+    sell_amount,
+    sell_capacity,
+    owner_lock_hash,
+    payment_lock_hash
+  ) {
+    return {
+      nonce: "0x" + BigInt(nonce).toString(16),
+      capacity: "0x" + BigInt(capacity).toString(16),
+      amount: "0x" + BigInt(amount).toString(16),
+      sudt_script_hash: sudt_script_hash,
+      account_script_hash: account_script_hash,
+      sell_amount: "0x" + BigInt(sell_amount).toString(16),
+      sell_capacity: "0x" + BigInt(sell_capacity).toString(16),
+      owner_lock_hash: owner_lock_hash,
+      payment_lock_hash: payment_lock_hash,
+    };
+  }
+}
 
 module.exports = {
   Godwoken,
