@@ -5,17 +5,23 @@ import { deploymentConfig } from "../utils/deployment_config";
 import { createGetRequiredInputValue } from "./helpers";
 
 export async function depositCKB(pwcore: PWCore, currentEthAddress: string) {
+  console.log("depositCKB");
   const prefix = "";
   const getRequiredInputValue = createGetRequiredInputValue(prefix);
 
   const submitAmountButton = async () => {
     const amount: string = getRequiredInputValue("#amount");
-    await sendTx(
-      pwcore,
-      deploymentConfig,
-      amount,
-      currentEthAddress.toLowerCase()
-    );
+    try {
+      const txHash = await sendTx(
+        pwcore,
+        deploymentConfig,
+        amount,
+        currentEthAddress.toLowerCase()
+      );
+      alert(`deposit tx hash: ${txHash}`);
+    } catch (e) {
+      alert(e.message);
+    }
   };
 
   const button = document.querySelector<HTMLElement>("#submit-amount");
@@ -31,13 +37,19 @@ export async function depositSudt(pwcore: PWCore, ethAddress: string) {
   const submitAmountButton = async () => {
     const amount: string = getRequiredInputValue("amount");
     const scriptArgs: HexString = getRequiredInputValue("script-args");
-    await sendSudtTx(
-      pwcore,
-      deploymentConfig,
-      amount,
-      scriptArgs,
-      ethAddress.toLowerCase()
-    );
+    try {
+      const txHash = await sendSudtTx(
+        pwcore,
+        deploymentConfig,
+        amount,
+        scriptArgs,
+        ethAddress.toLowerCase()
+      );
+
+      alert(`deposit tx hash: ${txHash}`);
+    } catch (e) {
+      alert(e.message);
+    }
   };
 
   const button = document.querySelector<HTMLElement>("#deposit-sudt-submit");

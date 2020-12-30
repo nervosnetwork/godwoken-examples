@@ -53,7 +53,7 @@ export async function godwokenWithdraw(currentEthAddress: string) {
     });
 
     try {
-      await withdraw(
+      const result = await withdraw(
         fromId,
         capacity,
         amount,
@@ -61,7 +61,13 @@ export async function godwokenWithdraw(currentEthAddress: string) {
         l2LockHash,
         ownerLockHash
       );
-      alert("withdraw success!");
+
+      const message = (result as any).message;
+      if (message !== undefined && message !== null) {
+        alert(message);
+      } else {
+        alert("withdraw success!");
+      }
     } catch (e) {
       alert(e.message);
       throw e;

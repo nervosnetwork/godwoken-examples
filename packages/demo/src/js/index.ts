@@ -12,6 +12,8 @@ import {
 import { godwokenQuerySudt } from "./pages/query_sudt";
 import { godwokenSudtTransfer } from "./pages/sudt_transfer";
 import { godwokenWithdraw } from "./pages/withdraw";
+import { Hash } from "@ckb-lumos/base";
+import { getAccountIdByEthAddress, getLayer2LockHash } from "./polyjuice";
 
 export async function initPWCore() {
   const pwcore = await new PWCore(ckbUrl).init(
@@ -28,9 +30,19 @@ async function withPw(currentEthAddress: string) {
   depositSudt(pwcore, currentEthAddress);
 }
 
+async function info(currentEthAddress: string) {
+  console.log("current eth address:", currentEthAddress);
+  const layer2LockHash: Hash = getLayer2LockHash(currentEthAddress);
+  console.log("layer2 lock hash:", layer2LockHash);
+  const accountId = await getAccountIdByEthAddress(currentEthAddress);
+  console.log("account id:", accountId);
+}
+
 async function main() {
   const currentEthAddress: string = await getCurrentEthAccount();
-  console.log("current eth address:", currentEthAddress);
+
+  info(currentEthAddress);
+
   displayEthAddress(currentEthAddress);
 
   withPw(currentEthAddress);
