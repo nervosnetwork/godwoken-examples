@@ -171,7 +171,7 @@ function getLayer2LockScript(ethAddress: string): Script {
   };
 }
 
-function getLayer2LockHash(ethAddress: string): Hash {
+export function getLayer2LockHash(ethAddress: string): Hash {
   return utils.computeScriptHash(getLayer2LockScript(ethAddress));
 }
 
@@ -190,7 +190,9 @@ export async function getBalance(
   return amount;
 }
 
-export function getAccountIdByEthAddress(ethAddress: string): Promise<Uint32> {
+export async function getAccountIdByEthAddress(
+  ethAddress: string
+): Promise<Uint32> {
   const layer2LockHash: Hash = getLayer2LockHash(ethAddress);
   return getAccountId(layer2LockHash);
 }

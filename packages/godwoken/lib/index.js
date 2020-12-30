@@ -119,7 +119,8 @@ class GodwokenUtils {
     ]);
     return `0x${keccak256(buf).toString("hex")}`;
   }
-  static generateWithdrawalMessageToSign(raw_request) {
+  
+  generateWithdrawalMessageToSign(raw_request) {
     const raw_request_data = core.SerializeRawWithdrawalRequest(
       NormalizeRawWithdrawalRequest(raw_request)
     );
@@ -135,6 +136,7 @@ class GodwokenUtils {
     ]);
     return `0x${keccak256(buf).toString("hex")}`;
   }
+  
   static createAccountRawL2Transaction(from_id, nonce, script) {
     const create_account = { script };
     const enum_tag = "0x00000000";

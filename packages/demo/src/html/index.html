@@ -241,6 +241,36 @@
         <span id="transfer-sudt-result"></span>
       </form>
     </div>
+
+    <div class="nes-container with-title container">
+      <p class="title">Withdrawal</p>
+
+      <form>
+        <div class="nes-field">
+          <label>capacity (shannon):</label>
+          <input type="number" id="withdrawal-capacity" class="nes-input" value="10000000000" required>
+        </div>
+        <div class="nes-field">
+          <label>amount:</label>
+          <input type="number" id="withdrawal-amount" class="nes-input" value="0" required>
+        </div>
+        <div class="nes-select">
+          <label>sudt script hash:</label>
+          <select type="text" id="withdrawal-sudt-script-hash"></select>
+        </div>
+        <div class="nes-field">
+          <label>eth address:</label>
+          <input type="text" id="withdrawal-eth-address" class="nes-input" required>
+        </div>
+        <div class="nes-field">
+          <label>owner lock hash (<span>For the least amount of trouble when using the demo, it's best if you withdraw to a single signed plain ckb address</span>):</label>
+          <input type="text" id="withdrawal-owner-ckb-address" class="nes-input" required>
+        </div>
+  
+        <button type="button" id="withdrawal-submit" class="nes-btn is-primary submit-button">Submit</button>
+        <span id="transfer-sudt-result"></span>
+      </form>
+    </div>
   </main>
 
   <script src="../js/index.js" type="text/javascript"></script>
