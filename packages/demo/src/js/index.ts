@@ -3,7 +3,7 @@ import { getCurrentEthAccount } from "./utils/eth_account";
 import { ckbUrl, pwCollectorUrl } from "./url";
 import { displayBalance } from "./pages/balance";
 import { displayEthAddress } from "./pages/display_eth_address";
-import { depositCKB, depositSudt } from "./pages/deposit";
+import { depositCKB, depositSudt, initDepositSudtPage } from "./pages/deposit";
 import {
   deploySimpleStorage,
   simpleStorageGet,
@@ -46,6 +46,8 @@ async function main() {
   displayEthAddress(currentEthAddress);
 
   withPw(currentEthAddress);
+
+  initDepositSudtPage();
 
   displayBalance(currentEthAddress);
 

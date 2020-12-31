@@ -23,7 +23,7 @@ export async function displayBalance(currentEthAddress: string) {
         currentEthAddress
       );
       console.log("get balance:", balance);
-      balanceElement.innerHTML = balance.toString();
+      balanceElement.innerHTML = `${balance} shannons`;
     } catch (e) {
       balanceElement.innerHTML = "Not Created.";
       alert(e.message);
