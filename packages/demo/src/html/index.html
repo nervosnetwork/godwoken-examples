@@ -63,8 +63,7 @@
     <div class="nes-container with-title container">
       <p class="title">Deposit SUDT</p>
       <div class="nes-field">
-        <label>sudt script args:</label>
-        <input type="text" id="deposit-sudt-script-args" class="nes-input" required>
+        <label>sudt type:  <span>ckETH</span></label>
       </div>
       <div class="nes-field">
         <label>amount:</label>
@@ -94,7 +93,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt type:</label>
+          <label>Godwoken token type:</label>
           <select id="deploy-sudt-id"></select>
         </div>
         <div class="nes-field">
@@ -126,7 +125,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt type:</label>
+          <label>Godwoken token type:</label>
           <select id="ss-set-sudt-id"></select>
         </div>
         <div class="nes-field">
@@ -153,7 +152,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt type:</label>
+          <label>Godwoken token type:</label>
           <select id="ss-get-sudt-id"></select>
         </div>
         <div class="nes-field">
@@ -173,7 +172,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt type:</label>
+          <label>Godwoken token type:</label>
           <select id="query-sudt-to-id"></select>
         </div>
         <div class="nes-field">
@@ -193,7 +192,7 @@
 
       <form>
         <div class="nes-select">
-          <label>sudt type:</label>
+          <label>Godwoken token type:</label>
           <select id="transfer-sudt-sudt-id"></select>
         </div>
         <div class="nes-field">
@@ -202,11 +201,11 @@
         </div>
         <div class="nes-field">
           <label>amount:</label>
-          <input type="number" id="transfer-sudt-amount" class="nes-input" required>
+          <input type="number" id="transfer-sudt-amount" class="nes-input" placeholder="Unit is shannon when transfer CKB" required>
         </div>
         <div class="nes-field">
           <label>fee:</label>
-          <input type="number" id="transfer-sudt-fee" class="nes-input" required>
+          <input type="number" id="transfer-sudt-fee" class="nes-input" placeholder="Unit is shannon when transfer CKB" required>
         </div>
   
         <button type="button" id="transfer-sudt-submit" class="nes-btn is-primary submit-button">Submit</button>
@@ -227,7 +226,7 @@
           <input type="number" id="withdrawal-amount" class="nes-input" value="0" required>
         </div>
         <div class="nes-select">
-          <label>sudt script hash:</label>
+          <label>Godwoken token type:</label>
           <select type="text" id="withdrawal-sudt-script-hash"></select>
         </div>
         <div class="nes-field">
