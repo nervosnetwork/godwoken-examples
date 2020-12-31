@@ -24,7 +24,7 @@ Deposit CLI both support `testnet` and `dev chain`.
 
 ```bash
 yarn workspace @godwoken-examples/godwoken tsc 
-yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken/demo build-cli
+yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-examples/demo build-cli
 ```
 
 ### Deposit
@@ -60,7 +60,7 @@ yarn workspace @godwoken-examples/demo start
 
 ### Open in browser
 
-Open `http://lcoalhost:9000/html/index.html`
+Open `http://localhost:9000/html/index.html`
 
 
 # Godwoken utils

@@ -24,7 +24,6 @@ import * as secp256k1 from "secp256k1";
 const keccak256 = require('keccak256');
 
 export function generateLockScript(privateKey: any) {
-    initializeConfig();
     const privateKeyBuffer = new Reader(privateKey).toArrayBuffer();
     const publicKeyArray = secp256k1.publicKeyCreate(
         new Uint8Array(privateKeyBuffer)
