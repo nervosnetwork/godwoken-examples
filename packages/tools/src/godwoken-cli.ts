@@ -242,9 +242,9 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const rollup_type_script = runnerConfig.godwokenConfig.chain.rollup_type_script;
   const rollup_type_hash = utils.computeScriptHash(rollup_type_script);
   console.log("rollup_type_hash", rollup_type_hash);
+  const withdrawal_lock_dep = runnerConfig.deploymentConfig.withdrawal_lock_dep;
 
   initializeConfig();
-  console.log("getConfig()", getConfig());
 
   const l2_lock_script_hash = accountScriptHash(privkey);
   const lock_script = generateLockScript(privkey);
@@ -362,7 +362,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const new_witness_args: WitnessArgs = {
     lock: data,
   };
-  const witness = new Reader(
+  const withdrawal_witness = new Reader(
     base_core.SerializeWitnessArgs(
       normalizers.NormalizeWitnessArgs(new_witness_args)
     )
@@ -373,18 +373,25 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     .update("inputs", (inputs) => {
       return inputs.push(withdrawal_cell);
     })
-    .update("inputs", (inputs) => {
-      return inputs.push(user_cell);
-    })
     .update("outputs", (outputs) => {
       return outputs.push(output_cell);
+    })
+    .update("cellDeps", (cell_deps) => {
+      return cell_deps.push(withdrawal_lock_dep);
     })
     .update("cellDeps", (cell_deps) => {
       return cell_deps.push(rollup_cell_dep);
     })
     .update("witnesses", (witnesses) => {
-      return witnesses.push(witness);
+      return witnesses.push(withdrawal_witness);
     });
+
+  txSkeleton = await common.setupInputCell(
+    txSkeleton,
+    user_cell,
+    undefined,
+    { config: getConfig() },
+  );
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,
     [ckb_address],
@@ -393,7 +400,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     { config: getConfig() },
   );
   txSkeleton = common.prepareSigningEntries(txSkeleton);
-  const message: HexString = txSkeleton.get("signingEntries").get(1)!.message;
+  const message: HexString = txSkeleton.get("signingEntries").get(0)!.message;
   const content: HexString = key.signRecoverable(message, privkey);
   const tx = sealTransaction(txSkeleton, [content]);
   const rpc = new RPC(program.ckbRpc);
