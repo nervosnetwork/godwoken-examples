@@ -1,4 +1,17 @@
-# godwoken examples
+# Godwoken Examples
+
+This demo shows of how to use [Godwoken](https://github.com/nervosnetwork/godwoken).
+
+The demo provides the following functionalities:
+
+* Deposit from a MetaMask powered address into Godwoken.
+* Deploy an Ethereum Smart Contract to Polyjuice running on Godwoken, we use SimpleStorage.
+* Submit a polyjuice transaction to set the value in SimpleStorage smart contract.
+* Execute (but do not submit) a transaction to fetch the current stored value in SimpleStorage smart contract.
+* Query the balance of a Godwoken account.
+* Make transfers between Godwoken accounts.
+* Withdraw from Godwoken back to a layer 1 CKB address.
+
 
 ## Install dependencies
 
