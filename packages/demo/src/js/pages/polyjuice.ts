@@ -23,12 +23,16 @@ export async function deploySimpleStorage(currentEthAddress: string) {
   const prefix = "#deploy-";
 
   fillSelectOptions("#deploy-sudt-id", polyjuiceConfig.sudt_ids);
-  const createAccountIdsStr: string = Object.values(
-    polyjuiceConfig.creator_account_ids
-  ).join(", ");
+  const createAccountIds: any = polyjuiceConfig.creator_account_ids;
+  const createAccountIdsStr: string = Object.keys(createAccountIds)
+    .map((key: string): string => {
+      const value: number = createAccountIds[key];
+      return `${value}(using ${key} token type)`
+    })
+    .join(", ");
   document.querySelector<HTMLInputElement>(
     "#deploy-creator-account-id"
-  )!.placeholder = `try ${createAccountIdsStr} for a deployed example account.`;
+  )!.placeholder = `Deployed example accounts: ${createAccountIdsStr}`;
 
   const getRequiredInputValue = createGetRequiredInputValue(prefix);
   const submitButton = async () => {
