@@ -23,7 +23,7 @@
   "scripts": {
     "clean": "rm -rf build",
     "fmt": "prettier --write \"src/**/*.ts\" package.json",
-    "cp-files": "cp -r src/html build/html",
+    "cp-files": "cp -r src/html build/",
     "build": "webpack --config webpack.dev.config.js && yarn run cp-files",
     "start": "webpack serve --config webpack.dev.config.js",
     "build:prod": "export NODE_ENV=production && webpack --config webpack.prod.config.js && yarn run cp-files",
