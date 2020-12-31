@@ -11,6 +11,7 @@ import {
     _signMessage,
     _generateTransactionMessageToSign,
     _createAccountRawL2Transaction,
+    accountScriptHash,
 } from "./common";
 
 import {
@@ -29,7 +30,6 @@ import {
 } from "@godwoken-examples/godwoken";
 import { Polyjuice } from "@godwoken-examples/polyjuice";
 import * as secp256k1 from "secp256k1";
-const keccak256 = require('keccak256');
 
 const program = new Command();
 program
@@ -170,40 +170,3 @@ async function staticCall(
     );
 }
 
-
-function ckbAddress(privateKey: any) {
-    initializeConfig();
-    const privateKeyBuffer = new Reader(privateKey).toArrayBuffer();
-    const publicKeyArray = secp256k1.publicKeyCreate(
-        new Uint8Array(privateKeyBuffer)
-    );
-    const publicKeyHash = utils
-        .ckbHash(publicKeyArray.buffer)
-        .serializeJson()
-        .substr(0, 42);
-    const scriptConfig = getConfig().SCRIPTS.SECP256K1_BLAKE160!;
-    const script = {
-        code_hash: scriptConfig.CODE_HASH,
-        hash_type: scriptConfig.HASH_TYPE,
-        args: publicKeyHash,
-    };
-    return scriptToAddress(script);
-}
-
-function ethAddress(privkey: any) {
-    const privateKeyBuffer = new Reader(privkey).toArrayBuffer();
-    const publicKeyArray = secp256k1.publicKeyCreate(
-        new Uint8Array(privateKeyBuffer)
-    );
-    const addr = `0x${keccak256(toBuffer(publicKeyArray.buffer)).slice(12).toString("hex")}`;
-    console.log("EthAddress:", addr);
-    return addr;
-}
-function accountScriptHash(privkey: any) {
-    const script: Script = {
-        code_hash: "0x0000000000000000000000000000000000000000000000000000000000000001",
-        hash_type: "data",
-        args: ethAddress(privkey),
-    };
-    return utils.ckbHash(base_core.SerializeScript(normalizers.NormalizeScript(script))).serializeJson();
-}

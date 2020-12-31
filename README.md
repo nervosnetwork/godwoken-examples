@@ -62,6 +62,23 @@ yarn workspace @godwoken-examples/demo start
 
 Open `http://lcoalhost:9000/html/index.html`
 
+
+# Godwoken utils
+
+### Unlock Withdrawal
+
+Run `godwoken-cli.js --help` to see how to use this command.
+
+```bash
+yarn workspace @godwoken-examples/godwoken tsc 
+yarn workspace @godwoken-examples/tools tsc 
+
+LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/tools/lib/godwoken-cli.js unlockWithdraw --help
+```
+
+
+# Polyjuice
+
 ## Create Creator account
 
 ### Build typescripts
@@ -93,7 +110,6 @@ $ node packages/tools/lib/godwoken-cli.js getAccountIdByScriptHash <script_hash>
 ```
 
 You can get the script hash when deposition finished.
-
 
 ## Update creator account config
 

@@ -8,6 +8,7 @@ const {
   NormalizeWithdrawalRequest,
   NormalizeRawWithdrawalRequest,
 } = require("./normalizer");
+const normalizer = require("./normalizer");
 const core = require("../schemas");
 
 function numberToUInt32LE(value) {
@@ -185,4 +186,6 @@ module.exports = {
   u32ToHex,
   hexToU32,
   toBuffer,
+  core,
+  normalizer,
 };

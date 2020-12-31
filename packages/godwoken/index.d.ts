@@ -61,6 +61,27 @@ export interface WithdrawalRequest {
   raw: RawWithdrawalRequest;
   signature: HexString;
 }
+export interface WithdrawalLockArgs {
+  // the original deposition info
+  // used for helping programs generate reverted custodian cell
+  deposition_block_hash: Hash,
+  deposition_block_number: HexNumber,
+  // the original custodian lock hash
+  withdrawal_block_hash: Hash,
+  withdrawal_block_number: HexNumber,
+  // buyer can pay sell_amount token to unlock
+  sudt_script_hash: Hash,
+  sell_amount: HexNumber,
+  sell_capacity: HexNumber,
+  // layer1 lock to withdraw after challenge period
+  owner_lock_hash: Hash,
+  // layer1 lock to receive the payment, must exists on the chain
+  payment_lock_hash: Hash,
+}
+
+export interface UnlockWithdrawalViaFinalize {
+  block_proof: HexString,
+}
 
 // export interface HeaderInfo {
 //     number: Uint64;
