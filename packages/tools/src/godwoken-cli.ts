@@ -295,17 +295,18 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   for await (const cell of withdrawalCollector.collect()) {
     console.log("withdrawalCell", cell);
     const lock_args = cell.cell_output.lock.args;
-    const current_rollup_type_hash = lock_args.slice(2, 34);
-    console.log("current_rollup_type_hash")
+    const current_rollup_type_hash = lock_args.slice(0, 66);
+    console.log("current_rollup_type_hash", current_rollup_type_hash);
     if (current_rollup_type_hash != rollup_type_hash) {
       console.log("rollup_type_hash not match");
       continue;
     }
-    const withdrawal_lock_args_data = lock_args.slice(34);
-    const withdrawal_lock_args = new core.WithdrawalLockArgs(new Reader("0x" + withdrawal_lock_args_data));
+    const withdrawal_lock_args_data = "0x" + lock_args.slice(66);
+    const withdrawal_lock_args = new core.WithdrawalLockArgs(new Reader(withdrawal_lock_args_data));
     const owner_lock_hash = "0x" + toBuffer(withdrawal_lock_args.getOwnerLockHash().raw()).toString("hex");
     console.log("owner_lock_hash", owner_lock_hash);
     if (owner_lock_hash != lock_script_hash) {
+      console.log("owner_lock_hash not match")
       continue;
     }
 
