@@ -8,7 +8,7 @@ import { normalizers, Reader, RPC } from "ckb-js-toolkit";
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
 import { common } from "@ckb-lumos/common-scripts";
-import { core as base_core, Hash, CellDep, HexString, WitnessArgs, Cell, Script, utils } from "@ckb-lumos/base";
+import { core as base_core, Hash, Input, CellDep, HexString, WitnessArgs, Cell, Script, utils } from "@ckb-lumos/base";
 import {
   TransactionSkeleton,
   scriptToAddress,
@@ -87,6 +87,10 @@ program
   .command("getScriptHash <account_id>")
   .description("Get script hash by account id")
   .action(getScriptHash)
+program
+  .command("getScript <script_hash>")
+  .description("Get script by script hash")
+  .action(getScript)
 program
   .command("deposite <privkey> <amount>")
   .description("Deposite some value [TODO]")
@@ -220,6 +224,11 @@ async function getScriptHash(account_id: string) {
   const script_hash = await godwoken.getScriptHash(parseInt(account_id));
   console.log("script hash:", script_hash);
 }
+async function getScript(script_hash: string) {
+  const godwoken = new Godwoken(program.rpc);
+  const script = await godwoken.getScript(script_hash);
+  console.log("script:", script);
+}
 
 async function unlockWithdraw(privkey: string, runner_config_path: string) {
   if (process.env.LUMOS_CONFIG_FILE) {
@@ -235,6 +244,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   console.log("rollup_type_hash", rollup_type_hash);
 
   initializeConfig();
+  console.log("getConfig()", getConfig());
 
   const l2_lock_script_hash = accountScriptHash(privkey);
   const lock_script = generateLockScript(privkey);
@@ -252,28 +262,42 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   // Ready to build L1 CKB transaction
 
   // * search cell by ckb address
+  var user_cell: any = null;
+  const userCollector = new CellCollector(indexer, {
+    lock: lock_script,
+  });
+  for await (const cell of userCollector.collect()) {
+    console.log("userCell", cell);
+    user_cell = cell;
+    break;
+  }
+  if (user_cell === null) {
+    console.log("user cell not found");
+    exit(-1);
+  }
 
   // * search rollup cell then get last_finalized_block_number from cell data (GlobalState)
   const rollupCollector = new CellCollector(indexer, {
     type: rollup_type_script,
   });
-  var rollupCell = null;
+  var rollup_cell: any = null;
   for await (const cell of rollupCollector.collect()) {
-    console.log("rollupCell", cell);
-    rollupCell = cell;
+    console.log("rollup_cell", cell);
+    rollup_cell = cell;
+    break;
   }
-  if (rollupCell === null) {
-    console.error("rollupCell not found");
+  if (rollup_cell === null) {
+    console.error("rollup_cell not found");
     exit(-1);
   }
-  const globalState = new core.GlobalState(new Reader(rollupCell.data));
+  const globalState = new core.GlobalState(new Reader(rollup_cell.data));
   const last_finalized_block_number = globalState.getLastFinalizedBlockNumber().toLittleEndianBigUint64();
   // FIXME: this value is zero
   console.log("last_finalized_block_number", last_finalized_block_number);
 
   // * use rollup cell's out point as cell_deps
   const rollup_cell_dep: CellDep = {
-    out_point: rollupCell.out_point!,
+    out_point: rollup_cell.out_point!,
     dep_type: "code",
   };
 
@@ -297,7 +321,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     const lock_args = cell.cell_output.lock.args;
     const current_rollup_type_hash = lock_args.slice(0, 66);
     console.log("current_rollup_type_hash", current_rollup_type_hash);
-    if (current_rollup_type_hash != rollup_type_hash) {
+    if (current_rollup_type_hash !== rollup_type_hash) {
       console.log("rollup_type_hash not match");
       continue;
     }
@@ -305,7 +329,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     const withdrawal_lock_args = new core.WithdrawalLockArgs(new Reader(withdrawal_lock_args_data));
     const owner_lock_hash = "0x" + toBuffer(withdrawal_lock_args.getOwnerLockHash().raw()).toString("hex");
     console.log("owner_lock_hash", owner_lock_hash);
-    if (owner_lock_hash != lock_script_hash) {
+    if (owner_lock_hash !== lock_script_hash) {
       console.log("owner_lock_hash not match")
       continue;
     }
@@ -346,16 +370,27 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
 
   let txSkeleton = TransactionSkeleton({ cellProvider: indexer });
   txSkeleton = txSkeleton
+    .update("inputs", (inputs) => {
+      return inputs.push(withdrawal_cell);
+    })
+    .update("inputs", (inputs) => {
+      return inputs.push(user_cell);
+    })
     .update("outputs", (outputs) => {
       return outputs.push(output_cell);
     })
     .update("cellDeps", (cell_deps) => {
       return cell_deps.push(rollup_cell_dep);
+    })
+    .update("witnesses", (witnesses) => {
+      return witnesses.push(witness);
     });
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,
     [ckb_address],
-    BigInt(1000)
+    BigInt(1000),
+    undefined,
+    { config: getConfig() },
   );
   txSkeleton = common.prepareSigningEntries(txSkeleton);
   const message: HexString = txSkeleton.get("signingEntries").get(1)!.message;
