@@ -6,13 +6,13 @@
   "polyjuice": {
     "validator_code_hash": "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
     "creator_account_ids": {
-      "5": 5
+      "7": 7
     },
     "sudt_ids": {
       "CKB": 1,
-      "ckETH": 100002
+      "ckETH": 10
     },
-    "simple_storage_account_id": 100001
+    "simple_storage_account_id": 8
   },
   "godwoken": {
     "rpc": [
