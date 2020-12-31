@@ -238,7 +238,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   console.log("LUMOS_CONFIG_FILE:", process.env.LUMOS_CONFIG_FILE);
   console.log("indexer-path:", indexerPath);
   const runnerConfig = JSON.parse(readFileSync(runner_config_path, "utf8"));
-  console.log("godwokenConfig", runnerConfig.godwokenConfig);
+  // console.log("godwokenConfig", runnerConfig.godwokenConfig);
   const rollup_type_script = runnerConfig.godwokenConfig.chain.rollup_type_script;
   const rollup_type_hash = utils.computeScriptHash(rollup_type_script);
   console.log("rollup_type_hash", rollup_type_hash);
@@ -251,6 +251,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const lock_script_hash = utils.computeScriptHash(lock_script);
   const ckb_address = scriptToAddress(lock_script);
   console.log("layer 2 lock script hash", l2_lock_script_hash);
+  console.log("ckb_address", ckb_address);
 
   const indexer = new Indexer(program.ckbRpc, indexerPath);
   indexer.startForever();
@@ -267,12 +268,12 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     lock: lock_script,
   });
   for await (const cell of userCollector.collect()) {
-    console.log("userCell", cell);
+    // console.log("userCell", cell);
     user_cell = cell;
     break;
   }
   if (user_cell === null) {
-    console.log("user cell not found");
+    console.log("[ERROR]: user cell not found");
     exit(-1);
   }
 
@@ -282,17 +283,16 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   });
   var rollup_cell: any = null;
   for await (const cell of rollupCollector.collect()) {
-    console.log("rollup_cell", cell);
+    // console.log("rollup_cell", cell);
     rollup_cell = cell;
     break;
   }
   if (rollup_cell === null) {
-    console.error("rollup_cell not found");
+    console.error("[ERROR]: rollup_cell not found");
     exit(-1);
   }
   const globalState = new core.GlobalState(new Reader(rollup_cell.data));
   const last_finalized_block_number = globalState.getLastFinalizedBlockNumber().toLittleEndianBigUint64();
-  // FIXME: this value is zero
   console.log("last_finalized_block_number", last_finalized_block_number);
 
   // * use rollup cell's out point as cell_deps
@@ -317,12 +317,12 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   });
   const withdrawal_cells = [];
   for await (const cell of withdrawalCollector.collect()) {
-    console.log("withdrawalCell", cell);
+    console.log("[INFO]: withdrawalCell", cell.out_point);
     const lock_args = cell.cell_output.lock.args;
     const current_rollup_type_hash = lock_args.slice(0, 66);
-    console.log("current_rollup_type_hash", current_rollup_type_hash);
+    console.log("rollup_type_hash", current_rollup_type_hash);
     if (current_rollup_type_hash !== rollup_type_hash) {
-      console.log("rollup_type_hash not match");
+      console.log("[INFO]: rollup_type_hash not match");
       continue;
     }
     const withdrawal_lock_args_data = "0x" + lock_args.slice(66);
@@ -330,19 +330,24 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     const owner_lock_hash = "0x" + toBuffer(withdrawal_lock_args.getOwnerLockHash().raw()).toString("hex");
     console.log("owner_lock_hash", owner_lock_hash);
     if (owner_lock_hash !== lock_script_hash) {
-      console.log("owner_lock_hash not match")
+      console.log("[INFO]: owner_lock_hash not match")
       continue;
     }
 
     const withdrawal_block_number = withdrawal_lock_args.getWithdrawalBlockNumber().toLittleEndianBigUint64();
     console.log("withdrawal_block_number", withdrawal_block_number);
+    if (withdrawal_block_number > last_finalized_block_number) {
+      console.log("[INFO]: withdrawal cell not finalized");
+      continue;
+    }
 
     withdrawal_cells.push(cell);
   }
   if (withdrawal_cells.length == 0) {
-    console.warn("No withdrawal cell found");
+    console.warn("[ERROR]: No valid withdrawal cell found");
     exit(-1);
   }
+  console.log(`[INFO] found ${withdrawal_cells.length} withdrawal cells, only process first one`);
   const withdrawal_cell = withdrawal_cells[0];
   const output_cell: Cell = {
     cell_output: {
@@ -359,6 +364,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     core.SerializeUnlockWithdrawalViaFinalize(
       normalizer.NormalizeUnlockWithdrawalViaFinalize({block_proof})
     )).serializeJson().slice(2);
+  console.log("withdrawal_witness", data);
   const new_witness_args: WitnessArgs = {
     lock: data,
   };
@@ -392,6 +398,12 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     undefined,
     { config: getConfig() },
   );
+  txSkeleton = txSkeleton.update("fixedEntries", (fixedEntries) => {
+    return fixedEntries.push({
+      field: "outputs",
+      index: 0,
+    });
+  });
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,
     [ckb_address],
