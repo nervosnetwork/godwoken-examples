@@ -2,7 +2,7 @@ import { Reader } from "ckb-js-toolkit";
 import { SerializeDepositionLockArgs } from "@godwoken-examples/godwoken/schemas";
 import { DeploymentConfig } from "../base";
 import { Script, HexString, Hash, PackedSince, utils } from "@ckb-lumos/base";
-import { NormalizeDepositionLockArgs } from "../base/normalizer";
+import { NormalizeDepositionLockArgs } from "@godwoken-examples/godwoken/normalizer";
 import runnerConfig from "../../configs/runner_config.json";
 import Config from "../../configs/config.json";
 const layer2LockConfig = Config.layer2_lock;

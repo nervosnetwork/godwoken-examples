@@ -10,7 +10,7 @@ import {
 import Config from "../configs/config.json";
 import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import { sign } from "./utils/eth_sign";
-import { L2Transaction } from "./base/normalizer";
+import { L2Transaction } from "@godwoken-examples/godwoken";
 import { getRollupTypeHash } from "./transactions/deposition";
 import { godwokenUrl } from "./url";
 import { LocalNonce } from "./utils/nonce";
