@@ -27,12 +27,12 @@ export async function deploySimpleStorage(currentEthAddress: string) {
   const createAccountIdsStr: string = Object.keys(createAccountIds)
     .map((key: string): string => {
       const value: number = createAccountIds[key];
-      return `${value}(using ${key} token type)`
+      return `${value}(using ${key} token type)`;
     })
     .join(", ");
   document.querySelector<HTMLInputElement>(
-    "#deploy-creator-account-id"
-  )!.placeholder = `Deployed example accounts: ${createAccountIdsStr}`;
+    "#deploy-creator-account-id-info"
+  )!.innerText = `Deployed example accounts: ${createAccountIdsStr}`;
 
   const getRequiredInputValue = createGetRequiredInputValue(prefix);
   const submitButton = async () => {
