@@ -14,7 +14,7 @@ import {
   SUDTQuery,
   SUDTTransfer,
   UnoinType,
-} from "@godwoken-examples/godwoken/normalizer";
+} from "@godwoken-examples/godwoken/lib/normalizer";
 import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/schemas";
 import { Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./transactions/deposition";
