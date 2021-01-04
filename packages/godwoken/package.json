@@ -11,7 +11,7 @@
     "fmt": "prettier --write \"{lib,scripts,tests}/**/*.js\" index.d.ts package.json"
   },
   "dependencies": {
-    "@ckb-lumos/base": "^0.14.2-rc5",
+    "@ckb-lumos/base": "^0.14.2-rc6",
     "ckb-js-toolkit": "^0.9.3",
     "immutable": "^4.0.0-rc.12",
     "keccak256": "^1.0.2"
