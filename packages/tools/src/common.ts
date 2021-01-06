@@ -49,9 +49,10 @@ export function ckbAddress(privateKey: any) {
 export function ethAddress(privkey: any) {
     const privateKeyBuffer = new Reader(privkey).toArrayBuffer();
     const publicKeyArray = secp256k1.publicKeyCreate(
-        new Uint8Array(privateKeyBuffer)
+      new Uint8Array(privateKeyBuffer),
+      false,
     );
-    const addr = `0x${keccak256(toBuffer(publicKeyArray.buffer)).slice(12).toString("hex")}`;
+    const addr = `0x${keccak256(toBuffer(publicKeyArray.buffer).slice(1)).slice(12).toString("hex")}`;
     console.log("EthAddress:", addr);
     return addr;
 }
