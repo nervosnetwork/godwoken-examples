@@ -155,6 +155,10 @@ async function generateL2Transaction(
   const rawL2Transaction: RawL2Transaction = polyjuice.generateTransaction(
     fromId,
     toId,
+    // TODO: gas_limit
+    0n,
+    // TODO: gas_price
+    0n,
     value,
     data,
     nonce
