@@ -53,7 +53,7 @@ program
   .action(staticCall)
 program.parse(argv);
 
-const validator_code_hash = "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9";
+const validator_code_hash = "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2";
 
 async function createCreatorAccount(
   from_id_str: string,
@@ -92,7 +92,7 @@ async function deploy(
   const gas_price = BigInt(gas_price_str);
   const godwoken = new Godwoken(program.rpc);
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+    validator_code_hash: "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2",
     sudt_id: 1,
     creator_account_id,
   });
@@ -129,7 +129,7 @@ async function _call(
 ) {
   const godwoken = new Godwoken(program.rpc);
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+    validator_code_hash: "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2",
     sudt_id: 1,
     creator_account_id: 0,
   });

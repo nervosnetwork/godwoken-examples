@@ -40,7 +40,7 @@ class Polyjuice {
   constructor(
     client,
     {
-      validator_code_hash = "0x20814f4f3ebaf8a297d452aa38dbf0f9cb0b2988a87cb6119c2497de817e7de9",
+      validator_code_hash = "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2",
       sudt_id = 1,
       creator_account_id,
     }
