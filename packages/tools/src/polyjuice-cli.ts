@@ -48,7 +48,7 @@ program
   .description("Call a EVM contract")
   .action(call)
 program
-  .command("staticCall <to_id> <input_data> <rollup_type_hash> <privkey>")
+  .command("staticCall <gas_limit> <gas_price> <to_id> <input_data> <rollup_type_hash> <privkey>")
   .description("Static Call a EVM contract")
   .action(staticCall)
 program.parse(argv);
@@ -88,7 +88,7 @@ async function deploy(
   privkey: string,
 ) {
   const creator_account_id = parseInt(creator_account_id_str);
-  const gas_lmit = BigInt(gas_limit_str);
+  const gas_limit = BigInt(gas_limit_str);
   const gas_price = BigInt(gas_price_str);
   const godwoken = new Godwoken(program.rpc);
   const polyjuice = new Polyjuice(godwoken, {
@@ -139,7 +139,7 @@ async function _call(
     console.log("Can not find account id by script_hash:", script_hash);
     exit(-1);
   }
-  const gas_lmit = BigInt(gas_limit_str);
+  const gas_limit = BigInt(gas_limit_str);
   const gas_price = BigInt(gas_price_str);
   const nonce = await godwoken.getNonce(from_id);
   const raw_l2tx = polyjuice.generateTransaction(from_id, parseInt(to_id_str), gas_limit, gas_price, 0n, input_data, nonce);
@@ -154,6 +154,8 @@ async function _call(
 
 async function call(
   to_id_str: string,
+  gas_limit_str: string,
+  gas_price_str: string,
   input_data: string,
   rollup_type_hash: string,
   privkey: string,
@@ -161,12 +163,14 @@ async function call(
   const godwoken = new Godwoken(program.rpc);
   _call(
     godwoken.submitL2Transaction.bind(godwoken),
-    to_id_str, input_data, rollup_type_hash, privkey,
+    to_id_str, gas_limit_str, gas_price_str, input_data, rollup_type_hash, privkey,
   );
 }
 
 async function staticCall(
   to_id_str: string,
+  gas_limit_str: string,
+  gas_price_str: string,
   input_data: string,
   rollup_type_hash: string,
   privkey: string,
@@ -174,7 +178,7 @@ async function staticCall(
   const godwoken = new Godwoken(program.rpc);
   _call(
     godwoken.executeL2Transaction.bind(godwoken),
-    to_id_str, input_data, rollup_type_hash, privkey,
+    to_id_str, gas_limit_str, gas_price_str, input_data, rollup_type_hash, privkey,
   );
 }
 
