@@ -77,9 +77,15 @@ export async function sendTx(
   const lockScript: Script = await getCurrentLockScript();
   const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
 
+  const layer2Lock: Script = {
+    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
+    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
+    args: layer2LockArgs,
+  };
+
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
     ownerLockHash,
-    layer2LockArgs
+    layer2Lock
   );
 
   console.log("depositionLockArgs:", depositionLockArgs);
@@ -112,9 +118,15 @@ export async function sendSudtTx(
   const lockScript: Script = await getCurrentLockScript();
   const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
 
+  const layer2Lock: Script = {
+    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
+    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
+    args: layer2LockArgs,
+  };
+
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
     ownerLockHash,
-    layer2LockArgs
+    layer2Lock
   );
 
   console.log("depositionLockArgs:", depositionLockArgs);
