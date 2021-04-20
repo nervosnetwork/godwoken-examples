@@ -24,7 +24,8 @@ yarn run bootstrap
 Firstly copy config files.
 
 ```bash
-cp <your godwoken `runner_config.json`> packages/demo/src/configs/runner_config.json
+cp <your godwoken `scripts-deploy-result.json`> packages/demo/src/configs/scripts-deploy-result.json
+cp <your godwoken `config.toml`> packages/demo/src/configs/godwoken-config.json (convert config.toml to json format)
 cp packages/demo/src/configs/config.json.sample packages/demo/src/configs/config.json
 # then update `config.json` with your own config.
 ```
