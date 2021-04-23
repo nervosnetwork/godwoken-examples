@@ -53,7 +53,7 @@ program
   .action(staticCall)
 program.parse(argv);
 
-const validator_code_hash = "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2";
+const VALIDATOR_CODE_HASH = "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c";
 
 async function createCreatorAccount(
   from_id_str: string,
@@ -66,7 +66,7 @@ async function createCreatorAccount(
   const nonce = await godwoken.getNonce(from_id);
   const script_args = numberToUInt32LE(parseInt(sudt_id_str));
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id, nonce, validator_code_hash, script_args,
+    from_id, nonce, VALIDATOR_CODE_HASH, script_args,
   );
   const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
   const signature = _signMessage(message, privkey);
@@ -92,7 +92,7 @@ async function deploy(
   const gas_price = BigInt(gas_price_str);
   const godwoken = new Godwoken(program.rpc);
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2",
+    validator_code_hash: "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
     sudt_id: 1,
     creator_account_id,
   });
@@ -129,7 +129,7 @@ async function _call(
 ) {
   const godwoken = new Godwoken(program.rpc);
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x6a946971979c019fe5096108267779775a141c9647936053b58358caa87bf5a2",
+    validator_code_hash: "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
     sudt_id: 1,
     creator_account_id: 0,
   });

@@ -111,3 +111,4 @@ packages/demo/src/cli/config.json
 packages/demo/src/configs/runner_config.json
 packages/demo/src/configs/config.json
 indexer-data/
+script/
