@@ -14,6 +14,7 @@ import {
   DepositionLockArgs,
   getDepositionLockArgs,
   serializeArgs,
+  getRollupTypeHash,
 } from "../js/transactions/deposition";
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
@@ -134,14 +135,14 @@ async function sendTx(
   console.log(`Layer 1 sudt script hash:`, sudtScriptHash);
 
   const godwokenRpc = new RPC(program.godwokenRpc);
-  const scriptHash = await godwokenRpc.gw_getScriptHash(1);
-  const script = await godwokenRpc.gw_getScript(scriptHash);
+  const scriptHash = await godwokenRpc.get_script_hash("0x1");
+  const script = await godwokenRpc.get_script(scriptHash);
   console.log(
     `Layer 2 sudt script hash:`,
     utils.computeScriptHash({
       code_hash: script.code_hash,
       hash_type: script.hash_type,
-      args: sudtScriptHash,
+      args: getRollupTypeHash() + sudtScriptHash.slice(2),
     })
   );
 

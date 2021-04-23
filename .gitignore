@@ -110,5 +110,8 @@ packages/demo/indexer-data
 packages/demo/src/cli/config.json
 packages/demo/src/configs/runner_config.json
 packages/demo/src/configs/config.json
+packages/demo/src/configs/scripts-deploy-result.json
+packages/demo/src/configs/godwoken-config.json
 indexer-data/
 script/
+cli-run/
