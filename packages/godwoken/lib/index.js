@@ -92,7 +92,7 @@ class Godwoken {
     return await this.rpc.get_script_hash(account_id);
   }
   async getData(data_hash) {
-    return await this.rpc.gw_get_data(data_hash);
+    return await this.rpc.get_data(data_hash);
   }
   async hasDataHash(data_hash) {
     return await this.rpc.get_data_hash(data_hash);
