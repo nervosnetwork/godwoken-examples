@@ -2537,6 +2537,14 @@ export class Uint64 {
     return this.view.buffer;
   }
 
+  toBigEndianBigUint64() {
+    return this.view.getBigUint64(0, false);
+  }
+
+  toLittleEndianBigUint64() {
+    return this.view.getUint64(0, true);
+  }
+
   static size() {
     return 8;
   }
