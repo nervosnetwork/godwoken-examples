@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { HexString } from "@ckb-lumos/base";
+import { HexString, utils } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
-  generateAddress,
+  generateAddress, parseAddress,
 } from "@ckb-lumos/helpers";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
@@ -19,8 +19,8 @@ program.version("0.0.1");
 program
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-c, --capacity <capacity>", "capacity in shannons")
-  .requiredOption("-s --sudt-script-hash <sudt script hash>", "sudt script hash")
-  .requiredOption("-o --owner-lock-hash <owner lock hash>", "owner lock hash")
+  .requiredOption("-s --sudt-script-hash <sudt script hash>", "l1 sudt script hash")
+  .requiredOption("-o --owner-ckb-address <owner ckb address>", "owner ckb address (to)")
   .requiredOption("-f --from-id <from id>", "from id")
   .option("-m --amount <amount>", "amount of sudt", "0")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
@@ -53,6 +53,12 @@ function _privateKeyToEthAddress(privateKey: HexString) {
       .slice(12)
       .toString("hex");
   return ethAddress;
+}
+
+function addressToLockHash(address: string): string {
+  const lock = parseAddress(address);
+  const lockHash = utils.computeScriptHash(lock);
+  return lockHash;  
 }
 
 async function withdrawal(
@@ -98,7 +104,10 @@ const run = async () => {
   const capacity = program.capacity;
   const amount = program.amount;
   const sudtScriptHash = program.sudtScriptHash;
-  const ownerLockHash = program.ownerLockHash;
+  // const ownerLockHash = program.ownerLockHash;
+  const ownerCkbAddress = program.ownerCkbAddress;
+  const ownerLockHash = addressToLockHash(ownerCkbAddress);
+  console.log("owner lock hash:", ownerLockHash);
   const fromId = program.fromId;
 
   const privateKey = program.privateKey;
