@@ -89,7 +89,7 @@ class Godwoken {
     return await this.rpc.get_script(script_hash);
   }
   async getScriptHash(account_id) {
-    return await this.rpc.get_script_hash(account_id);
+    return await this.rpc.get_script_hash("0x" + account_id.toString(16));
   }
   async getData(data_hash) {
     return await this.rpc.get_data(data_hash);
@@ -111,6 +111,25 @@ class GodwokenUtils {
     const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
     const data = toArrayBuffer(
       Buffer.concat([rollup_type_hash, toBuffer(raw_tx_data)])
+    );
+    const message = utils.ckbHash(data).serializeJson();
+    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
+    const buf = Buffer.concat([
+      prefix_buf,
+      Buffer.from(message.slice(2), "hex"),
+    ]);
+    return `0x${keccak256(buf).toString("hex")}`;
+  }
+
+  newGenerateTransactionMessageToSign(raw_l2tx, sender_script_hash, receiver_script_hash) {
+    const raw_tx_data = core.SerializeRawL2Transaction(
+      NormalizeRawL2Transaction(raw_l2tx)
+    );
+    const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
+    const senderScriptHash = Buffer.from(sender_script_hash.slice(2), "hex");
+    const receiverScriptHash = Buffer.from(receiver_script_hash.slice(2), "hex");
+    const data = toArrayBuffer(
+      Buffer.concat([rollup_type_hash, senderScriptHash, receiverScriptHash, toBuffer(raw_tx_data)])
     );
     const message = utils.ckbHash(data).serializeJson();
     const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);

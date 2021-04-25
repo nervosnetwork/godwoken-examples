@@ -11,18 +11,18 @@ import path from "path";
 import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
 import crypto from "crypto";
 import keccak256 from "keccak256";
-import { withdrawCLI } from "../js/godwoken"
+import { transferCLI, withdrawCLI } from "../js/godwoken"
 
 const program = new Command();
 program.version("0.0.1");
 
 program
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
-  .requiredOption("-c, --capacity <capacity>", "capacity in shannons")
-  .requiredOption("-s --sudt-script-hash <sudt script hash>", "l1 sudt script hash")
-  .requiredOption("-o --owner-ckb-address <owner ckb address>", "owner ckb address (to)")
-  .requiredOption("-f --from-id <from id>", "from id")
-  .option("-m --amount <amount>", "amount of sudt", "0")
+  .requiredOption("-m, --amount <amount>", "capacity in shannons / amount in sudt")
+  .requiredOption("-e, --fee <fee>", "fee")
+  .requiredOption("-f, --from-id <from id>", "from id")
+  .requiredOption("-t, --to-id <to id>", "to id")
+  .requiredOption("-s, --sudt-id <sudt id>", "sudt id")
   .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
   .option("-g, --godwoken-rpc <godwoken rpc>", "godwoken rpc path", "http://127.0.0.1:8119")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
@@ -61,28 +61,24 @@ function addressToLockHash(address: string): string {
   return lockHash;  
 }
 
-async function withdrawal(
-    rpc: RPC,
-    godwokenURL: string,
-    privateKey: string,
-    capacity: string,
-    amount: string,
-    sudtScriptHash: string,
-    ownerLockHash: string,
-    fromId: number,
+async function transfer(
+  godwokenURL: string,
+  privateKey: string,
+  fromId: number,
+  toId: number,
+  sudtId: number,
+  amount: bigint,
+  fee: bigint,
 ) {
-    const l2LockHash = await rpc.get_script_hash("0x" + fromId.toString(16));
-    console.log("l2 lock hash:", l2LockHash);
-    return await withdrawCLI(
-        godwokenURL,
-        fromId,
-        BigInt(capacity),
-        BigInt(amount),
-        sudtScriptHash,
-        l2LockHash,
-        ownerLockHash,
-        privateKey,
-    )
+  return await transferCLI(
+    godwokenURL,
+    privateKey,
+    fromId,
+    toId,
+    sudtId,
+    amount,
+    fee
+  )
 }
 
 const run = async () => {
@@ -103,14 +99,12 @@ const run = async () => {
   await indexer.waitForSync();
   console.log("synced ...");
 
-  const capacity = program.capacity;
   const amount = program.amount;
-  const sudtScriptHash = program.sudtScriptHash;
-  // const ownerLockHash = program.ownerLockHash;
-  const ownerCkbAddress = program.ownerCkbAddress;
-  const ownerLockHash = addressToLockHash(ownerCkbAddress);
-  console.log("owner lock hash:", ownerLockHash);
+  const fee = program.fee;
   const fromId = program.fromId;
+  const toId = program.toId;
+  const sudtId = program.sudtId;
+  const godwokenURL = program.godwokenRpc;
 
   const privateKey = program.privateKey;
 
@@ -118,18 +112,15 @@ const run = async () => {
   console.log("public key:", publicKey)
   console.log("eth address:", _privateKeyToEthAddress(privateKey));
 
-  const rpc = new RPC(program.rpc);
-  const godwokenRPC = new RPC(program.godwokenRpc);
   try {
-    await withdrawal(
-      godwokenRPC,
-      program.godwokenRpc,
+    await transfer(
+      godwokenURL,
       privateKey,
-      capacity,
-      amount,
-      sudtScriptHash,
-      ownerLockHash,
       +fromId,
+      +toId,
+      +sudtId,
+      BigInt(amount),
+      BigInt(fee),
     )
 
     process.exit(0);
