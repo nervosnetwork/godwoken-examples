@@ -22,6 +22,8 @@ import { sign } from "./utils/eth_sign";
 import { godwokenUrl } from "./url";
 import { LocalNonce } from "./utils/nonce";
 
+import * as secp256k1 from "secp256k1";
+
 /**
  *
  * @param fromId
@@ -206,4 +208,84 @@ export async function withdraw(
 
   console.log("--- godwoken withdraw finished ---");
   return result;
+}
+
+export async function withdrawCLI(
+  fromId: Uint32,
+  capacity: bigint,
+  amount: bigint,
+  sudtScriptHash: Hash,
+  accountScriptHash: Hash,
+  ownerLockHash: Hash,
+  privateKey: string,
+) {
+  console.log("--- godwoken withdraw ---");
+
+  const godwoken = new Godwoken(godwokenUrl);
+  const nonce: Uint32 = await godwoken.getNonce(fromId);
+  // const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
+  console.log("nonce:", nonce);
+
+  const rawWithdrawalRequest = GodwokenUtils.createRawWithdrawalRequest(
+    nonce,
+    capacity,
+    amount,
+    sudtScriptHash,
+    accountScriptHash,
+    BigInt(0),
+    BigInt(100 * 10 ** 8),
+    ownerLockHash,
+    "0x" + "0".repeat(64)
+  );
+
+  console.log("rawWithdrawalRequest:", rawWithdrawalRequest);
+
+  const godwokenUtils = new GodwokenUtils(getRollupTypeHash());
+  const message = godwokenUtils.generateWithdrawalMessageToSign(
+    rawWithdrawalRequest
+  );
+
+  console.log("message:", message);
+
+  // const signature: HexString = await sign(message);
+  // let web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
+  // let signature: HexString = web3.eth.accounts.sign(message, privateKey).signature;
+  let signature: HexString = signMessage(message, privateKey);
+  let v = Number.parseInt(signature.slice(-2), 16);
+  if (v >= 27) v -= 27;
+  signature = signature.slice(0, -2) + v.toString(16).padStart(2, "0");
+
+  console.log("web3 signature:", signature);
+
+  const withdrawalRequest: WithdrawalRequest = {
+    raw: rawWithdrawalRequest,
+    signature: signature,
+  };
+
+  console.log("withdrawalRequest:", withdrawalRequest);
+
+  const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
+  console.log("result:", result);
+
+  if (result !== null) {
+    const errorMessage = (result as any).message;
+    if (errorMessage !== undefined && errorMessage !== null) {
+      throw new Error(errorMessage);
+    }
+  }
+
+  console.log("--- godwoken withdraw finished ---");
+  return result;
+}
+
+export function signMessage(message: string, privkey: string) {
+  const signObject = secp256k1.ecdsaSign(
+    new Uint8Array(new Reader(message).toArrayBuffer()),
+    new Uint8Array(new Reader(privkey).toArrayBuffer())
+  );
+  const signatureBuffer = new ArrayBuffer(65);
+  const signatureArray = new Uint8Array(signatureBuffer);
+  signatureArray.set(signObject.signature, 0);
+  signatureArray.set([signObject.recid], 64);
+  return new Reader(signatureBuffer).serializeJson();
 }

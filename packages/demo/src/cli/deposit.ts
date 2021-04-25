@@ -14,6 +14,7 @@ import {
   DepositionLockArgs,
   getDepositionLockArgs,
   serializeArgs,
+  getRollupTypeHash,
 } from "../js/transactions/deposition";
 import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
@@ -79,9 +80,9 @@ async function sendTx(
   const ownerLock: Script = parseAddress(fromAddress);
   const ownerLockHash: Hash = utils.computeScriptHash(ownerLock);
   const layer2Lock: Script = {
-    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
-    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
-    args: layer2LockArgs,
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
+    args: getRollupTypeHash() + layer2LockArgs.slice(2),
   };
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
     ownerLockHash,

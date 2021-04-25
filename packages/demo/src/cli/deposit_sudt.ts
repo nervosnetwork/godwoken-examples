@@ -89,9 +89,9 @@ async function sendTx(
   const ownerLock: Script = parseAddress(fromAddress);
   const ownerLockHash: Hash = utils.computeScriptHash(ownerLock);
   const layer2Lock: Script = {
-    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
-    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
-    args: layer2LockArgs,
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
+    args: getRollupTypeHash() + layer2LockArgs.slice(2),
   };
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
     ownerLockHash,
@@ -136,14 +136,16 @@ async function sendTx(
 
   const godwokenRpc = new RPC(program.godwokenRpc);
   const scriptHash = await godwokenRpc.get_script_hash("0x1");
-  const script = await godwokenRpc.get_script(scriptHash);
+  const script = await godwokenRpc.get_script(scriptHash)
+  const layer2SudtScript = {
+    code_hash: script.code_hash,
+    hash_type: script.hash_type,
+    args: getRollupTypeHash() + sudtScriptHash.slice(2),
+  }
+  console.log("layer 2 sudt script:", layer2SudtScript)
   console.log(
     `Layer 2 sudt script hash:`,
-    utils.computeScriptHash({
-      code_hash: script.code_hash,
-      hash_type: script.hash_type,
-      args: getRollupTypeHash() + sudtScriptHash.slice(2),
-    })
+    utils.computeScriptHash(layer2SudtScript)
   );
 
   txSkeleton = await common.payFeeByFeeRate(
