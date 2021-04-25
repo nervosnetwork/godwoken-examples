@@ -211,6 +211,7 @@ export async function withdraw(
 }
 
 export async function withdrawCLI(
+  godwokenURL: string,
   fromId: Uint32,
   capacity: bigint,
   amount: bigint,
@@ -221,7 +222,7 @@ export async function withdrawCLI(
 ) {
   console.log("--- godwoken withdraw ---");
 
-  const godwoken = new Godwoken(godwokenUrl);
+  const godwoken = new Godwoken(godwokenURL);
   const nonce: Uint32 = await godwoken.getNonce(fromId);
   // const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
   console.log("nonce:", nonce);
@@ -288,4 +289,90 @@ export function signMessage(message: string, privkey: string) {
   signatureArray.set(signObject.signature, 0);
   signatureArray.set([signObject.recid], 64);
   return new Reader(signatureBuffer).serializeJson();
+}
+
+export async function transferCLI(
+  godwokenURL: string,
+  privateKey: string,
+  fromId: Uint32,
+  toId: Uint32,
+  sudtId: Uint32,
+  amount: Uint128,
+  fee: Uint128
+) {
+  console.log("--- godwoken sudt transfer ---");
+  const godwoken = new Godwoken(godwokenURL);
+  const nonce = await godwoken.getNonce(fromId);
+  // const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
+
+  const sudtTransfer: SUDTTransfer = {
+    to: "0x" + toId.toString(16),
+    amount: "0x" + amount.toString(16),
+    fee: "0x" + fee.toString(16),
+  };
+
+  const sudtArgs: UnoinType = {
+    type: "SUDTTransfer",
+    value: NormalizeSUDTTransfer(sudtTransfer),
+  };
+
+  const serializedSudtArgs = new Reader(
+    SerializeSUDTArgs(sudtArgs)
+  ).serializeJson();
+
+  console.log("serialized sudt args:", sudtArgs);
+
+  const rawL2Transaction: RawL2Transaction = {
+    from_id: "0x" + fromId.toString(16),
+    to_id: "0x" + sudtId.toString(16),
+    nonce: "0x" + BigInt(nonce).toString(16),
+    args: serializedSudtArgs,
+  };
+
+  console.log("rawL2Transaction:", rawL2Transaction);
+
+  const rollupTypeHash: Hash = getRollupTypeHash();
+
+  const senderScriptHash = await godwoken.getScriptHash(fromId);
+  const receiverScriptHash = await godwoken.getScriptHash(sudtId);
+  console.log("sender script hash:", senderScriptHash);
+  console.log("receiver script hash:", receiverScriptHash);
+
+  const godwokenUtils = new GodwokenUtils(rollupTypeHash);
+  const message = godwokenUtils.newGenerateTransactionMessageToSign(
+    rawL2Transaction,
+    senderScriptHash,
+    receiverScriptHash
+  );
+
+  console.log("message:", message);
+
+  // const signature: HexString = await sign(message);
+  let signature: HexString = signMessage(message, privateKey);
+  let v = Number.parseInt(signature.slice(-2), 16);
+  if (v >= 27) v -= 27;
+  signature = signature.slice(0, -2) + v.toString(16).padStart(2, "0");
+
+  console.log("signature:", signature);
+
+  const l2Transaction: L2Transaction = {
+    raw: rawL2Transaction,
+    signature,
+  };
+
+  console.log("l2 transaction:", l2Transaction);
+
+  // const runResult = await godwoken.executeL2Transaction(l2Transaction);
+  const runResult = await godwoken.submitL2Transaction(l2Transaction);
+  console.log("runResult:", runResult);
+
+  if (runResult !== null) {
+    const errorMessage: string | undefined = (runResult as any).message;
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+  }
+
+  console.log("--- godwoken sudt transfer finished ---");
+  return;
 }
