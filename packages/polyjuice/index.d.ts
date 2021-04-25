@@ -9,7 +9,7 @@ export declare class Polyjuice {
   constructor(
     client: Godwoken,
     config: {
-      validator_code_hash: Hash,
+      validator_script_hash: Hash,
       sudt_id: Uint32,
       creator_account_id: Uint32,
     }
@@ -41,7 +41,7 @@ export declare class Polyjuice {
     nonce: Uint32,
   ): RawL2Transaction;
   // Generate a RawL2Transaction for creating polyjuice base account (for creating polyjuice layer 2 account)
-  generateCreateCreatorAccountTransaction(from_id: Uint32, nonce: Uint32): RawL2Transaction;
+  generateCreateCreatorAccountTransaction(rollup_type_hash: Hash, from_id: Uint32, nonce: Uint32): RawL2Transaction;
 }
 
 export declare class SimpleStorage {

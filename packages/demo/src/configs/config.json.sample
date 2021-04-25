@@ -4,7 +4,7 @@
     "hash_type": "data"
   },
   "polyjuice": {
-    "validator_code_hash": "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
+    "validator_script_hash": "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14",
     "creator_account_ids": {
       "4": 4
     },

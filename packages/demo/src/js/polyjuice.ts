@@ -144,7 +144,7 @@ async function generateL2Transaction(
 ): Promise<[L2Transaction, Uint32, Godwoken, Polyjuice]> {
   const godwoken = new Godwoken(godwokenUrl);
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: polyjuiceConfig.validator_code_hash,
+    validator_script_hash: polyjuiceConfig.validator_script_hash,
     sudt_id: sudtId,
     creator_account_id: creatorAccountId,
   });

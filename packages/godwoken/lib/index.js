@@ -73,23 +73,28 @@ class Godwoken {
   }
   async getBalance(sudt_id, account_id) {
     // TODO: maybe swap params later?
-    const hex = await this.rpc.get_balance(account_id, sudt_id);
+    const sudt_id_hex = `0x${sudt_id.toString(16)}`;
+    const account_id_hex = `0x${account_id.toString(16)}`;
+    const hex = await this.rpc.get_balance(account_id_hex, sudt_id_hex);
     return BigInt(hex);
   }
   async getStorageAt(account_id, key) {
-    return await this.rpc.get_storage_at(account_id, key);
+    const account_id_hex = `0x${account_id.toString(16)}`;
+    return await this.rpc.get_storage_at(account_id_hex, key);
   }
   async getAccountIdByScriptHash(script_hash) {
     return await this.rpc.get_account_id_by_script_hash(script_hash);
   }
   async getNonce(account_id) {
-    return await this.rpc.get_nonce("0x" + account_id.toString(16));
+    const account_id_hex = `0x${account_id.toString(16)}`;
+    return parseInt(await this.rpc.get_nonce(account_id_hex));
   }
   async getScript(script_hash) {
     return await this.rpc.get_script(script_hash);
   }
   async getScriptHash(account_id) {
-    return await this.rpc.get_script_hash("0x" + account_id.toString(16));
+    const account_id_hex = `0x${account_id.toString(16)}`;
+    return await this.rpc.get_script_hash(account_id_hex);
   }
   async getData(data_hash) {
     return await this.rpc.get_data(data_hash);

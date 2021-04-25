@@ -1,7 +1,7 @@
 
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { argv, exit } from "process";
+import { argv, exit, env } from "process";
 
 import { normalizers, Reader } from "ckb-js-toolkit";
 import { Command } from "commander";
@@ -100,3 +100,4 @@ export function _createAccountRawL2Transaction(
     };
     return GodwokenUtils.createAccountRawL2Transaction(from_id, nonce, script);
 }
+

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { argv, exit } from "process";
+import { argv, exit, env } from "process";
 
 import { normalizers, Reader } from "ckb-js-toolkit";
 import { Command } from "commander";
@@ -53,7 +53,15 @@ program
   .action(staticCall)
 program.parse(argv);
 
-const VALIDATOR_CODE_HASH = "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c";
+const VALIDATOR_SCRIPT_HASH = "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14";
+
+export function getValidatorScriptHash() : string {
+  const script_hash = env["VALIDATOR_SCRIPT_HASH"];
+  if (script_hash === undefined || !!script_hash || script_hash.length != 66) {
+    throw new Error(`invalid polyjuice validator script hash: '${script_hash}', use 'export VALIDATOR_SCRIPT_HASH=0x...' to set the value.`);
+  }
+  return script_hash;
+}
 
 async function createCreatorAccount(
   from_id_str: string,
@@ -65,8 +73,9 @@ async function createCreatorAccount(
   const from_id = parseInt(from_id_str);
   const nonce = await godwoken.getNonce(from_id);
   const script_args = numberToUInt32LE(parseInt(sudt_id_str));
+  let validator_script_hash = getValidatorScriptHash();
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id, nonce, VALIDATOR_CODE_HASH, script_args,
+    from_id, nonce, validator_script_hash, script_args,
   );
   const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
   const signature = _signMessage(message, privkey);
@@ -91,8 +100,9 @@ async function deploy(
   const gas_limit = BigInt(gas_limit_str);
   const gas_price = BigInt(gas_price_str);
   const godwoken = new Godwoken(program.rpc);
+  let validator_script_hash = getValidatorScriptHash();
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
+    validator_script_hash: validator_script_hash,
     sudt_id: 1,
     creator_account_id,
   });
@@ -128,8 +138,9 @@ async function _call(
   privkey: string,
 ) {
   const godwoken = new Godwoken(program.rpc);
+  let validator_script_hash = getValidatorScriptHash();
   const polyjuice = new Polyjuice(godwoken, {
-    validator_code_hash: "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
+    validator_script_hash: validator_script_hash,
     sudt_id: 1,
     creator_account_id: 0,
   });

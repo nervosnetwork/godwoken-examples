@@ -40,13 +40,13 @@ class Polyjuice {
   constructor(
     client,
     {
-      validator_code_hash = "0x4b83dd9158e7f3407bbc3fefbcac5dfeecf40221ea28706eb97fd653d375e00c",
+      validator_script_hash = "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14",
       sudt_id = 1,
       creator_account_id,
     }
   ) {
     this.client = client;
-    this.validator_code_hash = validator_code_hash;
+    this.validator_script_hash = validator_script_hash;
     this.sudt_id = sudt_id;
     this.creator_account_id = creator_account_id;
   }
@@ -70,7 +70,7 @@ class Polyjuice {
           + numberToUInt32LE(from_id).slice(2)
           + numberToUInt32LE(nonce).slice(2);
     const script = {
-      code_hash: this.validator_code_hash,
+      code_hash: this.validator_script_hash,
       hash_type: "data",
       args,
     };
@@ -89,11 +89,16 @@ class Polyjuice {
       args,
     };
   }
-  async generateCreateCreatorAccountTransaction(from_id, nonce) {
-    const script_args_buf = Buffer.alloc(4);
-    script_args_buf.writeUInt32LE(this.sudt_id);
+  async generateCreateCreatorAccountTransaction(rollup_type_hash, from_id, nonce) {
+    const rollup_type_hash_buf = Buffer.from(rollup_type_hash.slice(2), "hex");
+    const sudt_id_buf = Buffer.alloc(4);
+    sudt_id_buf.writeUInt32LE(this.sudt_id);
+
+    const script_args_buf = Buffer.alloc(36);
+    rollup_type_hash_buf.copy(script_args_buf, 0);
+    sudt_id_buf.copy(sudt_id_buf, 32);
     const script = {
-      code_hash: this.validator_code_hash,
+      code_hash: this.validator_script_hash,
       hash_type: "data",
       args: `0x${script_args_buf.toString("hex")}`,
     };
