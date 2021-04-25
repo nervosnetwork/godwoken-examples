@@ -83,7 +83,7 @@ class Godwoken {
     return await this.rpc.get_account_id_by_script_hash(script_hash);
   }
   async getNonce(account_id) {
-    return await this.rpc.get_nonce(account_id);
+    return await this.rpc.get_nonce("0x" + account_id.toString(16));
   }
   async getScript(script_hash) {
     return await this.rpc.get_script(script_hash);

@@ -18,7 +18,8 @@
     "ckb-js-toolkit": "^0.9.3",
     "commander": "^6.2.1",
     "keccak256": "^1.0.2",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "secp256k1": "^4.0.2"
   },
   "scripts": {
     "clean": "rm -rf build",
@@ -31,6 +32,7 @@
     "clean-cli": "rm -rf build-cli"
   },
   "devDependencies": {
+    "@types/secp256k1": "^4.0.2",
     "browserify": "^17.0.0",
     "ts-loader": "^8.0.12",
     "webpack": "^5.11.0",
