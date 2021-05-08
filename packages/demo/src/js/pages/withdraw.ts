@@ -66,9 +66,13 @@ export async function godwokenWithdraw(currentEthAddress: string) {
         ownerLockHash
       );
 
-      const message = (result as any).message;
-      if (message !== undefined && message !== null) {
-        alert(message);
+      if (result !== null) {
+        const message = (result as any).message;
+        if (message !== undefined && message !== null) {
+          alert(message);
+        } else {
+          alert(SUBMIT_SUCCESS_MESSAGE);
+        }
       } else {
         alert(SUBMIT_SUCCESS_MESSAGE);
       }

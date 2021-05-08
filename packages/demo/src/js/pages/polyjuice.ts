@@ -76,11 +76,15 @@ export async function deploySimpleStorage(currentEthAddress: string) {
     const deployedScriptHash = deployResult![1];
     const contractAccountId = deployResult![2];
 
-    const errorMessage: string | undefined = (runResult as any).message;
-    if (errorMessage !== undefined && errorMessage !== null) {
-      alert(errorMessage);
+    if (runResult !== null) {
+      const errorMessage: string | undefined = (runResult as any).message;
+      if (errorMessage !== undefined && errorMessage !== null) {
+        alert(errorMessage);
+      } else {
+        alert(SUBMIT_SUCCESS_MESSAGE);
+      }
     } else {
-      alert(SUBMIT_SUCCESS_MESSAGE);
+      alert(SUBMIT_SUCCESS_MESSAGE)
     }
 
     document.querySelector(

@@ -36,9 +36,12 @@ export async function query(
   accountId: Uint32
 ): Promise<Uint128> {
   console.log("--- godwoken sudt query ---");
+  fromId = +fromId;
+  toId = +toId;
+  accountId = +accountId;
   const godwoken = new Godwoken(godwokenUrl);
   // const nonce: Uint32 = await godwoken.getNonce(fromId);
-  const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
+  const nonce: Uint32 = await LocalNonce.getNonce(+fromId, godwoken);
 
   const sudtQuery: SUDTQuery = {
     account_id: "0x" + accountId.toString(16),
@@ -55,17 +58,24 @@ export async function query(
 
   console.log("serialized sudt args:", sudtArgs);
 
+  const rollupTypeHash: Hash = getRollupTypeHash();
+
   const rawL2Transaction: RawL2Transaction = {
-    from_id: "0x" + fromId.toString(16),
-    to_id: "0x" + toId.toString(16),
+    from_id: "0x" + (+fromId).toString(16),
+    to_id: "0x" + (+toId).toString(16),
     nonce: "0x" + nonce.toString(16),
     args: serializedSudtArgs,
   };
 
-  const rollupTypeHash: Hash = getRollupTypeHash();
   const godwokenUtils = new GodwokenUtils(rollupTypeHash);
-  const message = godwokenUtils.generateTransactionMessageToSign(
-    rawL2Transaction
+
+  const senderScriptHash = await godwoken.getScriptHash(+fromId);
+  const receiverScriptHash = await godwoken.getScriptHash(+toId);
+
+  const message = godwokenUtils.generateTransactionMessageWithoutPrefixToSign(
+    rawL2Transaction,
+    senderScriptHash,
+    receiverScriptHash,
   );
 
   const signature: HexString = await sign(message);
@@ -75,8 +85,14 @@ export async function query(
     signature,
   };
 
+  console.log("l2 transaction:", l2Transaction);
+
   const runResult = await godwoken.executeL2Transaction(l2Transaction);
   console.log("runResult:", runResult);
+
+  if (runResult === undefined || runResult === null) {
+    return BigInt(-1);
+  }
 
   const errorMessage: string | undefined = (runResult as any).message;
   if (errorMessage) {
@@ -100,6 +116,9 @@ export async function transfer(
   fee: Uint128
 ) {
   console.log("--- godwoken sudt transfer ---");
+  fromId = +fromId;
+  toId = +toId;
+  sudtId = +sudtId;
   const godwoken = new Godwoken(godwokenUrl);
   const nonce: Uint32 = await LocalNonce.getNonce(fromId, godwoken);
 
@@ -129,8 +148,14 @@ export async function transfer(
 
   const rollupTypeHash: Hash = getRollupTypeHash();
   const godwokenUtils = new GodwokenUtils(rollupTypeHash);
-  const message = godwokenUtils.generateTransactionMessageToSign(
-    rawL2Transaction
+
+  const senderScriptHash: Hash = await godwoken.getScriptHash(fromId);
+  const receiverScriptHash: Hash = await godwoken.getScriptHash(sudtId);
+
+  const message = godwokenUtils.generateTransactionMessageWithoutPrefixToSign(
+    rawL2Transaction,
+    senderScriptHash,
+    receiverScriptHash,
   );
 
   const signature: HexString = await sign(message);
@@ -143,6 +168,11 @@ export async function transfer(
   // const runResult = await godwoken.executeL2Transaction(l2Transaction);
   const runResult = await godwoken.submitL2Transaction(l2Transaction);
   console.log("runResult:", runResult);
+
+  if (runResult === undefined || runResult === null) {
+    LocalNonce.increaseNonce();
+    return;
+  }
 
   const errorMessage: string | undefined = (runResult as any).message;
   if (errorMessage) {
@@ -164,6 +194,9 @@ export async function withdraw(
   ownerLockHash: Hash
 ) {
   console.log("--- godwoken withdraw ---");
+  fromId = +fromId;
+  capacity = BigInt(capacity);
+  amount = BigInt(amount);
 
   const godwoken = new Godwoken(godwokenUrl);
   // const nonce: Uint32 = await godwoken.getNonce(fromId);
@@ -183,7 +216,7 @@ export async function withdraw(
   );
 
   const godwokenUtils = new GodwokenUtils(getRollupTypeHash());
-  const message = godwokenUtils.generateWithdrawalMessageToSign(
+  const message = godwokenUtils.generateWithdrawalMessageWithoutPrefixToSign(
     rawWithdrawalRequest
   );
 
@@ -198,6 +231,11 @@ export async function withdraw(
 
   const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
   console.log("result:", result);
+
+  if (result === undefined || result === null) {
+    LocalNonce.increaseNonce();
+    return result;
+  }
 
   const errorMessage = (result as any).message;
   if (errorMessage !== undefined && errorMessage !== null) {
@@ -339,7 +377,7 @@ export async function transferCLI(
   console.log("receiver script hash:", receiverScriptHash);
 
   const godwokenUtils = new GodwokenUtils(rollupTypeHash);
-  const message = godwokenUtils.newGenerateTransactionMessageToSign(
+  const message = godwokenUtils.generateTransactionMessageToSign(
     rawL2Transaction,
     senderScriptHash,
     receiverScriptHash

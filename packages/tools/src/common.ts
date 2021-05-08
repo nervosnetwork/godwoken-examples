@@ -81,10 +81,12 @@ export function _signMessage(message: string, privkey: string) {
 export function _generateTransactionMessageToSign(
     raw_l2tx: RawL2Transaction,
     rollup_type_hash: string,
+    sender_script_hash: string,
+    receiver_script_hash: string,
 ) {
     console.log("RawL2Transaction", raw_l2tx);
     const godwoken_utils = new GodwokenUtils(rollup_type_hash);
-    return godwoken_utils.generateTransactionMessageToSign(raw_l2tx);
+    return godwoken_utils.generateTransactionMessageToSign(raw_l2tx, sender_script_hash, receiver_script_hash);
 }
 
 export function _createAccountRawL2Transaction(
@@ -95,7 +97,7 @@ export function _createAccountRawL2Transaction(
 ) {
     const script: Script = {
         code_hash: script_code_hash,
-        hash_type: "data",
+        hash_type: "type",
         args: script_args
     };
     return GodwokenUtils.createAccountRawL2Transaction(from_id, nonce, script);
