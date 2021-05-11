@@ -37,6 +37,7 @@ program
     "Eth address (layer2 lock args, using --private-key value to calculate if not provided)"
   )
   .option("-c, --capacity <capacity>", "capacity in shannons", "40000000000")
+  .option("-w, --prefix-with-gw", "prefix with `gw_` or not", "true")
   .action(depositSudtRun);
 
 program
@@ -57,6 +58,7 @@ program
     "http://127.0.0.1:8119"
   )
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
+  .option("-w, --prefix-with-gw", "prefix with `gw_` or not", "true")
   .action(transferRun);
 
 program
@@ -80,6 +82,7 @@ program
     "http://127.0.0.1:8119"
   )
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
+  .option("-w, --prefix-with-gw", "prefix with `gw_` or not", "true")
   .action(withdrawRun);
 
 program.parse(process.argv);

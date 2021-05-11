@@ -7,7 +7,6 @@ import {
   NormalizeWithdrawalRequest,
   NormalizeRawWithdrawalRequest,
 } from "./normalizer";
-import core from "../schemas";
 import {
   L2Transaction,
   RawL2Transaction,
@@ -19,6 +18,11 @@ import {
   Uint64,
 } from "./types";
 import keccak256 from "keccak256";
+
+import * as core from "../schemas";
+import * as normalizer from "./normalizer";
+export { core, normalizer };
+export * from "./types";
 
 export function numberToUInt32LE(value: number): HexString {
   const buf = Buffer.alloc(4);
@@ -60,11 +64,11 @@ function toArrayBuffer(buf: Buffer) {
 
 export class Godwoken {
   private rpc: RPC;
-  private utils: GodwokenUtils;
+  private prefixGw: boolean;
 
-  constructor(url: string) {
+  constructor(url: string, prefixGw = false) {
     this.rpc = new RPC(url);
-    this.utils = new GodwokenUtils("");
+    this.prefixGw = prefixGw;
   }
 
   async _send(l2tx: L2Transaction, method: any) {
@@ -75,46 +79,88 @@ export class Godwoken {
   }
 
   async executeL2Transaction(l2tx: L2Transaction): Promise<RunResult> {
+    if (this.prefixGw) {
+      return this._send(l2tx, this.rpc.gw_execute_l2transaction);
+    }
     return this._send(l2tx, this.rpc.execute_l2transaction);
   }
+
   async submitL2Transaction(l2tx: L2Transaction): Promise<RunResult> {
+    if (this.prefixGw) {
+      return this._send(l2tx, this.rpc.gw_submit_l2transaction);
+    }
     return this._send(l2tx, this.rpc.submit_l2transaction);
   }
+
   async submitWithdrawalRequest(request: WithdrawalRequest): Promise<void> {
     const data = new Reader(
       core.SerializeWithdrawalRequest(NormalizeWithdrawalRequest(request))
     ).serializeJson();
+    if (this.prefixGw) {
+      return await this.rpc.gw_submit_withdrawal_request(data);
+    }
     return await this.rpc.submit_withdrawal_request(data);
   }
+
   async getBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128> {
     // TODO: maybe swap params later?
     const sudt_id_hex = `0x${(+sudt_id).toString(16)}`;
     const account_id_hex = `0x${(+account_id).toString(16)}`;
-    const hex = await this.rpc.get_balance(account_id_hex, sudt_id_hex);
+    const hex = this.prefixGw
+      ? await this.rpc.gw_get_balance(account_id_hex, sudt_id_hex)
+      : await this.rpc.get_balance(account_id_hex, sudt_id_hex);
     return BigInt(hex);
   }
+
   async getStorageAt(account_id: Uint32, key: Hash): Promise<Hash> {
     const account_id_hex = `0x${account_id.toString(16)}`;
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_storage_at(account_id_hex, key);
+    }
     return await this.rpc.get_storage_at(account_id_hex, key);
   }
+
   async getAccountIdByScriptHash(script_hash: Hash): Promise<Uint32> {
-    return await this.rpc.get_account_id_by_script_hash(script_hash);
+    const id = this.prefixGw
+      ? await this.rpc.gw_get_account_id_by_script_hash(script_hash)
+      : await this.rpc.get_account_id_by_script_hash(script_hash);
+    return +id;
   }
+
   async getNonce(account_id: Uint32): Promise<Uint32> {
     const account_id_hex = `0x${account_id.toString(16)}`;
-    return parseInt(await this.rpc.get_nonce(account_id_hex));
+    const nonce = this.prefixGw
+      ? await this.rpc.gw_get_nonce(account_id_hex)
+      : await this.rpc.get_nonce(account_id_hex);
+    return parseInt(nonce);
   }
+
   async getScript(script_hash: Hash): Promise<Script> {
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_script(script_hash);
+    }
     return await this.rpc.get_script(script_hash);
   }
+
   async getScriptHash(account_id: Uint32): Promise<Hash> {
     const account_id_hex = `0x${account_id.toString(16)}`;
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_script_hash(account_id_hex);
+    }
     return await this.rpc.get_script_hash(account_id_hex);
   }
+
   async getData(data_hash: Hash): Promise<HexString> {
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_data(data_hash);
+    }
     return await this.rpc.get_data(data_hash);
   }
+
   async hasDataHash(data_hash: Hash): Promise<boolean> {
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_data_hash(data_hash);
+    }
     return await this.rpc.get_data_hash(data_hash);
   }
 }

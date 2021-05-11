@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import {
   DeploymentConfig,
   deploymentConfig,
@@ -21,12 +20,13 @@ import {
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
-import commander from "commander";
+import commander, { program } from "commander";
 import {
   privateKeyToCkbAddress,
   privateKeyToEthAddress,
 } from "../modules/utils";
 import { initConfigAndSync } from "./common";
+import { Godwoken } from "@godwoken-examples/godwoken";
 
 async function sendTx(
   godwokenUrl: string,
@@ -87,9 +87,12 @@ async function sendTx(
   );
   console.log(`Layer 1 sudt script hash:`, sudtScriptHash);
 
-  const godwokenRpc = new RPC(godwokenUrl);
-  const scriptHash = await godwokenRpc.get_script_hash("0x1");
-  const script = await godwokenRpc.get_script(scriptHash);
+  const godwokenRpc = new Godwoken(
+    godwokenUrl,
+    program.prefixWithGw === "true"
+  );
+  const scriptHash = await godwokenRpc.getScriptHash(1);
+  const script = await godwokenRpc.getScript(scriptHash);
   const layer2SudtScript = {
     code_hash: script.code_hash,
     hash_type: script.hash_type,

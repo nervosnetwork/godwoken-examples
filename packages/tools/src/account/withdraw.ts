@@ -5,10 +5,10 @@ import { RPC } from "ckb-js-toolkit";
 import { withdrawCLI } from "../modules/godwoken";
 import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
+import { Godwoken } from "@godwoken-examples/godwoken";
 
 async function withdrawal(
-  rpc: RPC,
-  godwokenURL: string,
+  godwoken: Godwoken,
   privateKey: string,
   capacity: string,
   amount: string,
@@ -16,10 +16,10 @@ async function withdrawal(
   ownerLockHash: string,
   fromId: number
 ) {
-  const l2LockHash = await rpc.get_script_hash("0x" + fromId.toString(16));
+  const l2LockHash = await godwoken.getScriptHash(+fromId);
   console.log("l2 lock hash:", l2LockHash);
   return await withdrawCLI(
-    godwokenURL,
+    godwoken,
     fromId,
     BigInt(capacity),
     BigInt(amount),
@@ -50,11 +50,13 @@ export const run = async (program: Command) => {
   console.log("public key:", publicKey);
   console.log("eth address:", privateKeyToEthAddress(privateKey));
 
-  const godwokenRPC = new RPC(program.godwokenRpc);
+  const godwoken = new Godwoken(
+    program.godwokenRPC,
+    program.prefixWithGw === "true"
+  );
   try {
     await withdrawal(
-      godwokenRPC,
-      program.godwokenRpc,
+      godwoken,
       privateKey,
       capacity,
       amount,

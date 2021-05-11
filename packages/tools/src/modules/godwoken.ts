@@ -20,7 +20,7 @@ import { getRollupTypeHash } from "./deposition";
 import * as secp256k1 from "secp256k1";
 
 export async function withdrawCLI(
-  godwokenURL: string,
+  godwoken: Godwoken,
   fromId: Uint32,
   capacity: bigint,
   amount: bigint,
@@ -31,7 +31,6 @@ export async function withdrawCLI(
 ) {
   console.log("--- godwoken withdraw ---");
 
-  const godwoken = new Godwoken(godwokenURL);
   const nonce: Uint32 = await godwoken.getNonce(fromId);
   console.log("nonce:", nonce);
 
@@ -85,7 +84,7 @@ export async function withdrawCLI(
 }
 
 export async function transferCLI(
-  godwokenURL: string,
+  godwoken: Godwoken,
   privateKey: string,
   fromId: Uint32,
   toId: Uint32,
@@ -94,7 +93,6 @@ export async function transferCLI(
   fee: Uint128
 ) {
   console.log("--- godwoken sudt transfer ---");
-  const godwoken = new Godwoken(godwokenURL);
   const nonce = await godwoken.getNonce(fromId);
 
   const sudtTransfer: SUDTTransfer = {
