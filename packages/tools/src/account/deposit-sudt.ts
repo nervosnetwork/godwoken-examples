@@ -52,6 +52,7 @@ async function sendTx(
       depositionLockArgs.layer2_lock
     )}`
   );
+  console.log("↑ Using this script hash to get user account id ↑")
 
   const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
@@ -61,14 +62,6 @@ async function sendTx(
 
   const toAddress: string = generateAddress(depositionLock);
 
-  // const outputCell: Cell = {
-  //   cell_output: {
-  //     capacity: "0x" + BigInt(amount).toString(16),
-  //     lock: depositionLock,
-  //   },
-  //   data: "0x",
-  // };
-
   txSkeleton = await sudt.transfer(
     txSkeleton,
     [fromAddress],
@@ -76,7 +69,11 @@ async function sendTx(
     toAddress,
     BigInt(amount),
     undefined,
-    capacity
+    capacity,
+    undefined,
+    {
+      splitChangeCell: true,
+    }
   );
 
   const sudtScriptHash = utils.computeScriptHash(
@@ -97,6 +94,7 @@ async function sendTx(
     `Layer 2 sudt script hash:`,
     utils.computeScriptHash(layer2SudtScript)
   );
+  console.log("↑ Using this script hash to get sudt account id ↑")
 
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,

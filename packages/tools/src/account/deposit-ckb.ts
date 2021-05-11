@@ -47,6 +47,7 @@ async function sendTx(
       depositionLockArgs.layer2_lock
     )}`
   );
+  console.log("↑ Using this script hash to get user account id ↑")
   const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
     deploymentConfig,
