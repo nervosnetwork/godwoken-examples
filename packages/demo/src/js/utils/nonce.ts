@@ -4,7 +4,8 @@ export class LocalNonce {
   static nonce: number = 0;
 
   static async getNonce(id: number, godwoken: Godwoken): Promise<number> {
-    const nonce = await godwoken.getNonce(id);
+    let nonce = await godwoken.getNonce(+id);
+    nonce = +nonce;
 
     if (LocalNonce.nonce < nonce) {
       LocalNonce.nonce = nonce;

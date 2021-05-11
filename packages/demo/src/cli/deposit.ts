@@ -99,6 +99,8 @@ async function sendTx(
     serializedArgs
   );
 
+  console.log("deposition lock:", depositionLock);
+
   const outputCell: Cell = {
     cell_output: {
       capacity: "0x" + BigInt(amount).toString(16),

@@ -113,11 +113,18 @@ export declare class Godwoken {
 
 export declare class GodwokenUtils {
   constructor(rollup_type_hash: Hash);
-  generateTransactionMessageToSign(raw_l2tx: RawL2Transaction): Hash;
-  newGenerateTransactionMessageToSign(
+  generateTransactionMessageWithoutPrefixToSign(
     raw_l2tx: RawL2Transaction,
     sender_script_hash: Hash,
     receiver_script_hash: Hash
+  ): Hash;
+  generateTransactionMessageToSign(
+    raw_l2tx: RawL2Transaction,
+    sender_script_hash: Hash,
+    receiver_script_hash: Hash
+  ): Hash;
+  generateWithdrawalMessageWithoutPrefixToSign(
+    raw_request: RawWithdrawalRequest
   ): Hash;
   generateWithdrawalMessageToSign(
     raw_request: RawWithdrawalRequest

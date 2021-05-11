@@ -14,6 +14,7 @@ import { L2Transaction } from "@godwoken-examples/godwoken";
 import { getRollupTypeHash } from "./transactions/deposition";
 import { godwokenUrl } from "./url";
 import { LocalNonce } from "./utils/nonce";
+import { deploymentConfig } from "./utils/deployment_config";
 
 const layer2LockConfig = Config.layer2_lock;
 const polyjuiceConfig = Config.polyjuice;
@@ -100,6 +101,10 @@ export async function deployContract(
   data: HexString
 ): Promise<[RunResult, Hash, Uint32]> {
   console.log("--- polyjuice deploy contract ---");
+  
+  sudtId = +sudtId;
+  creatorAccountId = +creatorAccountId;
+  fromId = +fromId;
 
   const [
     l2Transaction,
@@ -115,7 +120,7 @@ export async function deployContract(
     data
   );
 
-  const runResult = await godwoken.submitL2Transaction(l2Transaction);
+  let runResult = await godwoken.submitL2Transaction(l2Transaction);
   console.log("runResult:", runResult);
 
   const scriptHash = polyjuice.calculateScriptHash(fromId, nonce);
@@ -123,9 +128,11 @@ export async function deployContract(
   const contractAccountId = await godwoken.getAccountIdByScriptHash(scriptHash);
   console.log("contract account id:", contractAccountId);
 
-  const errorMessage = (runResult as any).message;
-  if (errorMessage !== undefined && errorMessage !== null) {
-    throw new Error(errorMessage);
+  if (runResult !== null) {
+    const errorMessage = (runResult as any).message;
+    if (errorMessage !== undefined && errorMessage !== null) {
+      throw new Error(errorMessage);
+    }
   }
 
   LocalNonce.increaseNonce();
@@ -166,8 +173,14 @@ async function generateL2Transaction(
 
   const rollupTypeHash: Hash = getRollupTypeHash();
   const godwokenUtils = new GodwokenUtils(rollupTypeHash);
-  const message = godwokenUtils.generateTransactionMessageToSign(
-    rawL2Transaction
+  
+  const senderScriptHash: Hash = await godwoken.getScriptHash(fromId);
+  const receiverScriptHash: Hash = await godwoken.getScriptHash(toId);
+
+  const message = godwokenUtils.generateTransactionMessageWithoutPrefixToSign(
+    rawL2Transaction,
+    senderScriptHash,
+    receiverScriptHash,
   );
 
   const signature: HexString = await sign(message);
@@ -184,9 +197,9 @@ async function generateL2Transaction(
 
 function getLayer2LockScript(ethAddress: string): Script {
   return {
-    code_hash: layer2LockConfig.code_hash,
-    hash_type: layer2LockConfig.hash_type as "data" | "type",
-    args: ethAddress,
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
+    args: getRollupTypeHash() + ethAddress.slice(2),
   };
 }
 

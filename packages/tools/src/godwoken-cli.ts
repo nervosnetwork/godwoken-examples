@@ -113,7 +113,7 @@ async function getBalance(sudt_id: string, account_id: string) {
   console.log("balance:", balance);
 }
 
-function generateTransactionMessageToSign(
+async function generateTransactionMessageToSign(
   from_id: string,
   to_id: string,
   nonce: string,
@@ -126,7 +126,12 @@ function generateTransactionMessageToSign(
     nonce: u32ToHex(parseInt(nonce)),
     args,
   };
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
+  const godwoken = new Godwoken(program.rpc);
+
+  const sender_script_hash = await godwoken.getScriptHash(+from_id);
+  const receiver_script_hash = await godwoken.getScriptHash(+to_id);
+
+  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
   console.log("message:", message);
 }
 
@@ -156,13 +161,17 @@ async function createAccount(
   const raw_l2tx = _createAccountRawL2Transaction(
     from_id, nonce, script_code_hash, script_args,
   );
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash);
+  const godwoken = new Godwoken(program.rpc);
+
+  const sender_script_hash = await godwoken.getScriptHash(from_id);
+  const receiver_script_hash = await godwoken.getScriptHash(0);
+
+  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
   const signature = _signMessage(message, privkey);
   console.log("message", message);
   console.log("signature", signature);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
 
-  const godwoken = new Godwoken(program.rpc);
   const run_result = await godwoken.submitL2Transaction(l2tx);
   console.log("RunResult", run_result);
   const new_account_id = UInt32LEToNumber(run_result.return_data);

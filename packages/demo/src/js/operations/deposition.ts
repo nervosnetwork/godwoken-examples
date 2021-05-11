@@ -7,12 +7,13 @@ import PWCore, {
   SUDT,
   AmountUnit,
 } from "@lay2/pw-core";
-import { Script, HexString, utils } from "@ckb-lumos/base";
+import { Script, HexString, utils, Hash } from "@ckb-lumos/base";
 import {
   DepositionLockArgs,
   generateDepositionLock,
   getDepositionLockArgs,
   serializeArgs,
+  getRollupTypeHash,
 } from "../transactions/deposition";
 import { DeploymentConfig } from "../base";
 
@@ -77,10 +78,12 @@ export async function sendTx(
   const lockScript: Script = await getCurrentLockScript();
   const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
 
+  const rollupTypeHash: Hash = getRollupTypeHash();
+
   const layer2Lock: Script = {
-    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
-    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
-    args: layer2LockArgs,
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
+    args: rollupTypeHash + layer2LockArgs.slice(2),
   };
 
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
@@ -118,10 +121,12 @@ export async function sendSudtTx(
   const lockScript: Script = await getCurrentLockScript();
   const ownerLockHash: HexString = utils.computeScriptHash(lockScript);
 
+  const rollupTypeHash: Hash = getRollupTypeHash();
+
   const layer2Lock: Script = {
-    code_hash: deploymentConfig.l2_sudt_validator.code_hash,
-    hash_type: deploymentConfig.l2_sudt_validator.hash_type as "data" | "type",
-    args: layer2LockArgs,
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
+    args: rollupTypeHash + layer2LockArgs.slice(2),
   };
 
   const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(

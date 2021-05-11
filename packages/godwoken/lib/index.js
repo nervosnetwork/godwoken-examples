@@ -60,7 +60,7 @@ class Godwoken {
   }
 
   async executeL2Transaction(l2tx) {
-    return this._send(l2tx, this.rpc.execute_l2tranaction);
+    return this._send(l2tx, this.rpc.execute_l2transaction);
   }
   async submitL2Transaction(l2tx) {
     return this._send(l2tx, this.rpc.submit_l2transaction);
@@ -73,8 +73,8 @@ class Godwoken {
   }
   async getBalance(sudt_id, account_id) {
     // TODO: maybe swap params later?
-    const sudt_id_hex = `0x${sudt_id.toString(16)}`;
-    const account_id_hex = `0x${account_id.toString(16)}`;
+    const sudt_id_hex = `0x${(+sudt_id).toString(16)}`;
+    const account_id_hex = `0x${(+account_id).toString(16)}`;
     const hex = await this.rpc.get_balance(account_id_hex, sudt_id_hex);
     return BigInt(hex);
   }
@@ -109,24 +109,7 @@ class GodwokenUtils {
     this.rollup_type_hash = rollup_type_hash;
   }
 
-  generateTransactionMessageToSign(raw_l2tx) {
-    const raw_tx_data = core.SerializeRawL2Transaction(
-      NormalizeRawL2Transaction(raw_l2tx)
-    );
-    const rollup_type_hash = Buffer.from(this.rollup_type_hash.slice(2), "hex");
-    const data = toArrayBuffer(
-      Buffer.concat([rollup_type_hash, toBuffer(raw_tx_data)])
-    );
-    const message = utils.ckbHash(data).serializeJson();
-    const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
-    const buf = Buffer.concat([
-      prefix_buf,
-      Buffer.from(message.slice(2), "hex"),
-    ]);
-    return `0x${keccak256(buf).toString("hex")}`;
-  }
-
-  newGenerateTransactionMessageToSign(raw_l2tx, sender_script_hash, receiver_script_hash) {
+  generateTransactionMessageWithoutPrefixToSign(raw_l2tx, sender_script_hash, receiver_script_hash) {
     const raw_tx_data = core.SerializeRawL2Transaction(
       NormalizeRawL2Transaction(raw_l2tx)
     );
@@ -137,6 +120,15 @@ class GodwokenUtils {
       Buffer.concat([rollup_type_hash, senderScriptHash, receiverScriptHash, toBuffer(raw_tx_data)])
     );
     const message = utils.ckbHash(data).serializeJson();
+    return message;
+  }
+
+  generateTransactionMessageToSign(raw_l2tx, sender_script_hash, receiver_script_hash) {
+    const message = this.generateTransactionMessageWithoutPrefixToSign(
+      raw_l2tx,
+      sender_script_hash,
+      receiver_script_hash
+    );
     const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
     const buf = Buffer.concat([
       prefix_buf,
@@ -145,7 +137,7 @@ class GodwokenUtils {
     return `0x${keccak256(buf).toString("hex")}`;
   }
 
-  generateWithdrawalMessageToSign(raw_request) {
+  generateWithdrawalMessageWithoutPrefixToSign(raw_request) {
     const raw_request_data = core.SerializeRawWithdrawalRequest(
       NormalizeRawWithdrawalRequest(raw_request)
     );
@@ -154,6 +146,11 @@ class GodwokenUtils {
       Buffer.concat([rollup_type_hash, toBuffer(raw_request_data)])
     );
     const message = utils.ckbHash(data).serializeJson();
+    return message;
+  }
+
+  generateWithdrawalMessageToSign(raw_request) {
+    const message = this.generateWithdrawalMessageWithoutPrefixToSign(raw_request);
     const prefix_buf = Buffer.from(`\x19Ethereum Signed Message:\n32`);
     const buf = Buffer.concat([
       prefix_buf,
