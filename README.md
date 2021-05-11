@@ -3,7 +3,7 @@
 ## Install dependencies
 
 ```bash
-yarn run bootstrap
+yarn
 ```
 
 ## Update Demo Configs
@@ -11,9 +11,8 @@ yarn run bootstrap
 Firstly copy config files.
 
 ```bash
-cp <your godwoken `scripts-deploy-result.json`> packages/demo/src/configs/scripts-deploy-result.json
-cp <your godwoken `config.toml`> packages/demo/src/configs/godwoken-config.json (convert config.toml to json format)
-cp packages/demo/src/configs/config.json.sample packages/demo/src/configs/config.json
+cp <your godwoken `scripts-deploy-result.json`> packages/tools/src/configs/scripts-deploy-result.json
+cp <your godwoken `config.toml`> packages/tools/src/configs/godwoken-config.json (convert config.toml to json format)
 ```
 
 For testnet
@@ -29,31 +28,16 @@ Deposit CLI both support `testnet` and `dev chain`.
 ### Build typescripts
 
 ```bash
-yarn workspace @godwoken-examples/godwoken tsc 
-yarn run build-demo-cli
+yarn run build-all
 ```
 
-### Deposit
+### Account operations
 
-Run `deposit.js --help` to see how to use this command.
-
-```bash
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit.js --help # for devnet
-LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/deposit.js --help # for testnet
-```
-
-Or Deposit SUDT
+Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer` and `withdraw`.
 
 ```bash
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit_sudt.js --help # for devnet
-LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/deposit_sudt.js --help # for testnet
-```
-
-### Withdrawal
-
-```bash
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/withdraw.js --help # for devnet
-LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/withdraw.js --help # for testnet
+LUMOS_CONFIG_FILE=<your lumos config file path> node ./packages/tools/lib/account-cli.js --help # for devnet
+LUMOS_CONFIG_NAME=AGGRON4 node ./packages/tools/lib/account-cli.js --help # for testnet
 ```
 
 # Polyjuice
@@ -71,8 +55,7 @@ yarn run build-tools
 Create account id for create polyjuice contract account (the `creator_account_id` config)
 
 ```bash
-export VALIDATOR_SCRIPT_HASH=<your validator script hash>
-$ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>
+$ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_id> <privkey>
 ```
 
 You can see `<rollup_type_hash>` when godwoken started.
