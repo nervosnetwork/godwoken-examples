@@ -15,5 +15,9 @@
     "@godwoken-examples/godwoken": "^0.0.1",
     "@types/secp256k1": "^4.0.1",
     "commander": "^6.2.1"
+  },
+  "scripts": {
+    "fmt": "prettier --write \"src/**/*.ts\" package.json",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\""
   }
 }

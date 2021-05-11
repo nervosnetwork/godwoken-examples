@@ -2,38 +2,38 @@
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
-import { withdrawCLI } from "../modules/godwoken"
-import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils"
+import { withdrawCLI } from "../modules/godwoken";
+import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
 
 async function withdrawal(
-    rpc: RPC,
-    godwokenURL: string,
-    privateKey: string,
-    capacity: string,
-    amount: string,
-    sudtScriptHash: string,
-    ownerLockHash: string,
-    fromId: number,
+  rpc: RPC,
+  godwokenURL: string,
+  privateKey: string,
+  capacity: string,
+  amount: string,
+  sudtScriptHash: string,
+  ownerLockHash: string,
+  fromId: number
 ) {
-    const l2LockHash = await rpc.get_script_hash("0x" + fromId.toString(16));
-    console.log("l2 lock hash:", l2LockHash);
-    return await withdrawCLI(
-        godwokenURL,
-        fromId,
-        BigInt(capacity),
-        BigInt(amount),
-        sudtScriptHash,
-        l2LockHash,
-        ownerLockHash,
-        privateKey,
-    )
+  const l2LockHash = await rpc.get_script_hash("0x" + fromId.toString(16));
+  console.log("l2 lock hash:", l2LockHash);
+  return await withdrawCLI(
+    godwokenURL,
+    fromId,
+    BigInt(capacity),
+    BigInt(amount),
+    sudtScriptHash,
+    l2LockHash,
+    ownerLockHash,
+    privateKey
+  );
 }
 
 export const run = async (program: Command) => {
   const ckbRpc = program.rpc;
   const indexerPath = program.indexerPath;
-  const _indexer = await initConfigAndSync(ckbRpc, indexerPath)
+  const _indexer = await initConfigAndSync(ckbRpc, indexerPath);
 
   const capacity = program.capacity;
   const amount = program.amount;
@@ -47,7 +47,7 @@ export const run = async (program: Command) => {
   const privateKey = program.privateKey;
 
   const publicKey = key.privateToPublic(privateKey);
-  console.log("public key:", publicKey)
+  console.log("public key:", publicKey);
   console.log("eth address:", privateKeyToEthAddress(privateKey));
 
   const godwokenRPC = new RPC(program.godwokenRpc);
@@ -60,8 +60,8 @@ export const run = async (program: Command) => {
       amount,
       sudtScriptHash,
       ownerLockHash,
-      +fromId,
-    )
+      +fromId
+    );
 
     process.exit(0);
   } catch (e) {

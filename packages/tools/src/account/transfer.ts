@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import commander, { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
-import { transferCLI } from "../modules/godwoken"
-import { privateKeyToEthAddress } from "../modules/utils"
+import { transferCLI } from "../modules/godwoken";
+import { privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
 
 async function transfer(
@@ -12,7 +12,7 @@ async function transfer(
   toId: number,
   sudtId: number,
   amount: bigint,
-  fee: bigint,
+  fee: bigint
 ) {
   return await transferCLI(
     godwokenURL,
@@ -22,13 +22,13 @@ async function transfer(
     sudtId,
     amount,
     fee
-  )
+  );
 }
 
 export const run = async (program: commander.Command) => {
   const ckbRpc = program.rpc;
-  const indexerPath = program.indexerPath
-  const _indexer = await initConfigAndSync(ckbRpc, indexerPath)
+  const indexerPath = program.indexerPath;
+  const _indexer = await initConfigAndSync(ckbRpc, indexerPath);
 
   const amount = program.amount;
   const fee = program.fee;
@@ -40,7 +40,7 @@ export const run = async (program: commander.Command) => {
   const privateKey = program.privateKey;
 
   const publicKey = key.privateToPublic(privateKey);
-  console.log("public key:", publicKey)
+  console.log("public key:", publicKey);
   console.log("eth address:", privateKeyToEthAddress(privateKey));
 
   try {
@@ -51,8 +51,8 @@ export const run = async (program: commander.Command) => {
       +toId,
       +sudtId,
       BigInt(amount),
-      BigInt(fee),
-    )
+      BigInt(fee)
+    );
 
     process.exit(0);
   } catch (e) {

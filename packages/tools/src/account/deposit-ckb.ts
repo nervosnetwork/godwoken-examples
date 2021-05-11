@@ -1,4 +1,7 @@
-import { DeploymentConfig, deploymentConfig } from "../modules/deployment-config";
+import {
+  DeploymentConfig,
+  deploymentConfig,
+} from "../modules/deployment-config";
 import { HexString, Cell, Script, Hash, utils } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
@@ -17,7 +20,10 @@ import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
 import commander from "commander";
-import { privateKeyToCkbAddress, privateKeyToEthAddress } from "../modules/utils"
+import {
+  privateKeyToCkbAddress,
+  privateKeyToEthAddress,
+} from "../modules/utils";
 import { initConfigAndSync } from "./common";
 
 async function sendTx(
@@ -47,7 +53,7 @@ async function sendTx(
       depositionLockArgs.layer2_lock
     )}`
   );
-  console.log("↑ Using this script hash to get user account id ↑")
+  console.log("↑ Using this script hash to get user account id ↑");
   const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
     deploymentConfig,
@@ -93,10 +99,9 @@ async function sendTx(
   return txHash;
 }
 
-
 export const run = async (program: commander.Command) => {
-  const ckbRpc = program.rpc
-  const indexerPath = program.indexerPath
+  const ckbRpc = program.rpc;
+  const indexerPath = program.indexerPath;
   const indexer = await initConfigAndSync(ckbRpc, indexerPath);
 
   const privateKey = program.privateKey;

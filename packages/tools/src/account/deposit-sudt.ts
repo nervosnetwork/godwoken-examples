@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-import { DeploymentConfig, deploymentConfig } from "../modules/deployment-config";
+import {
+  DeploymentConfig,
+  deploymentConfig,
+} from "../modules/deployment-config";
 import { HexString, Script, Hash, utils } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
@@ -19,7 +22,10 @@ import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
 import commander from "commander";
-import { privateKeyToCkbAddress, privateKeyToEthAddress } from "../modules/utils"
+import {
+  privateKeyToCkbAddress,
+  privateKeyToEthAddress,
+} from "../modules/utils";
 import { initConfigAndSync } from "./common";
 
 async function sendTx(
@@ -52,7 +58,7 @@ async function sendTx(
       depositionLockArgs.layer2_lock
     )}`
   );
-  console.log("↑ Using this script hash to get user account id ↑")
+  console.log("↑ Using this script hash to get user account id ↑");
 
   const serializedArgs: HexString = serializeArgs(depositionLockArgs);
   const depositionLock: Script = generateDepositionLock(
@@ -83,18 +89,18 @@ async function sendTx(
 
   const godwokenRpc = new RPC(godwokenUrl);
   const scriptHash = await godwokenRpc.get_script_hash("0x1");
-  const script = await godwokenRpc.get_script(scriptHash)
+  const script = await godwokenRpc.get_script(scriptHash);
   const layer2SudtScript = {
     code_hash: script.code_hash,
     hash_type: script.hash_type,
     args: getRollupTypeHash() + sudtScriptHash.slice(2),
-  }
-  console.log("layer 2 sudt script:", layer2SudtScript)
+  };
+  console.log("layer 2 sudt script:", layer2SudtScript);
   console.log(
     `Layer 2 sudt script hash:`,
     utils.computeScriptHash(layer2SudtScript)
   );
-  console.log("↑ Using this script hash to get sudt account id ↑")
+  console.log("↑ Using this script hash to get sudt account id ↑");
 
   txSkeleton = await common.payFeeByFeeRate(
     txSkeleton,
@@ -117,7 +123,7 @@ async function sendTx(
 
 export const run = async (program: commander.Command) => {
   const ckbRpc = program.rpc;
-  const indexerPath = program.indexerPath
+  const indexerPath = program.indexerPath;
   const indexer = await initConfigAndSync(ckbRpc, indexerPath);
 
   const privateKey = program.privateKey;

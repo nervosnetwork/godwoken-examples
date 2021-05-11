@@ -27,7 +27,7 @@ export async function withdrawCLI(
   sudtScriptHash: Hash,
   accountScriptHash: Hash,
   ownerLockHash: Hash,
-  privateKey: string,
+  privateKey: string
 ) {
   console.log("--- godwoken withdraw ---");
 

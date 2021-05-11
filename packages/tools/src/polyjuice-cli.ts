@@ -32,33 +32,49 @@ import { Polyjuice } from "@godwoken-examples/polyjuice";
 import * as secp256k1 from "secp256k1";
 
 const program = new Command();
-program
-  .option("-r, --rpc <rpc>", "Godwoken jsonrpc url", "http://127.0.0.1:8119");
+program.option(
+  "-r, --rpc <rpc>",
+  "Godwoken jsonrpc url",
+  "http://127.0.0.1:8119"
+);
 
 program
-  .command("createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>")
-  .description("Create account id for create polyjuice contract account (the `creator_account_id` config)")
-  .action(createCreatorAccount)
+  .command(
+    "createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>"
+  )
+  .description(
+    "Create account id for create polyjuice contract account (the `creator_account_id` config)"
+  )
+  .action(createCreatorAccount);
 program
-  .command("deploy <creator_account_id>  <gas_limit> <gas_price> <init_code> <rollup_type_hash> <privkey>")
+  .command(
+    "deploy <creator_account_id>  <gas_limit> <gas_price> <init_code> <rollup_type_hash> <privkey>"
+  )
   .description("Deploy a EVM contract")
-  .action(deploy)
+  .action(deploy);
 program
-  .command("call <to_id> <gas_limit> <gas_price> <input_data> <rollup_type_hash> <privkey>")
+  .command(
+    "call <to_id> <gas_limit> <gas_price> <input_data> <rollup_type_hash> <privkey>"
+  )
   .description("Call a EVM contract")
-  .action(call)
+  .action(call);
 program
-  .command("staticCall <gas_limit> <gas_price> <to_id> <input_data> <rollup_type_hash> <privkey>")
+  .command(
+    "staticCall <gas_limit> <gas_price> <to_id> <input_data> <rollup_type_hash> <privkey>"
+  )
   .description("Static Call a EVM contract")
-  .action(staticCall)
+  .action(staticCall);
 program.parse(argv);
 
-const VALIDATOR_SCRIPT_HASH = "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14";
+const VALIDATOR_SCRIPT_HASH =
+  "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14";
 
-export function getValidatorScriptHash() : string {
+export function getValidatorScriptHash(): string {
   const script_hash = env["VALIDATOR_SCRIPT_HASH"];
   if (script_hash === undefined || !script_hash || script_hash.length != 66) {
-    throw new Error(`invalid polyjuice validator script hash: '${script_hash}', use 'export VALIDATOR_SCRIPT_HASH=0x...' to set the value.`);
+    throw new Error(
+      `invalid polyjuice validator script hash: '${script_hash}', use 'export VALIDATOR_SCRIPT_HASH=0x...' to set the value.`
+    );
   }
   return script_hash;
 }
@@ -76,18 +92,26 @@ async function createCreatorAccount(
   let validator_script_hash = getValidatorScriptHash();
 
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id, nonce, validator_script_hash, rollup_type_hash + script_args.slice(2),
+    from_id,
+    nonce,
+    validator_script_hash,
+    rollup_type_hash + script_args.slice(2)
   );
 
   const sender_script_hash = await godwoken.getScriptHash(from_id);
   const receiver_script_hash = await godwoken.getScriptHash(0);
 
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash
+  );
   const signature = _signMessage(message, privkey);
   console.log("message", message);
   console.log("signature", signature);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
-  console.log("l2_tx:", JSON.stringify(l2tx, null, 2))
+  console.log("l2_tx:", JSON.stringify(l2tx, null, 2));
   const run_result = await godwoken.submitL2Transaction(l2tx);
   console.log("RunResult", run_result);
   // const new_account_id = UInt32LEToNumber(run_result.return_data);
@@ -108,7 +132,7 @@ async function deploy(
   gas_price_str: string,
   init_code: string,
   rollup_type_hash: string,
-  privkey: string,
+  privkey: string
 ) {
   const creator_account_id = parseInt(creator_account_id_str);
   const gas_limit = BigInt(gas_limit_str);
@@ -127,12 +151,25 @@ async function deploy(
     exit(-1);
   }
   const nonce = await godwoken.getNonce(from_id);
-  const raw_l2tx = polyjuice.generateTransaction(from_id, 0, gas_limit, gas_price, 0n, init_code, nonce);
+  const raw_l2tx = polyjuice.generateTransaction(
+    from_id,
+    0,
+    gas_limit,
+    gas_price,
+    0n,
+    init_code,
+    nonce
+  );
 
   const sender_script_hash = await godwoken.getScriptHash(from_id);
   const receiver_script_hash = await godwoken.getScriptHash(creator_account_id);
 
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash
+  );
   const signature = _signMessage(message, privkey);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
   console.log("L2Transaction", l2tx);
@@ -153,7 +190,7 @@ async function _call(
   gas_price_str: string,
   input_data: string,
   rollup_type_hash: string,
-  privkey: string,
+  privkey: string
 ) {
   const godwoken = new Godwoken(program.rpc);
   let validator_script_hash = getValidatorScriptHash();
@@ -171,12 +208,25 @@ async function _call(
   const gas_limit = BigInt(gas_limit_str);
   const gas_price = BigInt(gas_price_str);
   const nonce = await godwoken.getNonce(from_id);
-  const raw_l2tx = polyjuice.generateTransaction(from_id, parseInt(to_id_str), gas_limit, gas_price, 0n, input_data, nonce);
+  const raw_l2tx = polyjuice.generateTransaction(
+    from_id,
+    parseInt(to_id_str),
+    gas_limit,
+    gas_price,
+    0n,
+    input_data,
+    nonce
+  );
 
   const sender_script_hash = script_hash;
   const receiver_script_hash = await godwoken.getScriptHash(+to_id_str);
 
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash
+  );
   const signature = _signMessage(message, privkey);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
   console.log("L2Transaction", l2tx);
@@ -191,12 +241,17 @@ async function call(
   gas_price_str: string,
   input_data: string,
   rollup_type_hash: string,
-  privkey: string,
+  privkey: string
 ) {
   const godwoken = new Godwoken(program.rpc);
   _call(
     godwoken.submitL2Transaction.bind(godwoken),
-    to_id_str, gas_limit_str, gas_price_str, input_data, rollup_type_hash, privkey,
+    to_id_str,
+    gas_limit_str,
+    gas_price_str,
+    input_data,
+    rollup_type_hash,
+    privkey
   );
 }
 
@@ -206,12 +261,16 @@ async function staticCall(
   gas_price_str: string,
   input_data: string,
   rollup_type_hash: string,
-  privkey: string,
+  privkey: string
 ) {
   const godwoken = new Godwoken(program.rpc);
   _call(
     godwoken.executeL2Transaction.bind(godwoken),
-    to_id_str, gas_limit_str, gas_price_str, input_data, rollup_type_hash, privkey,
+    to_id_str,
+    gas_limit_str,
+    gas_price_str,
+    input_data,
+    rollup_type_hash,
+    privkey
   );
 }
-

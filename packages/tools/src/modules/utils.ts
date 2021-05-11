@@ -1,8 +1,5 @@
 import { HexString, utils } from "@ckb-lumos/base";
-import {
-  generateAddress,
-  parseAddress
-} from "@ckb-lumos/helpers";
+import { generateAddress, parseAddress } from "@ckb-lumos/helpers";
 import { key } from "@ckb-lumos/hd";
 import { getConfig } from "@ckb-lumos/config-manager";
 import crypto from "crypto";
@@ -38,5 +35,5 @@ export function privateKeyToEthAddress(privateKey: HexString) {
 export function ckbAddressToLockHash(address: Address): HexString {
   const lock = parseAddress(address);
   const lockHash = utils.computeScriptHash(lock);
-  return lockHash;  
+  return lockHash;
 }
