@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
+import { readFileSync } from "fs";
 import { argv, exit } from "process";
 import path from "path";
 
@@ -11,12 +10,10 @@ import { common } from "@ckb-lumos/common-scripts";
 import {
   core as base_core,
   Hash,
-  Input,
   CellDep,
   HexString,
   WitnessArgs,
   Cell,
-  Script,
   utils,
 } from "@ckb-lumos/base";
 import {
@@ -27,27 +24,18 @@ import {
 import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
 import {
   Godwoken,
-  GodwokenUtils,
   L2Transaction,
   RawL2Transaction,
-  RawWithdrawalRequest,
-  WithdrawalRequest,
-  CreateAccount,
   UInt32LEToNumber,
   u32ToHex,
-  WithdrawalLockArgs,
-  UnlockWithdrawalViaFinalize,
   core,
   toBuffer,
   normalizer,
 } from "@godwoken-examples/godwoken";
-import * as secp256k1 from "secp256k1";
 import {
   _createAccountRawL2Transaction,
   _generateTransactionMessageToSign,
   _signMessage,
-  ckbAddress,
-  ethAddress,
   accountScriptHash,
   generateLockScript,
 } from "./common";
