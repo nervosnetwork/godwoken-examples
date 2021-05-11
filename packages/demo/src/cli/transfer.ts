@@ -23,7 +23,7 @@ program
   .requiredOption("-f, --from-id <from id>", "from id")
   .requiredOption("-t, --to-id <to id>", "to id")
   .requiredOption("-s, --sudt-id <sudt id>", "sudt id")
-  .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-g, --godwoken-rpc <godwoken rpc>", "godwoken rpc path", "http://127.0.0.1:8119")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
 program.parse(process.argv);

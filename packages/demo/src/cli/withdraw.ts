@@ -23,7 +23,7 @@ program
   .requiredOption("-o --owner-ckb-address <owner ckb address>", "owner ckb address (to)")
   .requiredOption("-f --from-id <from id>", "from id")
   .option("-m --amount <amount>", "amount of sudt", "0")
-  .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-g, --godwoken-rpc <godwoken rpc>", "godwoken rpc path", "http://127.0.0.1:8119")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
 program.parse(process.argv);

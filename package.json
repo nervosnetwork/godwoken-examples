@@ -18,6 +18,8 @@
     "build-pw-core": "cd ./node_modules/@lay2/pw-core && yarn run build && rm -rf src && cd -",
     "bootstrap": "yarn cache clean && rm -rf node_modules && yarn install && yarn run build-pw-core",
     "build-demo-cli": "yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-examples/demo build-cli",
-    "build-demo": "yarn workspace @godwoken-examples/demo clean && yarn workspace @godwoken-examples/demo build"
+    "build-demo": "yarn workspace @godwoken-examples/demo clean && yarn workspace @godwoken-examples/demo build",
+    "build-tools": "yarn workspace @godwoken-examples/godwoken tsc && yarn workspace @godwoken-examples/polyjuice tsc && yarn workspace @godwoken-examples/tools tsc",
+    "generate-testnet-configs": "cp packages/demo/src/configs/testnet-scripts-deploy-result.json packages/demo/src/configs/scripts-deploy-result.json && cp packages/demo/src/configs/testnet-godwoken-config.json packages/demo/src/configs/godwoken-config.json && cp packages/demo/src/configs/config.json.sample packages/demo/src/configs/config.json"
   }
 }

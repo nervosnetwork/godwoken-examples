@@ -1,18 +1,5 @@
 # Godwoken Examples
 
-This demo shows of how to use [Godwoken](https://github.com/nervosnetwork/godwoken).
-
-The demo provides the following functionalities:
-
-* Deposit from a MetaMask powered address into Godwoken.
-* Deploy an Ethereum Smart Contract to Polyjuice running on Godwoken, we use SimpleStorage.
-* Submit a polyjuice transaction to set the value in SimpleStorage smart contract.
-* Execute (but do not submit) a transaction to fetch the current stored value in SimpleStorage smart contract.
-* Query the balance of a Godwoken account.
-* Make transfers between Godwoken accounts.
-* Withdraw from Godwoken back to a layer 1 CKB address.
-
-
 ## Install dependencies
 
 ```bash
@@ -27,7 +14,12 @@ Firstly copy config files.
 cp <your godwoken `scripts-deploy-result.json`> packages/demo/src/configs/scripts-deploy-result.json
 cp <your godwoken `config.toml`> packages/demo/src/configs/godwoken-config.json (convert config.toml to json format)
 cp packages/demo/src/configs/config.json.sample packages/demo/src/configs/config.json
-# then update `config.json` with your own config.
+```
+
+For testnet
+
+```bash
+yarn run generate-testnet-configs
 ```
 
 ## Deposit By CLI
@@ -38,7 +30,7 @@ Deposit CLI both support `testnet` and `dev chain`.
 
 ```bash
 yarn workspace @godwoken-examples/godwoken tsc 
-yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-examples/demo build-cli
+yarn run build-demo-cli
 ```
 
 ### Deposit
@@ -46,50 +38,23 @@ yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-exa
 Run `deposit.js --help` to see how to use this command.
 
 ```bash
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit.js --help
+LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit.js --help # for devnet
+LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/deposit.js --help # for testnet
 ```
 
 Or Deposit SUDT
 
 ```bash
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit_sudt.js --help
+LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/deposit_sudt.js --help # for devnet
+LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/deposit_sudt.js --help # for testnet
 ```
 
-## Deposit By Demo Page
-
-Deposit and Deposit SUDT module only support `testnet`, other parts support both `testnet` and `dev chain`
-
-### Build typescripts
+### Withdrawal
 
 ```bash
-yarn workspace @godwoken-examples/godwoken tsc
-yarn workspace @godwoken-examples/demo clean && yarn workspace @godwoken-examples/demo build
+LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/demo/build-cli/cli/withdraw.js --help # for devnet
+LUMOS_CONFIG_NAME=AGGRON4 node ./packages/demo/build-cli/cli/withdraw.js --help # for testnet
 ```
-
-### Start Server
-
-```bash
-yarn workspace @godwoken-examples/demo start
-```
-
-### Open in browser
-
-Open `http://localhost:9000/html/index.html`
-
-
-# Godwoken utils
-
-### Unlock Withdrawal
-
-Run `godwoken-cli.js --help` to see how to use this command.
-
-```bash
-yarn workspace @godwoken-examples/godwoken tsc 
-yarn workspace @godwoken-examples/tools tsc 
-
-LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/tools/lib/godwoken-cli.js unlockWithdraw --help
-```
-
 
 # Polyjuice
 
@@ -98,9 +63,7 @@ LUMOS_CONFIG_FILE=<your lumos config json file> node ./packages/tools/lib/godwok
 ### Build typescripts
 
 ```bash
-yarn workspace @godwoken-examples/godwoken tsc 
-yarn workspace @godwoken-examples/polyjuice tsc 
-yarn workspace @godwoken-examples/tools tsc 
+yarn run build-tools
 ```
 
 ### Create creator account for polyjuice
@@ -108,6 +71,7 @@ yarn workspace @godwoken-examples/tools tsc
 Create account id for create polyjuice contract account (the `creator_account_id` config)
 
 ```bash
+export VALIDATOR_SCRIPT_HASH=<your validator script hash>
 $ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>
 ```
 

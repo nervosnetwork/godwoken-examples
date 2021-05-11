@@ -32,7 +32,7 @@ program
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-m --amount <amount>", "sudt amount")
   .requiredOption("-s --sudt-script-args <sudt script args>", "sudt amount")
-  .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option(
     "-g, --godwoken-rpc <rpc>",
     "godwoken rpc path",

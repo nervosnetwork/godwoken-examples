@@ -31,7 +31,7 @@ program.version("0.0.1");
 program
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-m --amount <amount>", "amount in shannons")
-  .option("-r, --rpc <rpc>", "rpc path", "http://127.0.0.1:8114")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .option(
     "-l, --eth-address <args>",
