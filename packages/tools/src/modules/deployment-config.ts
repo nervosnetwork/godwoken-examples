@@ -1,5 +1,5 @@
 import { Script, CellDep } from "@ckb-lumos/base";
-import deployResult from "../configs/scripts-deploy-result.json";
+const deployResult = require("../../configs/scripts-deploy-result.json");
 
 export interface DeploymentConfig {
   custodian_lock: Script;

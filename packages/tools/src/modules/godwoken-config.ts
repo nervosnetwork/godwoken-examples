@@ -1,5 +1,5 @@
 import { Hash } from "@ckb-lumos/base";
-import godwokenConfig from "../configs/godwoken-config.json";
+const godwokenConfig = require("../../configs/godwoken-config.json");
 
 export const VALIDATOR_SCRIPT_TYPE_HASH: Hash =
   godwokenConfig.backends[2].validator_script_type_hash;
