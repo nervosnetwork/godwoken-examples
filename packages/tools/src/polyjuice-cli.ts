@@ -1,12 +1,7 @@
-import { readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { argv, exit, env } from "process";
+import { argv, exit } from "process";
 
-import { normalizers, Reader } from "ckb-js-toolkit";
 import { Command } from "commander";
-import { core as base_core, Script, utils } from "@ckb-lumos/base";
-import { scriptToAddress } from "@ckb-lumos/helpers";
-import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
+import { Script, utils } from "@ckb-lumos/base";
 import {
   _signMessage,
   _generateTransactionMessageToSign,
@@ -15,21 +10,15 @@ import {
 } from "./common";
 
 import {
-  core,
-  toBuffer,
   Godwoken,
-  GodwokenUtils,
   L2Transaction,
-  RawL2Transaction,
-  RawWithdrawalRequest,
-  WithdrawalRequest,
-  CreateAccount,
-  UInt32LEToNumber,
   numberToUInt32LE,
-  u32ToHex,
 } from "@godwoken-examples/godwoken";
 import { Polyjuice } from "@godwoken-examples/polyjuice";
-import * as secp256k1 from "secp256k1";
+import {
+  ROLLUP_TYPE_HASH,
+  VALIDATOR_SCRIPT_TYPE_HASH,
+} from "./modules/godwoken-config";
 
 const program = new Command();
 program.option(
@@ -39,9 +28,7 @@ program.option(
 );
 
 program
-  .command(
-    "createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>"
-  )
+  .command("createCreatorAccount <from_id> <sudt_id> <privkey>")
   .description(
     "Create account id for create polyjuice contract account (the `creator_account_id` config)"
   )
@@ -66,14 +53,21 @@ program
   .action(staticCall);
 program.parse(argv);
 
-const VALIDATOR_SCRIPT_HASH =
-  "0x7563b2cfba14333cd6d74e7ad5abafc7b27cb1483185da3842ad99331c111e14";
-
-export function getValidatorScriptHash(): string {
-  const script_hash = env["VALIDATOR_SCRIPT_HASH"];
+function getValidatorScriptHash(): string {
+  const script_hash = VALIDATOR_SCRIPT_TYPE_HASH;
   if (script_hash === undefined || !script_hash || script_hash.length != 66) {
     throw new Error(
-      `invalid polyjuice validator script hash: '${script_hash}', use 'export VALIDATOR_SCRIPT_HASH=0x...' to set the value.`
+      `invalid polyjuice validator script hash: '${script_hash}', check your 'godwoken-config.json'.`
+    );
+  }
+  return script_hash;
+}
+
+function getRollupTypeHash(): string {
+  const script_hash = ROLLUP_TYPE_HASH;
+  if (script_hash === undefined || !script_hash || script_hash.length != 66) {
+    throw new Error(
+      `invalid godwoken rollup type hash: '${script_hash}', check your 'godwoken-config.json'.`
     );
   }
   return script_hash;
@@ -82,7 +76,6 @@ export function getValidatorScriptHash(): string {
 async function createCreatorAccount(
   from_id_str: string,
   sudt_id_str: string,
-  rollup_type_hash: string,
   privkey: string
 ) {
   const godwoken = new Godwoken(program.rpc);
@@ -95,7 +88,7 @@ async function createCreatorAccount(
     from_id,
     nonce,
     validator_script_hash,
-    rollup_type_hash + script_args.slice(2)
+    getRollupTypeHash() + script_args.slice(2)
   );
 
   const sender_script_hash = await godwoken.getScriptHash(from_id);
@@ -103,7 +96,7 @@ async function createCreatorAccount(
 
   const message = _generateTransactionMessageToSign(
     raw_l2tx,
-    rollup_type_hash,
+    getRollupTypeHash(),
     sender_script_hash,
     receiver_script_hash
   );
@@ -120,7 +113,7 @@ async function createCreatorAccount(
   const l2_script: Script = {
     code_hash: validator_script_hash,
     hash_type: "type",
-    args: rollup_type_hash + script_args.slice(2),
+    args: getRollupTypeHash() + script_args.slice(2),
   };
   const l2_script_hash = utils.computeScriptHash(l2_script);
   console.log("creator account l2 script hash:", l2_script_hash);

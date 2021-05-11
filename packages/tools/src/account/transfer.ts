@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-import commander, { Command } from "commander";
+import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
 import { transferCLI } from "../modules/godwoken";
 import { privateKeyToEthAddress } from "../modules/utils";
@@ -26,7 +25,7 @@ async function transfer(
   );
 }
 
-export const run = async (program: commander.Command) => {
+export const run = async (program: Command) => {
   const ckbRpc = program.rpc;
   const indexerPath = program.indexerPath;
   const _indexer = await initConfigAndSync(ckbRpc, indexerPath);

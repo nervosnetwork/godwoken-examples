@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
-import { RPC } from "ckb-js-toolkit";
 import { withdrawCLI } from "../modules/godwoken";
 import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";

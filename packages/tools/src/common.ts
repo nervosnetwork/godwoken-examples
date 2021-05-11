@@ -1,22 +1,10 @@
-import { readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { argv, exit, env } from "process";
-
 import { normalizers, Reader } from "ckb-js-toolkit";
-import { Command } from "commander";
 import { core as base_core, Script, utils } from "@ckb-lumos/base";
 import { scriptToAddress } from "@ckb-lumos/helpers";
-import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
+import { getConfig } from "@ckb-lumos/config-manager";
 import {
-  Godwoken,
   GodwokenUtils,
-  L2Transaction,
   RawL2Transaction,
-  RawWithdrawalRequest,
-  WithdrawalRequest,
-  CreateAccount,
-  UInt32LEToNumber,
-  u32ToHex,
   toBuffer,
 } from "@godwoken-examples/godwoken";
 import * as secp256k1 from "secp256k1";

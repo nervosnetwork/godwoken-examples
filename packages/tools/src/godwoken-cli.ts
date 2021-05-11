@@ -303,7 +303,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   // Ready to build L1 CKB transaction
 
   // * search cell by ckb address
-  var user_cell: any = null;
+  let user_cell: any = null;
   const userCollector = new CellCollector(indexer, {
     lock: lock_script,
   });
@@ -321,7 +321,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const rollupCollector = new CellCollector(indexer, {
     type: rollup_type_script,
   });
-  var rollup_cell: any = null;
+  let rollup_cell: any = null;
   for await (const cell of rollupCollector.collect()) {
     // console.log("rollup_cell", cell);
     rollup_cell = cell;
