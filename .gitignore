@@ -115,3 +115,5 @@ packages/demo/src/configs/godwoken-config.json
 indexer-data/
 script/
 cli-run/
+packages/tools/src/configs/godwoken-config.json
+packages/tools/src/configs/scripts-deploy-result.json

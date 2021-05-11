@@ -6,10 +6,12 @@
   "types": "index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@ckb-lumos/common-scripts": "^0.14.2-rc6",
-    "@ckb-lumos/config-manager": "^0.14.2-rc6",
-    "@ckb-lumos/hd": "^0.14.2-rc6",
-    "@ckb-lumos/helpers": "^0.14.2-rc6",
+    "@ckb-lumos/base": "^0.16.0",
+    "@ckb-lumos/common-scripts": "^0.16.0",
+    "@ckb-lumos/config-manager": "^0.16.0",
+    "@ckb-lumos/hd": "^0.16.0",
+    "@ckb-lumos/helpers": "^0.16.0",
+    "@ckb-lumos/indexer": "^0.16.0",
     "@godwoken-examples/godwoken": "^0.0.1",
     "@types/secp256k1": "^4.0.1",
     "commander": "^6.2.1"

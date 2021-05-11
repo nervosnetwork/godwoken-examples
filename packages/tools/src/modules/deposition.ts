@@ -1,9 +1,9 @@
 import { Reader } from "ckb-js-toolkit";
 import { SerializeDepositionLockArgs } from "@godwoken-examples/godwoken/schemas";
-import { DeploymentConfig } from "../base";
+import { DeploymentConfig } from "./deployment-config";
 import { Script, HexString, Hash, PackedSince, utils } from "@ckb-lumos/base";
 import { NormalizeDepositionLockArgs } from "@godwoken-examples/godwoken/lib/normalizer";
-import godwokenConfig from "../../configs/godwoken-config.json";
+import godwokenConfig from "../configs/godwoken-config.json";
 
 export interface DepositionLockArgs {
   owner_lock_hash: Hash;
