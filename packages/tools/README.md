@@ -4,19 +4,15 @@
 ## Build typescript
 
 ```
-cd godwoken-examples
-yarn workspace @godwoken-examples/godwoken tsc 
-yarn workspace @godwoken-examples/polyjuice tsc 
-yarn workspace @godwoken-examples/tools tsc 
+yarn run build-all
 ```
 
 ## Create creator account for polyjuice
 
 Create account id for create polyjuice contract account (the `creator_account_id` config)
 ```
-$ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_id> <rollup_type_hash> <privkey>
+$ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_id> <privkey>
 ```
-* You can see `<rollup_type_hash>` when godwoken started.
 * `<sudt_id>` given `1` is for CKB Token.
 * `<privkey>` is a `0x` prefixed hex string.
 * `<from_id>` is your user account, you can get the account id by:
