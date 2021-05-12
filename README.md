@@ -27,7 +27,7 @@ Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer` 
 
 ```bash
 LUMOS_CONFIG_FILE=<your lumos config file path> node ./packages/tools/lib/account-cli.js --help # for devnet
-LUMOS_CONFIG_NAME=AGGRON4 node ./packages/tools/lib/account-cli.js --help # for testnet
+node ./packages/tools/lib/account-cli.js --help # for testnet
 ```
 
 # Polyjuice
