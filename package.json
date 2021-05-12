@@ -15,9 +15,10 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "build-pw-core": "cd ./node_modules/@lay2/pw-core && yarn run build && rm -rf src && cd -",
-    "bootstrap": "yarn cache clean && rm -rf node_modules && yarn install && yarn run build-pw-core",
-    "build-demo-cli": "yarn workspace @godwoken-examples/demo clean-cli && yarn workspace @godwoken-examples/demo build-cli",
-    "build-demo": "yarn workspace @godwoken-examples/demo clean && yarn workspace @godwoken-examples/demo build"
+    "build-godwoken": "yarn workspace @godwoken-examples/godwoken tsc",
+    "build-polyjuice": "yarn workspace @godwoken-examples/polyjuice tsc",
+    "build-tools": "yarn workspace @godwoken-examples/tools tsc",
+    "build-all": "yarn run build-godwoken && yarn run build-polyjuice && yarn run build-tools",
+    "generate-testnet-configs": "cp packages/tools/configs/testnet-scripts-deploy-result.json packages/tools/configs/scripts-deploy-result.json && cp packages/tools/configs/testnet-godwoken-config.json packages/tools/configs/godwoken-config.json"
   }
 }

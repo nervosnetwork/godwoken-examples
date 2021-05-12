@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
+import { readFileSync } from "fs";
 import { argv, exit } from "process";
 import path from "path";
 
@@ -8,7 +7,15 @@ import { normalizers, Reader, RPC } from "ckb-js-toolkit";
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
 import { common } from "@ckb-lumos/common-scripts";
-import { core as base_core, Hash, Input, CellDep, HexString, WitnessArgs, Cell, Script, utils } from "@ckb-lumos/base";
+import {
+  core as base_core,
+  Hash,
+  CellDep,
+  HexString,
+  WitnessArgs,
+  Cell,
+  utils,
+} from "@ckb-lumos/base";
 import {
   TransactionSkeleton,
   scriptToAddress,
@@ -17,27 +24,18 @@ import {
 import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
 import {
   Godwoken,
-  GodwokenUtils,
   L2Transaction,
   RawL2Transaction,
-  RawWithdrawalRequest,
-  WithdrawalRequest,
-  CreateAccount,
   UInt32LEToNumber,
   u32ToHex,
-  WithdrawalLockArgs,
-  UnlockWithdrawalViaFinalize,
   core,
   toBuffer,
   normalizer,
 } from "@godwoken-examples/godwoken";
-import * as secp256k1 from "secp256k1";
 import {
   _createAccountRawL2Transaction,
   _generateTransactionMessageToSign,
   _signMessage,
-  ckbAddress,
-  ethAddress,
   accountScriptHash,
   generateLockScript,
 } from "./common";
@@ -45,7 +43,11 @@ import {
 const program = new Command();
 program
   .option("-r, --rpc <rpc>", "Godwoken jsonrpc url", "http://127.0.0.1:8119")
-  .option("-s, --ckb-rpc <ckbRpc>", "CKB node jsonrpc url", "http://127.0.0.1:8114");
+  .option(
+    "-s, --ckb-rpc <ckbRpc>",
+    "CKB node jsonrpc url",
+    "http://127.0.0.1:8114"
+  );
 
 program
   .command("getNonce <account_id>")
@@ -56,51 +58,60 @@ program
   .description("Get balance from account")
   .action(getBalance);
 program
-  .command("generateTransactionMessageToSign <from_id> <to_id> <nonce> <args> <rollup_type_hash>")
+  .command(
+    "generateTransactionMessageToSign <from_id> <to_id> <nonce> <args> <rollup_type_hash>"
+  )
   .description("Generate the raw layer 2 transaction message to sign")
-  .action(generateTransactionMessageToSign)
+  .action(generateTransactionMessageToSign);
 program
-  .command("createAccountRawL2Transaction <from_id> <nonce> <script_code_hash> <script_args>")
-  .description("Create raw layer 2 transaction for layer 2 creator account (to_id)")
-  .action(createAccountRawL2Transaction)
+  .command(
+    "createAccountRawL2Transaction <from_id> <nonce> <script_code_hash> <script_args>"
+  )
+  .description(
+    "Create raw layer 2 transaction for layer 2 creator account (to_id)"
+  )
+  .action(createAccountRawL2Transaction);
 program
-  .command("createAccount <from_id> <nonce> <script_code_hash> <script_args> <rollup_type_hash> <privkey>")
+  .command(
+    "createAccount <from_id> <nonce> <script_code_hash> <script_args> <rollup_type_hash> <privkey>"
+  )
   .description("Create an account by target script")
-  .action(createAccount)
+  .action(createAccount);
 program
   .command("executeL2Transaction <from_id> <to_id> <nonce> <args> <signature>")
   .description("Submit the layer 2 transaction")
-  .action(executeL2Transaction)
+  .action(executeL2Transaction);
 program
   .command("submitL2Transaction <from_id> <to_id> <nonce> <args> <signature>")
   .description("Submit the layer 2 transaction")
-  .action(submitL2Transaction)
+  .action(submitL2Transaction);
 program
   .command("signMessage <message> <privkey>")
   .description("Sign the message use secp256k1")
-  .action(signMessage)
+  .action(signMessage);
 program
   .command("getAccountIdByScriptHash <script_hash>")
   .description("Get account id by script hash")
-  .action(getAccountIdByScriptHash)
+  .action(getAccountIdByScriptHash);
 program
   .command("getScriptHash <account_id>")
   .description("Get script hash by account id")
-  .action(getScriptHash)
+  .action(getScriptHash);
 program
   .command("getScript <script_hash>")
   .description("Get script by script hash")
-  .action(getScript)
+  .action(getScript);
 program
   .command("deposite <privkey> <amount>")
-  .description("Deposite some value [TODO]")
+  .description("Deposite some value [TODO]");
 program
   .command("unlockWithdraw <privkey> <runner_config>")
-  .description("Unlock one finalized withdrawal locked cell (NOTE: need lumos-config path)")
-  .action(unlockWithdraw)
+  .description(
+    "Unlock one finalized withdrawal locked cell (NOTE: need lumos-config path)"
+  )
+  .action(unlockWithdraw);
 
 program.parse(argv);
-
 
 async function getNonce(account_id: string) {
   const godwoken = new Godwoken(program.rpc);
@@ -109,7 +120,10 @@ async function getNonce(account_id: string) {
 }
 async function getBalance(sudt_id: string, account_id: string) {
   const godwoken = new Godwoken(program.rpc);
-  const balance = await godwoken.getBalance(parseInt(sudt_id), parseInt(account_id));
+  const balance = await godwoken.getBalance(
+    parseInt(sudt_id),
+    parseInt(account_id)
+  );
   console.log("balance:", balance);
 }
 
@@ -118,7 +132,7 @@ async function generateTransactionMessageToSign(
   to_id: string,
   nonce: string,
   args: string,
-  rollup_type_hash: string,
+  rollup_type_hash: string
 ) {
   const raw_l2tx: RawL2Transaction = {
     from_id: u32ToHex(parseInt(from_id)),
@@ -131,7 +145,12 @@ async function generateTransactionMessageToSign(
   const sender_script_hash = await godwoken.getScriptHash(+from_id);
   const receiver_script_hash = await godwoken.getScriptHash(+to_id);
 
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash
+  );
   console.log("message:", message);
 }
 
@@ -139,12 +158,15 @@ function createAccountRawL2Transaction(
   from_id_str: string,
   nonce_str: string,
   script_code_hash: string,
-  script_args: string,
+  script_args: string
 ) {
   const from_id = parseInt(from_id_str);
   const nonce = parseInt(nonce_str);
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id, nonce, script_code_hash, script_args,
+    from_id,
+    nonce,
+    script_code_hash,
+    script_args
   );
   console.log("RawL2Transaction", raw_l2tx);
 }
@@ -154,19 +176,27 @@ async function createAccount(
   script_code_hash: string,
   script_args: string,
   rollup_type_hash: string,
-  privkey: string,
+  privkey: string
 ) {
   const from_id = parseInt(from_id_str);
   const nonce = parseInt(nonce_str);
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id, nonce, script_code_hash, script_args,
+    from_id,
+    nonce,
+    script_code_hash,
+    script_args
   );
   const godwoken = new Godwoken(program.rpc);
 
   const sender_script_hash = await godwoken.getScriptHash(from_id);
   const receiver_script_hash = await godwoken.getScriptHash(0);
 
-  const message = _generateTransactionMessageToSign(raw_l2tx, rollup_type_hash, sender_script_hash, receiver_script_hash);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash
+  );
   const signature = _signMessage(message, privkey);
   console.log("message", message);
   console.log("signature", signature);
@@ -183,7 +213,7 @@ async function send(
   to_id: string,
   nonce: string,
   args: string,
-  signature: string,
+  signature: string
 ) {
   const raw_l2tx: RawL2Transaction = {
     from_id: u32ToHex(parseInt(from_id)),
@@ -201,7 +231,7 @@ async function executeL2Transaction(
   to_id: string,
   nonce: string,
   args: string,
-  signature: string,
+  signature: string
 ) {
   const godwoken = new Godwoken(program.rpc);
   send(godwoken.executeL2Transaction, from_id, to_id, nonce, args, signature);
@@ -211,7 +241,7 @@ async function submitL2Transaction(
   to_id: string,
   nonce: string,
   args: string,
-  signature: string,
+  signature: string
 ) {
   const godwoken = new Godwoken(program.rpc);
   send(godwoken.submitL2Transaction, from_id, to_id, nonce, args, signature);
@@ -243,12 +273,13 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   if (process.env.LUMOS_CONFIG_FILE) {
     process.env.LUMOS_CONFIG_FILE = path.resolve(process.env.LUMOS_CONFIG_FILE);
   }
-  const indexerPath = "./indexer-data"
+  const indexerPath = "./indexer-data";
   console.log("LUMOS_CONFIG_FILE:", process.env.LUMOS_CONFIG_FILE);
   console.log("indexer-path:", indexerPath);
   const runnerConfig = JSON.parse(readFileSync(runner_config_path, "utf8"));
   // console.log("godwokenConfig", runnerConfig.godwokenConfig);
-  const rollup_type_script = runnerConfig.godwokenConfig.chain.rollup_type_script;
+  const rollup_type_script =
+    runnerConfig.godwokenConfig.chain.rollup_type_script;
   const rollup_type_hash = utils.computeScriptHash(rollup_type_script);
   console.log("rollup_type_hash", rollup_type_hash);
   const withdrawal_lock_dep = runnerConfig.deploymentConfig.withdrawal_lock_dep;
@@ -272,7 +303,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   // Ready to build L1 CKB transaction
 
   // * search cell by ckb address
-  var user_cell: any = null;
+  let user_cell: any = null;
   const userCollector = new CellCollector(indexer, {
     lock: lock_script,
   });
@@ -290,7 +321,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const rollupCollector = new CellCollector(indexer, {
     type: rollup_type_script,
   });
-  var rollup_cell: any = null;
+  let rollup_cell: any = null;
   for await (const cell of rollupCollector.collect()) {
     // console.log("rollup_cell", cell);
     rollup_cell = cell;
@@ -301,7 +332,9 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     exit(-1);
   }
   const globalState = new core.GlobalState(new Reader(rollup_cell.data));
-  const last_finalized_block_number = globalState.getLastFinalizedBlockNumber().toLittleEndianBigUint64();
+  const last_finalized_block_number = globalState
+    .getLastFinalizedBlockNumber()
+    .toLittleEndianBigUint64();
   console.log("last_finalized_block_number", last_finalized_block_number);
 
   // * use rollup cell's out point as cell_deps
@@ -335,15 +368,21 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
       continue;
     }
     const withdrawal_lock_args_data = "0x" + lock_args.slice(66);
-    const withdrawal_lock_args = new core.WithdrawalLockArgs(new Reader(withdrawal_lock_args_data));
-    const owner_lock_hash = "0x" + toBuffer(withdrawal_lock_args.getOwnerLockHash().raw()).toString("hex");
+    const withdrawal_lock_args = new core.WithdrawalLockArgs(
+      new Reader(withdrawal_lock_args_data)
+    );
+    const owner_lock_hash =
+      "0x" +
+      toBuffer(withdrawal_lock_args.getOwnerLockHash().raw()).toString("hex");
     console.log("owner_lock_hash", owner_lock_hash);
     if (owner_lock_hash !== lock_script_hash) {
-      console.log("[INFO]: owner_lock_hash not match")
+      console.log("[INFO]: owner_lock_hash not match");
       continue;
     }
 
-    const withdrawal_block_number = withdrawal_lock_args.getWithdrawalBlockNumber().toLittleEndianBigUint64();
+    const withdrawal_block_number = withdrawal_lock_args
+      .getWithdrawalBlockNumber()
+      .toLittleEndianBigUint64();
     console.log("withdrawal_block_number", withdrawal_block_number);
     if (withdrawal_block_number > last_finalized_block_number) {
       console.log("[INFO]: withdrawal cell not finalized");
@@ -356,7 +395,9 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     console.warn("[ERROR]: No valid withdrawal cell found");
     exit(-1);
   }
-  console.log(`[INFO] found ${withdrawal_cells.length} withdrawal cells, only process first one`);
+  console.log(
+    `[INFO] found ${withdrawal_cells.length} withdrawal cells, only process first one`
+  );
   const withdrawal_cell = withdrawal_cells[0];
   const output_cell: Cell = {
     cell_output: {
@@ -368,11 +409,16 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   };
 
   // * Build UnlockWithdrawal::UnlockWithdrawalViaFinalize and put into withess
-  const block_proof = "0x";     // FIXME: fill this field
-  const data = "0x00000000" + new Reader(
-    core.SerializeUnlockWithdrawalViaFinalize(
-      normalizer.NormalizeUnlockWithdrawalViaFinalize({block_proof})
-    )).serializeJson().slice(2);
+  const block_proof = "0x"; // FIXME: fill this field
+  const data =
+    "0x00000000" +
+    new Reader(
+      core.SerializeUnlockWithdrawalViaFinalize(
+        normalizer.NormalizeUnlockWithdrawalViaFinalize({ block_proof })
+      )
+    )
+      .serializeJson()
+      .slice(2);
   console.log("withdrawal_witness", data);
   const new_witness_args: WitnessArgs = {
     lock: data,
@@ -401,12 +447,9 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
       return witnesses.push(withdrawal_witness);
     });
 
-  txSkeleton = await common.setupInputCell(
-    txSkeleton,
-    user_cell,
-    undefined,
-    { config: getConfig() },
-  );
+  txSkeleton = await common.setupInputCell(txSkeleton, user_cell, undefined, {
+    config: getConfig(),
+  });
   txSkeleton = txSkeleton.update("fixedEntries", (fixedEntries) => {
     return fixedEntries.push({
       field: "outputs",
@@ -418,7 +461,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     [ckb_address],
     BigInt(1000),
     undefined,
-    { config: getConfig() },
+    { config: getConfig() }
   );
   txSkeleton = common.prepareSigningEntries(txSkeleton);
   const message: HexString = txSkeleton.get("signingEntries").get(0)!.message;
