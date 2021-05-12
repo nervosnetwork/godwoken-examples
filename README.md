@@ -6,7 +6,7 @@
 yarn && yarn run build-all
 ```
 
-## Update Demo Configs
+## Update Tools Configs
 
 Firstly copy config files.
 
