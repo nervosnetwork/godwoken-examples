@@ -37,3 +37,7 @@ export function ckbAddressToLockHash(address: Address): HexString {
   const lockHash = utils.computeScriptHash(lock);
   return lockHash;
 }
+
+export async function asyncSleep(ms = 0) {
+  return new Promise((r) => setTimeout(r, ms));
+}

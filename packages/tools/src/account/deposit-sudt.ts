@@ -25,8 +25,12 @@ import {
   privateKeyToCkbAddress,
   privateKeyToEthAddress,
 } from "../modules/utils";
-import { initConfigAndSync } from "./common";
+import { initConfigAndSync, waitForDeposit, waitTxCommitted } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
+import {
+  getBalanceByScriptHash,
+  ethAddressToScriptHash,
+} from "../modules/godwoken";
 
 async function sendTx(
   godwokenUrl: string,
@@ -39,7 +43,7 @@ async function sendTx(
   ckbUrl: string,
   sudtToken: HexString,
   capacity?: bigint
-): Promise<Hash> {
+): Promise<[Hash, Hash]> {
   let txSkeleton = TransactionSkeleton({ cellProvider: indexer });
 
   const ownerLock: Script = parseAddress(fromAddress);
@@ -99,10 +103,8 @@ async function sendTx(
     args: getRollupTypeHash() + sudtScriptHash.slice(2),
   };
   console.log("layer 2 sudt script:", layer2SudtScript);
-  console.log(
-    `Layer 2 sudt script hash:`,
-    utils.computeScriptHash(layer2SudtScript)
-  );
+  const layer2SudtScriptHash = utils.computeScriptHash(layer2SudtScript);
+  console.log(`Layer 2 sudt script hash:`, layer2SudtScriptHash);
   console.log("↑ Using this script hash to get sudt account id ↑");
 
   txSkeleton = await common.payFeeByFeeRate(
@@ -121,13 +123,13 @@ async function sendTx(
   const rpc = new RPC(ckbUrl);
   const txHash: Hash = await rpc.send_transaction(tx);
 
-  return txHash;
+  return [txHash, layer2SudtScriptHash];
 }
 
 export const run = async (program: commander.Command) => {
-  const ckbRpc = program.rpc;
+  const ckbRpc = new RPC(program.rpc);
   const indexerPath = program.indexerPath;
-  const indexer = await initConfigAndSync(ckbRpc, indexerPath);
+  const indexer = await initConfigAndSync(program.rpc, indexerPath);
 
   const privateKey = program.privateKey;
   const ckbAddress = privateKeyToCkbAddress(privateKey);
@@ -138,8 +140,14 @@ export const run = async (program: commander.Command) => {
   if (capacity < BigInt(40000000000)) {
     throw new Error("capacity can't less than 400 CKB");
   }
+
+  const godwoken = new Godwoken(
+    program.godwokenRpc,
+    program.prefixWithGw === "true"
+  );
+
   try {
-    const txHash: Hash = await sendTx(
+    const [txHash, layer2SudtScriptHash] = await sendTx(
       program.godwokenRpc,
       deploymentConfig,
       ckbAddress,
@@ -153,6 +161,22 @@ export const run = async (program: commander.Command) => {
     );
 
     console.log("txHash:", txHash);
+
+    console.log("--------- wait for tx deposition ----------");
+
+    await waitTxCommitted(txHash, ckbRpc);
+    const accountScriptHash = ethAddressToScriptHash(ethAddress);
+    const currentBalance = await getBalanceByScriptHash(
+      godwoken,
+      1,
+      accountScriptHash
+    );
+    await waitForDeposit(
+      godwoken,
+      accountScriptHash,
+      currentBalance,
+      layer2SudtScriptHash
+    );
 
     process.exit(0);
   } catch (e) {

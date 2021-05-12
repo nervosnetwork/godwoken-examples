@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { key } from "@ckb-lumos/hd";
-import { privateKeyToAccountId, withdrawCLI } from "../modules/godwoken";
+import {
+  ethAddressToScriptHash,
+  getBalanceByScriptHash,
+  privateKeyToAccountId,
+  withdrawCLI,
+} from "../modules/godwoken";
 import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils";
-import { initConfigAndSync } from "./common";
+import { initConfigAndSync, waitForWithdraw } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
 
 async function withdrawal(
@@ -44,12 +48,14 @@ export const run = async (program: Command) => {
 
   const privateKey = program.privateKey;
 
-  const publicKey = key.privateToPublic(privateKey);
-  console.log("public key:", publicKey);
-  console.log("eth address:", privateKeyToEthAddress(privateKey));
+  // const publicKey = key.privateToPublic(privateKey);
+  // console.log("public key:", publicKey);
+  const ethAddress = privateKeyToEthAddress(privateKey);
+  console.log("eth address:", ethAddress);
+  const accountScriptHash = ethAddressToScriptHash(ethAddress);
 
   const godwoken = new Godwoken(
-    program.godwokenRPC,
+    program.godwokenRpc,
     program.prefixWithGw === "true"
   );
   try {
@@ -61,6 +67,13 @@ export const run = async (program: Command) => {
       sudtScriptHash,
       ownerLockHash
     );
+
+    const currentBalance = await getBalanceByScriptHash(
+      godwoken,
+      1,
+      accountScriptHash
+    );
+    await waitForWithdraw(godwoken, accountScriptHash, currentBalance);
 
     process.exit(0);
   } catch (e) {

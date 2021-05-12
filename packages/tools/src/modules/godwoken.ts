@@ -49,21 +49,21 @@ export async function withdrawCLI(
     "0x" + "0".repeat(64)
   );
 
-  console.log("rawWithdrawalRequest:", rawWithdrawalRequest);
+  // console.log("rawWithdrawalRequest:", rawWithdrawalRequest);
 
   const godwokenUtils = new GodwokenUtils(getRollupTypeHash());
   const message = godwokenUtils.generateWithdrawalMessageToSign(
     rawWithdrawalRequest
   );
 
-  console.log("message:", message);
+  // console.log("message:", message);
 
   let signature: HexString = signMessage(message, privateKey);
   let v = Number.parseInt(signature.slice(-2), 16);
   if (v >= 27) v -= 27;
   signature = signature.slice(0, -2) + v.toString(16).padStart(2, "0");
 
-  console.log("web3 signature:", signature);
+  // console.log("web3 signature:", signature);
 
   const withdrawalRequest: WithdrawalRequest = {
     raw: rawWithdrawalRequest,
@@ -113,7 +113,7 @@ export async function transferCLI(
     SerializeSUDTArgs(sudtArgs)
   ).serializeJson();
 
-  console.log("serialized sudt args:", sudtArgs);
+  // console.log("serialized sudt args:", sudtArgs);
 
   const rawL2Transaction: RawL2Transaction = {
     from_id: "0x" + fromId.toString(16),
@@ -122,7 +122,7 @@ export async function transferCLI(
     args: serializedSudtArgs,
   };
 
-  console.log("rawL2Transaction:", rawL2Transaction);
+  // console.log("rawL2Transaction:", rawL2Transaction);
 
   const rollupTypeHash: Hash = getRollupTypeHash();
 
@@ -138,14 +138,14 @@ export async function transferCLI(
     receiverScriptHash
   );
 
-  console.log("message:", message);
+  // console.log("message:", message);
 
   let signature: HexString = signMessage(message, privateKey);
   let v = Number.parseInt(signature.slice(-2), 16);
   if (v >= 27) v -= 27;
   signature = signature.slice(0, -2) + v.toString(16).padStart(2, "0");
 
-  console.log("signature:", signature);
+  // console.log("signature:", signature);
 
   const l2Transaction: L2Transaction = {
     raw: rawL2Transaction,
@@ -155,7 +155,7 @@ export async function transferCLI(
   console.log("l2 transaction:", l2Transaction);
 
   const runResult = await godwoken.submitL2Transaction(l2Transaction);
-  console.log("runResult:", runResult);
+  console.log("l2 tx hash:", runResult);
 
   if (runResult !== null) {
     const errorMessage: string | undefined = (runResult as any).message;
@@ -195,4 +195,43 @@ export async function privateKeyToAccountId(
   const id = await godwoken.getAccountIdByScriptHash(scriptHash);
 
   return id;
+}
+
+// export function privateKeyToScriptHash(
+//   privateKey: HexString
+// ): Hash {
+//   const ethAddress = privateKeyToEthAddress(privateKey);
+//   const script = {
+//     ...deploymentConfig.eth_account_lock,
+//     args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
+//   };
+
+//   const scriptHash = utils.computeScriptHash(script);
+
+//   return scriptHash;
+// }
+
+export function ethAddressToScriptHash(ethAddress: HexString): Hash {
+  const script = {
+    ...deploymentConfig.eth_account_lock,
+    args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
+  };
+
+  const scriptHash = utils.computeScriptHash(script);
+
+  return scriptHash;
+}
+
+export async function getBalanceByScriptHash(
+  godwoken: Godwoken,
+  sudtId: number,
+  scriptHash: Hash
+): Promise<bigint> {
+  const accountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  if (!accountId) {
+    return BigInt(0);
+  }
+
+  const balance = await godwoken.getBalance(sudtId, accountId);
+  return balance;
 }

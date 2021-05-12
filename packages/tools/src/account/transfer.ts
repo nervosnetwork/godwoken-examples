@@ -1,5 +1,4 @@
 import { Command } from "commander";
-import { key } from "@ckb-lumos/hd";
 import { privateKeyToAccountId, transferCLI } from "../modules/godwoken";
 import { privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
@@ -40,8 +39,6 @@ export const run = async (program: Command) => {
 
   const privateKey = program.privateKey;
 
-  const publicKey = key.privateToPublic(privateKey);
-  console.log("public key:", publicKey);
   console.log("eth address:", privateKeyToEthAddress(privateKey));
 
   try {

@@ -24,7 +24,12 @@ import {
   privateKeyToCkbAddress,
   privateKeyToEthAddress,
 } from "../modules/utils";
-import { initConfigAndSync } from "./common";
+import { initConfigAndSync, waitForDeposit, waitTxCommitted } from "./common";
+import { Godwoken } from "@godwoken-examples/godwoken";
+import {
+  getBalanceByScriptHash,
+  ethAddressToScriptHash,
+} from "../modules/godwoken";
 
 async function sendTx(
   deploymentConfig: DeploymentConfig,
@@ -60,7 +65,7 @@ async function sendTx(
     serializedArgs
   );
 
-  console.log("deposition lock:", depositionLock);
+  // console.log("deposition lock:", depositionLock);
 
   const outputCell: Cell = {
     cell_output: {
@@ -100,13 +105,19 @@ async function sendTx(
 }
 
 export const run = async (program: commander.Command) => {
-  const ckbRpc = program.rpc;
+  const ckbRpc = new RPC(program.rpc);
   const indexerPath = program.indexerPath;
-  const indexer = await initConfigAndSync(ckbRpc, indexerPath);
+  const indexer = await initConfigAndSync(program.rpc, indexerPath);
 
   const privateKey = program.privateKey;
   const ckbAddress = privateKeyToCkbAddress(privateKey);
   const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
+
+  const godwoken = new Godwoken(
+    program.godwokenRpc,
+    program.prefixWithGw === "true"
+  );
+
   console.log("using eth address:", ethAddress);
   try {
     const txHash: Hash = await sendTx(
@@ -120,6 +131,17 @@ export const run = async (program: commander.Command) => {
     );
 
     console.log("txHash:", txHash);
+
+    console.log("--------- wait for tx deposition ----------");
+
+    await waitTxCommitted(txHash, ckbRpc);
+    const accountScriptHash = ethAddressToScriptHash(ethAddress);
+    const currentBalance = await getBalanceByScriptHash(
+      godwoken,
+      1,
+      accountScriptHash
+    );
+    await waitForDeposit(godwoken, accountScriptHash, currentBalance);
 
     process.exit(0);
   } catch (e) {

@@ -13,6 +13,7 @@
     "@ckb-lumos/helpers": "^0.16.0",
     "@ckb-lumos/indexer": "^0.16.0",
     "@godwoken-examples/godwoken": "^0.0.1",
+    "ckb-js-toolkit": "^0.10.2",
     "commander": "^6.2.1",
     "secp256k1": "^4.0.2"
   },
