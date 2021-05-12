@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
-import { transferCLI } from "../modules/godwoken";
+import { privateKeyToAccountId, transferCLI } from "../modules/godwoken";
 import { privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
@@ -8,12 +8,12 @@ import { Godwoken } from "@godwoken-examples/godwoken";
 async function transfer(
   godwoken: Godwoken,
   privateKey: string,
-  fromId: number,
   toId: number,
   sudtId: number,
   amount: bigint,
   fee: bigint
 ) {
+  const fromId = await privateKeyToAccountId(godwoken, privateKey);
   return await transferCLI(
     godwoken,
     privateKey,
@@ -32,7 +32,6 @@ export const run = async (program: Command) => {
 
   const amount = program.amount;
   const fee = program.fee;
-  const fromId = program.fromId;
   const toId = program.toId;
   const sudtId = program.sudtId;
   const godwokenURL = program.godwokenRpc;
@@ -49,7 +48,6 @@ export const run = async (program: Command) => {
     await transfer(
       godwoken,
       privateKey,
-      +fromId,
       +toId,
       +sudtId,
       BigInt(amount),

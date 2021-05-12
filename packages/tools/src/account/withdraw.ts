@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { key } from "@ckb-lumos/hd";
-import { withdrawCLI } from "../modules/godwoken";
+import { privateKeyToAccountId, withdrawCLI } from "../modules/godwoken";
 import { ckbAddressToLockHash, privateKeyToEthAddress } from "../modules/utils";
 import { initConfigAndSync } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
@@ -12,9 +12,9 @@ async function withdrawal(
   capacity: string,
   amount: string,
   sudtScriptHash: string,
-  ownerLockHash: string,
-  fromId: number
+  ownerLockHash: string
 ) {
+  const fromId = await privateKeyToAccountId(godwoken, privateKey);
   const l2LockHash = await godwoken.getScriptHash(+fromId);
   console.log("l2 lock hash:", l2LockHash);
   return await withdrawCLI(
@@ -41,7 +41,6 @@ export const run = async (program: Command) => {
   const ownerCkbAddress = program.ownerCkbAddress;
   const ownerLockHash = ckbAddressToLockHash(ownerCkbAddress);
   console.log("owner lock hash:", ownerLockHash);
-  const fromId = program.fromId;
 
   const privateKey = program.privateKey;
 
@@ -60,8 +59,7 @@ export const run = async (program: Command) => {
       capacity,
       amount,
       sudtScriptHash,
-      ownerLockHash,
-      +fromId
+      ownerLockHash
     );
 
     process.exit(0);

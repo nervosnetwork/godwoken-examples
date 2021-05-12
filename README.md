@@ -1,9 +1,9 @@
 # Godwoken Examples
 
-## Install dependencies
+## Install dependencies & Build
 
 ```bash
-yarn
+yarn && yarn run build-all
 ```
 
 ## Update Demo Configs
@@ -21,17 +21,7 @@ For testnet
 yarn run generate-testnet-configs
 ```
 
-## Deposit By CLI
-
-Deposit CLI both support `testnet` and `dev chain`.
-
-### Build typescripts
-
-```bash
-yarn run build-all
-```
-
-### Account operations
+## Account operations
 
 Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer` and `withdraw`.
 

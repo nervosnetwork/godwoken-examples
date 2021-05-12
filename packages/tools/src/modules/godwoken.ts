@@ -1,4 +1,4 @@
-import { Hash, HexString } from "@ckb-lumos/base";
+import { Hash, HexString, utils } from "@ckb-lumos/base";
 import {
   Godwoken,
   Uint32,
@@ -18,6 +18,9 @@ import { Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./deposition";
 
 import * as secp256k1 from "secp256k1";
+import { privateKeyToEthAddress } from "./utils";
+import { deploymentConfig } from "./deployment-config";
+import { ROLLUP_TYPE_HASH } from "./godwoken-config";
 
 export async function withdrawCLI(
   godwoken: Godwoken,
@@ -175,4 +178,21 @@ function signMessage(message: string, privkey: string) {
   signatureArray.set(signObject.signature, 0);
   signatureArray.set([signObject.recid], 64);
   return new Reader(signatureBuffer).serializeJson();
+}
+
+export async function privateKeyToAccountId(
+  godwoken: Godwoken,
+  privateKey: HexString
+): Promise<number> {
+  const ethAddress = privateKeyToEthAddress(privateKey);
+  const script = {
+    ...deploymentConfig.eth_account_lock,
+    args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
+  };
+
+  const scriptHash = utils.computeScriptHash(script);
+
+  const id = await godwoken.getAccountIdByScriptHash(scriptHash);
+
+  return id;
 }
