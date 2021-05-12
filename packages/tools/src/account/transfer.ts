@@ -33,9 +33,12 @@ export const run = async (program: Command) => {
   const fee = program.fee;
   const toId = program.toId;
   const sudtId = program.sudtId;
-  const godwokenURL = program.godwokenRpc;
+  const godwokenURL = program.parent.godwokenRpc;
 
-  const godwoken = new Godwoken(godwokenURL, program.prefixWithGw === "true");
+  const godwoken = new Godwoken(
+    godwokenURL,
+    program.parent.prefixWithGw !== false
+  );
 
   const privateKey = program.privateKey;
 

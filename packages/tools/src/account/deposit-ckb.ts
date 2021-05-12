@@ -114,8 +114,8 @@ export const run = async (program: commander.Command) => {
   const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
 
   const godwoken = new Godwoken(
-    program.godwokenRpc,
-    program.prefixWithGw === "true"
+    program.parent.godwokenRpc,
+    program.parent.prefixWithGw !== false
   );
 
   console.log("using eth address:", ethAddress);

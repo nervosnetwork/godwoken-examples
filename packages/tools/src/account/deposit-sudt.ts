@@ -20,7 +20,7 @@ import {
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
-import commander, { program } from "commander";
+import commander from "commander";
 import {
   privateKeyToCkbAddress,
   privateKeyToEthAddress,
@@ -33,7 +33,7 @@ import {
 } from "../modules/godwoken";
 
 async function sendTx(
-  godwokenUrl: string,
+  godwoken: Godwoken,
   deploymentConfig: DeploymentConfig,
   fromAddress: string,
   amount: string,
@@ -91,12 +91,8 @@ async function sendTx(
   );
   console.log(`Layer 1 sudt script hash:`, sudtScriptHash);
 
-  const godwokenRpc = new Godwoken(
-    godwokenUrl,
-    program.prefixWithGw === "true"
-  );
-  const scriptHash = await godwokenRpc.getScriptHash(1);
-  const script = await godwokenRpc.getScript(scriptHash);
+  const scriptHash = await godwoken.getScriptHash(1);
+  const script = await godwoken.getScript(scriptHash);
   const layer2SudtScript = {
     code_hash: script.code_hash,
     hash_type: script.hash_type,
@@ -141,14 +137,15 @@ export const run = async (program: commander.Command) => {
     throw new Error("capacity can't less than 400 CKB");
   }
 
+  const godwokenRpc = program.parent.godwokenRpc;
   const godwoken = new Godwoken(
-    program.godwokenRpc,
-    program.prefixWithGw === "true"
+    godwokenRpc,
+    program.parent.prefixWithGw !== false
   );
 
   try {
     const [txHash, layer2SudtScriptHash] = await sendTx(
-      program.godwokenRpc,
+      godwoken,
       deploymentConfig,
       ckbAddress,
       program.amount,
