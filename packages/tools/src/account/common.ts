@@ -70,6 +70,7 @@ export async function waitForDeposit(
     if (!accountId) {
       accountId = await godwoken.getAccountIdByScriptHash(accountScriptHash);
       if (!accountId) {
+        await asyncSleep(loopInterval * 1000);
         continue;
       }
       console.log("Your account id:", accountId);
@@ -77,7 +78,8 @@ export async function waitForDeposit(
 
     if (sudtScriptHash !== undefined && (!sudtId || sudtId === 1)) {
       sudtId = await godwoken.getAccountIdByScriptHash(sudtScriptHash);
-      if (!sudtId && sudtId !== 0) {
+      if (!sudtId) {
+        await asyncSleep(loopInterval * 1000);
         continue;
       }
       console.log("Your sudt id:", sudtId);
@@ -120,6 +122,7 @@ export async function waitForWithdraw(
     if (!accountId) {
       accountId = await godwoken.getAccountIdByScriptHash(accountScriptHash);
       if (!accountId) {
+        await asyncSleep(loopInterval * 1000);
         continue;
       }
       console.log("Your account id:", accountId);
