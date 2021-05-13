@@ -19,9 +19,11 @@
   },
   "scripts": {
     "fmt": "prettier --write \"src/**/*.ts\" package.json",
-    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\""
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "convert-config-format": "node ./configs/convert-config-format.js"
   },
   "devDependencies": {
+    "@iarna/toml": "^2.2.5",
     "@types/secp256k1": "^4.0.2"
   }
 }
