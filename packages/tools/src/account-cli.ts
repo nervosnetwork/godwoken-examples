@@ -93,6 +93,7 @@ program
   .command("unlock")
   .description("unlock withdrawal CKB / sUDT from godwoken")
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
+  .option("-s --sudt-script-args <l1 sudt script args>", "only for unlock sudt")
   .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .action(unlockRun);

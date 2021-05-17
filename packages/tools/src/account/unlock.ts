@@ -8,6 +8,7 @@ import {
   core as base_core,
   Transaction,
   OutPoint,
+  Script,
 } from "@ckb-lumos/base";
 import {
   parseAddress,
@@ -28,8 +29,14 @@ import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { Command } from "commander";
 import { initConfigAndSync } from "./common";
+import { getConfig } from "@ckb-lumos/config-manager";
 
-async function unlock(privateKey: HexString, indexer: Indexer, rpc: RPC) {
+async function unlock(
+  privateKey: HexString,
+  indexer: Indexer,
+  rpc: RPC,
+  sudtScript?: Script
+) {
   const rollup_type_script = ROLLUP_TYPE_SCRIPT;
   const rollup_type_hash: Hash = ROLLUP_TYPE_HASH;
   console.log("rollup_type_hash:", rollup_type_hash);
@@ -97,6 +104,7 @@ async function unlock(privateKey: HexString, indexer: Indexer, rpc: RPC) {
       hash_type: withdrawal_lock.hash_type,
       args: rollup_type_hash, // prefix search
     },
+    type: sudtScript ? sudtScript : "empty",
     argsLen: "any",
   });
   const withdrawal_cells = [];
@@ -185,6 +193,12 @@ async function unlock(privateKey: HexString, indexer: Indexer, rpc: RPC) {
     .update("witnesses", (witnesses) => {
       return witnesses.push(withdrawal_witness);
     });
+
+  if (!!sudtScript) {
+    txSkeleton = txSkeleton.update("cellDeps", (cell_deps) => {
+      return cell_deps.push(getSudtCellDep());
+    });
+  }
 
   txSkeleton = await common.setupInputCell(txSkeleton, user_cell);
   txSkeleton = txSkeleton.update("fixedEntries", (fixedEntries) => {
@@ -279,6 +293,32 @@ async function waitForTxCommitted(
   console.log(`... timeout ... please check tx ${txHash} status by your self`);
 }
 
+function getSudtScript(args: HexString): Script {
+  const sudtInfo = getConfig().SCRIPTS.SUDT;
+  if (sudtInfo === undefined || sudtInfo === null) {
+    throw new Error("SUDT info not found in lumos config!");
+  }
+  return {
+    code_hash: sudtInfo.CODE_HASH,
+    hash_type: sudtInfo.HASH_TYPE,
+    args,
+  };
+}
+
+function getSudtCellDep(): CellDep {
+  const sudtInfo = getConfig().SCRIPTS.SUDT;
+  if (sudtInfo === undefined || sudtInfo === null) {
+    throw new Error("SUDT info not found in lumos config!");
+  }
+  return {
+    dep_type: sudtInfo.DEP_TYPE,
+    out_point: {
+      tx_hash: sudtInfo.TX_HASH,
+      index: sudtInfo.INDEX,
+    },
+  };
+}
+
 export const run = async (program: Command) => {
   const ckbUrl = program.rpc;
   const ckbRpc = new RPC(ckbUrl);
@@ -287,8 +327,15 @@ export const run = async (program: Command) => {
 
   const privateKey = program.privateKey;
 
+  const sudtScriptArgs = program.sudtScriptArgs;
+
+  let sudtScript = undefined;
+  if (!!sudtScriptArgs) {
+    sudtScript = getSudtScript(sudtScriptArgs);
+  }
+
   try {
-    await unlock(privateKey, indexer, ckbRpc);
+    await unlock(privateKey, indexer, ckbRpc, sudtScript);
 
     process.exit(0);
   } catch (e) {
