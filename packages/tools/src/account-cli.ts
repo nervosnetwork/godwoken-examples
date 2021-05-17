@@ -4,6 +4,7 @@ import { run as depositRun } from "./account/deposit-ckb";
 import { run as depositSudtRun } from "./account/deposit-sudt";
 import { run as transferRun } from "./account/transfer";
 import { run as withdrawRun } from "./account/withdraw";
+import { run as unlockRun } from "./account/unlock";
 
 const program = new Command();
 program.version("0.0.1");
@@ -87,5 +88,13 @@ program
   .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .action(withdrawRun);
+
+program
+  .command("unlock")
+  .description("unlock withdrawal CKB / sUDT from godwoken")
+  .requiredOption("-p, --private-key <privateKey>", "private key to use")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
+  .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
+  .action(unlockRun);
 
 program.parse(process.argv);
