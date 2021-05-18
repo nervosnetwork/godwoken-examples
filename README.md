@@ -22,6 +22,7 @@ Or copy by yourself.
 cp <your godwoken `scripts-deploy-result.json`> packages/tools/configs/scripts-deploy-result.json
 cp <your godwoken `config.toml`> packages/tools/configs/godwoken-config.toml
 yarn run convert-config-format # convert `godwoken-config.toml` to `godwoken-config.json`
+npx pkg -t node14-macos,node14-linux packages/tools/lib/account-cli.js     
 ```
 
 For testnet
