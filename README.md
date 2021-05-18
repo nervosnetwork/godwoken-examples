@@ -44,7 +44,7 @@ chmod +x ./lumos-config-generator
 
 ## Account operations
 
-Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer` and `withdraw`.
+Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer`, `withdraw` and `get-balance`.
 
 ```bash
 LUMOS_CONFIG_FILE=<your lumos config file path> node ./packages/tools/lib/account-cli.js --help # for devnet
