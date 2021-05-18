@@ -76,12 +76,13 @@ program
   .requiredOption("-p, --private-key <privateKey>", "private key to use")
   .requiredOption("-c, --capacity <capacity>", "capacity in shannons")
   .requiredOption(
-    "-s --sudt-script-hash <sudt script hash>",
-    "l1 sudt script hash"
-  )
-  .requiredOption(
     "-o --owner-ckb-address <owner ckb address>",
     "owner ckb address (to)"
+  )
+  .option(
+    "-s --sudt-script-hash <sudt script hash>",
+    "l1 sudt script hash, default for withdrawal CKB",
+    "0x0000000000000000000000000000000000000000000000000000000000000000"
   )
   .option("-m --amount <amount>", "amount of sudt", "0")
   .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
