@@ -19,6 +19,8 @@ import {
   ROLLUP_TYPE_HASH,
   VALIDATOR_SCRIPT_TYPE_HASH,
 } from "./modules/godwoken-config";
+import { asyncSleep } from "./modules/utils";
+import { privateKeyToAccountId } from "./modules/godwoken";
 
 const program = new Command();
 program.option(
@@ -27,11 +29,35 @@ program.option(
   "http://127.0.0.1:8119"
 );
 
+let defaultGodwokenRpc = "http://127.0.0.1:8119";
+let defaultPrefixWithGw = false;
+if (process.env.ENABLE_TESTNET_MODE) {
+  defaultGodwokenRpc = "http://godwoken-testnet-web3-rpc.ckbapp.dev";
+  defaultPrefixWithGw = true;
+}
+
 program
-  .command("createCreatorAccount <from_id> <sudt_id> <privkey>")
+  .option(
+    "-g, --godwoken-rpc <rpc>",
+    "godwoken rpc path, defualt to http://127.0.0.1:8119, and ENABLE_TESTNET_MODE=true, default to http://godwoken-testnet-web3-rpc.ckbapp.dev",
+    defaultGodwokenRpc
+  )
+  .option(
+    "-w, --prefix-with-gw",
+    "prefix with `gw_` or not, , defualt to false, and ENABLE_TESTNET_MODE=true, default to true",
+    defaultPrefixWithGw
+  );
+
+program
+  .command("create-creator-account")
   .description(
     "Create account id for create polyjuice contract account (the `creator_account_id` config)"
   )
+  .requiredOption(
+    "-p, --private-key <private key>",
+    "your private key to create creator account id"
+  )
+  .option("-s, --sudt-id <sudt id>", "sudt id, default to CKB id (1)", "1")
   .action(createCreatorAccount);
 program
   .command(
@@ -73,25 +99,33 @@ function getRollupTypeHash(): string {
   return script_hash;
 }
 
-async function createCreatorAccount(
-  from_id_str: string,
-  sudt_id_str: string,
-  privkey: string
-) {
-  const godwoken = new Godwoken(program.rpc);
-  const from_id = parseInt(from_id_str);
-  const nonce = await godwoken.getNonce(from_id);
-  const script_args = numberToUInt32LE(parseInt(sudt_id_str));
+async function createCreatorAccount(program: Command) {
+  const godwokenUrl = program.parent.godwokenRpc;
+  // const fromId = +program.fromId;
+  const sudtId = +program.sudtId;
+  const privateKey = program.privateKey;
+
+  const godwoken = new Godwoken(godwokenUrl);
+
+  const fromId = +(await privateKeyToAccountId(godwoken, privateKey));
+  if (!fromId) {
+    console.error("Account id of provided private key not found!");
+    exit(-1);
+  }
+  console.log("Your from id:", fromId);
+
+  const nonce = await godwoken.getNonce(fromId);
+  const script_args = numberToUInt32LE(sudtId);
   let validator_script_hash = getValidatorScriptHash();
 
   const raw_l2tx = _createAccountRawL2Transaction(
-    from_id,
+    fromId,
     nonce,
     validator_script_hash,
     getRollupTypeHash() + script_args.slice(2)
   );
 
-  const sender_script_hash = await godwoken.getScriptHash(from_id);
+  const sender_script_hash = await godwoken.getScriptHash(fromId);
   const receiver_script_hash = await godwoken.getScriptHash(0);
 
   const message = _generateTransactionMessageToSign(
@@ -100,13 +134,13 @@ async function createCreatorAccount(
     sender_script_hash,
     receiver_script_hash
   );
-  const signature = _signMessage(message, privkey);
-  console.log("message", message);
-  console.log("signature", signature);
+  const signature = _signMessage(message, privateKey);
+  console.log("message:", message);
+  console.log("signature:", signature);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
-  console.log("l2_tx:", JSON.stringify(l2tx, null, 2));
+  console.log("l2 tx:", JSON.stringify(l2tx, null, 2));
   const run_result = await godwoken.submitL2Transaction(l2tx);
-  console.log("RunResult", run_result);
+  console.log("run result:", run_result);
   // const new_account_id = UInt32LEToNumber(run_result.return_data);
   // console.log("Created account id:", new_account_id);
 
@@ -117,6 +151,19 @@ async function createCreatorAccount(
   };
   const l2_script_hash = utils.computeScriptHash(l2_script);
   console.log("creator account l2 script hash:", l2_script_hash);
+
+  // wait for tx committed
+  const loopInterval = 3;
+  for (let i = 0; i < 300; i += loopInterval) {
+    console.log(`waiting for account id created ... waiting for ${i} seconds`);
+    const accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
+    if (!!accountId) {
+      console.log("Your creator account id:", accountId);
+      break;
+    }
+
+    await asyncSleep(loopInterval * 1000);
+  }
 }
 
 async function deploy(
