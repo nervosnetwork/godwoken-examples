@@ -91,10 +91,12 @@ program
   .action(withdrawRun);
 
 program
-  .command("get-balance <account-id> [sudt-id]")
+  .command("get-balance")
   .description(
     "get CKB / sUDT balance from godwoken, default sudt-id is 1 (for CKB)"
   )
+  .requiredOption("-a, --account-id <account id>", "account id")
+  .option("-s, --sudt-id <sudt id>", "sudt id", "1")
   .action(getBalance);
 
 program.parse(process.argv);
