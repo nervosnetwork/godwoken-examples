@@ -197,6 +197,18 @@ export async function privateKeyToAccountId(
   return id;
 }
 
+export function privateKeyToScriptHash(privateKey: HexString): Hash {
+  const ethAddress = privateKeyToEthAddress(privateKey);
+  const script = {
+    ...deploymentConfig.eth_account_lock,
+    args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
+  };
+
+  const scriptHash = utils.computeScriptHash(script);
+
+  return scriptHash;
+}
+
 // export function privateKeyToScriptHash(
 //   privateKey: HexString
 // ): Hash {

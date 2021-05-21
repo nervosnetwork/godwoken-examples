@@ -26,7 +26,6 @@ import {
   Godwoken,
   L2Transaction,
   RawL2Transaction,
-  UInt32LEToNumber,
   u32ToHex,
   core,
   toBuffer,
@@ -202,10 +201,10 @@ async function createAccount(
   console.log("signature", signature);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
 
-  const run_result = await godwoken.submitL2Transaction(l2tx);
-  console.log("RunResult", run_result);
-  const new_account_id = UInt32LEToNumber(run_result.return_data);
-  console.log("Created account id:", new_account_id);
+  const _run_result = await godwoken.submitL2Transaction(l2tx);
+  // console.log("RunResult", run_result);
+  // const new_account_id = UInt32LEToNumber(run_result.return_data);
+  // console.log("Created account id:", new_account_id);
 }
 async function send(
   method: Function,

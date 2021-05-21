@@ -7,7 +7,15 @@
   "author": "Linfeng Qian <thewawar@gmail.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "fmt": "prettier --write \"src/**/*.ts\" package.json",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\""
+  },
   "dependencies": {
-    "@godwoken-examples/godwoken": "^0.0.1"
+    "@ckb-lumos/base": "^0.16.0",
+    "@godwoken-examples/godwoken": "^0.0.1",
+    "ckb-js-toolkit": "^0.10.2",
+    "ethereumjs-util": "^7.0.10",
+    "keccak256": "^1.0.2"
   }
 }

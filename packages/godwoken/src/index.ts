@@ -85,11 +85,21 @@ export class Godwoken {
     return this._send(l2tx, this.rpc.execute_l2transaction);
   }
 
-  async submitL2Transaction(l2tx: L2Transaction): Promise<RunResult> {
+  async submitL2Transaction(l2tx: L2Transaction): Promise<Hash> {
     if (this.prefixGw) {
       return this._send(l2tx, this.rpc.gw_submit_l2transaction);
     }
     return this._send(l2tx, this.rpc.submit_l2transaction);
+  }
+
+  async executeRawL2Transaction(rawL2Tx: RawL2Transaction): Promise<RunResult> {
+    const hex = new Reader(
+      core.SerializeRawL2Transaction(NormalizeRawL2Transaction(rawL2Tx))
+    ).serializeJson();
+    if (this.prefixGw) {
+      return await this.rpc.gw_execute_raw_l2transaction(hex);
+    }
+    return await this.rpc.execute_raw_l2transaction(hex);
   }
 
   async submitWithdrawalRequest(request: WithdrawalRequest): Promise<void> {
@@ -162,6 +172,13 @@ export class Godwoken {
       return await this.rpc.gw_get_data_hash(data_hash);
     }
     return await this.rpc.get_data_hash(data_hash);
+  }
+
+  async getTransactionReceipt(l2_tx_hash: Hash) {
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_transaction_receipt(l2_tx_hash);
+    }
+    return await this.rpc.get_transaction_receipt(l2_tx_hash);
   }
 }
 
