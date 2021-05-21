@@ -19,6 +19,10 @@ async function withdrawal(
   ownerLockHash: string
 ) {
   const fromId = await privateKeyToAccountId(godwoken, privateKey);
+  if (!fromId) {
+    console.error("from id not found!");
+    process.exit(-1);
+  }
   const l2LockHash = await godwoken.getScriptHash(+fromId);
   console.log("l2 lock hash:", l2LockHash);
   return await withdrawCLI(

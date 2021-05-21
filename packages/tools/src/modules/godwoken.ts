@@ -183,7 +183,7 @@ function signMessage(message: string, privkey: string) {
 export async function privateKeyToAccountId(
   godwoken: Godwoken,
   privateKey: HexString
-): Promise<number> {
+): Promise<number | undefined> {
   const ethAddress = privateKeyToEthAddress(privateKey);
   const script = {
     ...deploymentConfig.eth_account_lock,
