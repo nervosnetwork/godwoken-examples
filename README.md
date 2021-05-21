@@ -44,7 +44,7 @@ chmod +x ./lumos-config-generator
 
 ## Account operations
 
-Run `account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer`, `withdraw` and `get-balance`.
+Run `node ./packages/tools/lib/account-cli.js --help` to see how to `deposit`, `deposit-sudt`, `transfer`, `withdraw` and `get-balance`.
 
 ```bash
 LUMOS_CONFIG_FILE=<your lumos config file path> node ./packages/tools/lib/account-cli.js --help # for devnet
@@ -54,3 +54,12 @@ node ./packages/tools/lib/account-cli.js --help # for testnet
 ### Notes
 
 If you switched to a new CKB chain, you should switch to a new indexer path `--indexer-path <your new path>` or just delete `indexer-data` dir.
+
+## Polyjuice CLI
+
+Run `node ./packages/tools/lib/polyjuice-cli.js --help` to see how to `creator creator account`, `deploy contract`, `call contract`.
+
+```bash
+node ./packages/tools/lib/polyjuice-cli.js --help # for devnet
+ENABLE_TESTNET_MODE=true node ./packages/tools/lib/polyjuice-cli.js --help # for testnet
+```

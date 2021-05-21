@@ -92,6 +92,16 @@ export class Godwoken {
     return this._send(l2tx, this.rpc.submit_l2transaction);
   }
 
+  async executeRawL2Transaction(rawL2Tx: RawL2Transaction): Promise<RunResult> {
+    const hex = new Reader(
+      core.SerializeRawL2Transaction(NormalizeRawL2Transaction(rawL2Tx))
+    ).serializeJson();
+    if (this.prefixGw) {
+      return await this.rpc.gw_execute_raw_l2transaction(hex);
+    }
+    return await this.rpc.execute_raw_l2transaction(hex);
+  }
+
   async submitWithdrawalRequest(request: WithdrawalRequest): Promise<void> {
     const data = new Reader(
       core.SerializeWithdrawalRequest(NormalizeWithdrawalRequest(request))
