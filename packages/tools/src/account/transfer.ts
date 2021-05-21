@@ -13,6 +13,10 @@ async function transfer(
   fee: bigint
 ) {
   const fromId = await privateKeyToAccountId(godwoken, privateKey);
+  if (!fromId) {
+    console.error("from id not found!");
+    process.exit(-1);
+  }
   return await transferCLI(
     godwoken,
     privateKey,

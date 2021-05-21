@@ -130,11 +130,13 @@ export class Godwoken {
     return await this.rpc.get_storage_at(account_id_hex, key);
   }
 
-  async getAccountIdByScriptHash(script_hash: Hash): Promise<Uint32> {
+  async getAccountIdByScriptHash(
+    script_hash: Hash
+  ): Promise<Uint32 | undefined> {
     const id = this.prefixGw
       ? await this.rpc.gw_get_account_id_by_script_hash(script_hash)
       : await this.rpc.get_account_id_by_script_hash(script_hash);
-    return +id;
+    return id ? +id : undefined;
   }
 
   async getNonce(account_id: Uint32): Promise<Uint32> {

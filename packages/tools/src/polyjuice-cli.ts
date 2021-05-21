@@ -24,6 +24,7 @@ import {
   privateKeyToAccountId,
   privateKeyToScriptHash,
 } from "./modules/godwoken";
+import { deploymentConfig } from "./modules/deployment-config";
 
 const EMPTY_ETH_ADDRESS = "0x" + "00".repeat(20);
 
@@ -139,7 +140,7 @@ async function createCreatorAccount(program: Command) {
 
   const godwoken = new Godwoken(godwokenUrl);
 
-  const fromId = +(await privateKeyToAccountId(godwoken, privateKey));
+  const fromId = +(await privateKeyToAccountId(godwoken, privateKey))!;
   if (!fromId) {
     console.error("Account id of provided private key not found!");
     exit(-1);
@@ -314,8 +315,12 @@ async function send(
   const nonce = await godwoken.getNonce(from_id);
   let to_id = 0;
   if (to_address !== "0x") {
-    const to_id_le = "0x" + to_address.slice(-8);
-    to_id = UInt32LEToNumber(to_id_le);
+    const id = await allTypeEthAddressToAccountId(godwoken, to_address);
+    if (!id) {
+      console.error("to id not found!");
+      exit(-1);
+    }
+    to_id = id;
   }
   const raw_l2tx = polyjuice.generateTransaction(
     from_id,
@@ -382,7 +387,62 @@ async function send(
 
     // script_hash first 16 bytes and to id le bytes(u32)
     const contract_address =
-      new_script_hash.slice(0, 34) + numberToUInt32LE(new_account_id).slice(2);
+      new_script_hash.slice(0, 34) + numberToUInt32LE(new_account_id!).slice(2);
     console.log("contract address:", contract_address);
   }
+}
+
+async function allTypeEthAddressToAccountId(
+  godwoken: Godwoken,
+  address: string
+): Promise<number | undefined> {
+  const scriptHash = ethAddressToScriptHash(address);
+  let accountId: number | undefined = await godwoken.getAccountIdByScriptHash(
+    scriptHash
+  );
+  if (accountId === null || accountId === undefined) {
+    accountId = await ethContractAddressToAccountId(address, godwoken);
+  }
+  return accountId;
+}
+
+function ethAddressToScriptHash(address: string): HexString {
+  const script: Script = {
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type,
+    args: ROLLUP_TYPE_HASH + address.slice(2),
+  };
+  const scriptHash = utils.computeScriptHash(script);
+  return scriptHash;
+}
+
+// https://github.com/nervosnetwork/godwoken-polyjuice/blob/7a04c9274c559e91b677ff3ea2198b58ba0003e7/polyjuice-tests/src/helper.rs#L239
+async function ethContractAddressToAccountId(
+  ethAddress: string,
+  godwoken: Godwoken
+): Promise<number | undefined> {
+  if (ethAddress.length != 42) {
+    throw new Error(`Invalid eth address length: ${ethAddress.length}`);
+  }
+  if (ethAddress === "0x0000000000000000000000000000000000000000") {
+    return undefined;
+  }
+  const accountIdBuf = Buffer.from(ethAddress.slice(-8), "hex");
+  const accountId = accountIdBuf.readUInt32LE();
+  const scriptHash = await godwoken.getScriptHash(accountId);
+
+  if (scriptHash === "0x" + "00".repeat(32)) {
+    return undefined;
+  }
+
+  if (scriptHash.slice(0, 34) !== ethAddress.slice(0, 34)) {
+    throw new Error(
+      `eth address first 16 bytes not match account script hash: expected=${ethAddress.slice(
+        0,
+        34
+      )}, got=${scriptHash.slice(0, 34)}`
+    );
+  }
+  console.log(`eth contract address: ${ethAddress}, account id: ${accountId}`);
+  return accountId;
 }

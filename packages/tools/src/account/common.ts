@@ -61,7 +61,7 @@ export async function waitForDeposit(
   loopInterval = 5
 ) {
   let accountId = undefined;
-  let sudtId = 1;
+  let sudtId: number | undefined = 1;
   for (let i = 0; i < timeout; i += loopInterval) {
     console.log(
       `waiting for layer 2 block producer collect the deposit cell ... ${i} seconds`
@@ -90,7 +90,7 @@ export async function waitForDeposit(
     if (originBalance !== godwokenCkbBalance) {
       if (sudtId !== 1) {
         const godwokenSudtBalance = await godwoken.getBalance(
-          sudtId,
+          sudtId!,
           accountId
         );
         console.log(`sudt balance in godwoken is: ${godwokenSudtBalance}`);
