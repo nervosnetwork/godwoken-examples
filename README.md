@@ -21,7 +21,9 @@ Or copy by yourself.
 ```bash
 cp <your godwoken `scripts-deploy-result.json`> packages/tools/configs/scripts-deploy-result.json
 cp <your godwoken `config.toml`> packages/tools/configs/godwoken-config.toml
-yarn run convert-config-format # convert `godwoken-config.toml` to `godwoken-config.json`
+# convert `godwoken-config.toml` to `godwoken-config.json`
+yarn run convert-config-format 
+# package packages/tools/account-cli into an executable 
 npx pkg -t node14-macos,node14-linux packages/tools/lib/account-cli.js     
 ```
 

@@ -20,6 +20,7 @@
     "build-polyjuice": "yarn workspace @godwoken-examples/polyjuice tsc",
     "build-tools": "yarn workspace @godwoken-examples/tools tsc",
     "build-all": "yarn run build-godwoken && yarn run build-polyjuice && yarn run build-tools",
+    "pkg": "pkg -t node14-macos,node14-linux packages/tools/lib/account-cli.js",
     "generate-testnet-configs": "cp packages/tools/configs/testnet-scripts-deploy-result.json packages/tools/configs/scripts-deploy-result.json && cp packages/tools/configs/testnet-godwoken-config.json packages/tools/configs/godwoken-config.json",
     "convert-config-format": "yarn workspace @godwoken-examples/tools run convert-config-format",
     "copy-configs": "cp $SCRIPT_DEPLOY_RESULT_PATH packages/tools/configs/scripts-deploy-result.json && cp $GODWOKEN_CONFIG_PATH packages/tools/configs/godwoken-config.toml && yarn run convert-config-format"
