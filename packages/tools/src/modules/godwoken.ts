@@ -117,7 +117,7 @@ export async function transferCLI(
 
   const rawL2Transaction: RawL2Transaction = {
     from_id: "0x" + fromId.toString(16),
-    to_id: "0x" + toId.toString(16),
+    to_id: "0x" + sudtId.toString(16),
     nonce: "0x" + BigInt(nonce).toString(16),
     args: serializedSudtArgs,
   };
@@ -127,7 +127,7 @@ export async function transferCLI(
   const rollupTypeHash: Hash = getRollupTypeHash();
 
   const senderScriptHash = await godwoken.getScriptHash(fromId);
-  const receiverScriptHash = await godwoken.getScriptHash(toId);
+  const receiverScriptHash = await godwoken.getScriptHash(sudtId);
   console.log("sender script hash:", senderScriptHash);
   console.log("receiver script hash:", receiverScriptHash);
 
