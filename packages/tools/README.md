@@ -21,7 +21,7 @@ $ node packages/tools/lib/polyjuice-cli.js createCreatorAccount <from_id> <sudt_
 $ node packages/tools/lib/godwoken-cli.js getAccountIdByScriptHash <script_hash>
 ```
 
-You can get the script hash when deposition finished.
+You can get the script hash when deposit finished.
 
 ## Deploy an Ethereum contract
 

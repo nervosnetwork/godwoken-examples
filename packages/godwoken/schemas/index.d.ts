@@ -542,6 +542,8 @@ export class Uint64 {
   validate(compatible?: boolean): void;
   indexAt(i: number): number;
   raw(): ArrayBuffer;
+  toBigEndianBigUint64(): bigint;
+  toLittleEndianBigUint64(): bigint;
   static size(): Number;
 }
 

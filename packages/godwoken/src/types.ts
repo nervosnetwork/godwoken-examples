@@ -51,10 +51,11 @@ export interface WithdrawalRequest {
   signature: HexString;
 }
 export interface WithdrawalLockArgs {
-  // the original deposition info
+  // the original deposit info
   // used for helping programs generate reverted custodian cell
-  deposition_block_hash: Hash;
-  deposition_block_number: HexNumber;
+  // deposition_block_hash: Hash;
+  // deposition_block_number: HexNumber;
+  account_script_hash: Hash;
   // the original custodian lock hash
   withdrawal_block_hash: Hash;
   withdrawal_block_number: HexNumber;

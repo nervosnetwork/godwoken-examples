@@ -69,7 +69,7 @@
         "challenge_maturity_blocks": "0x5",
         "challenge_script_type_hash": "0x7fa6597590c11de176c2b92f8c83a4dbc328879aeb9ff5ced7f2f5d19421624a",
         "custodian_script_type_hash": "0x9c1154662aad7636ca8387dfe3c2e2a60b8c8512310dad967ba1cba1d70aa918",
-        "deposition_script_type_hash": "0x84f58d135be41fc9035710ac2e74b982535eb08074e44c2a12302cdbf16f0722",
+        "deposit_script_type_hash": "0x84f58d135be41fc9035710ac2e74b982535eb08074e44c2a12302cdbf16f0722",
         "finality_blocks": "0x14",
         "l1_sudt_script_type_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "l2_sudt_validator_script_type_hash": "0x89cb6dd8fe5cebb678bd14d8eeaad08040b7d4abc8344a2454a4eae54495f83e",
