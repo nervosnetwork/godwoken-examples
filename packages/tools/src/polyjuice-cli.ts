@@ -1,7 +1,7 @@
 import { argv, exit } from "process";
 
 import { Command } from "commander";
-import { HexString, Script, utils } from "@ckb-lumos/base";
+import { Hash, HexString, Script, utils } from "@ckb-lumos/base";
 import {
   _signMessage,
   _generateTransactionMessageToSign,
@@ -332,13 +332,13 @@ async function send(
     nonce
   );
 
-  const message = polyjuice.calcMessage(
-    to_address,
-    gas_limit,
-    gas_price,
-    value,
-    data,
-    nonce
+  const sender_script_hash: Hash = await godwoken.getScriptHash(from_id);
+  const receiver_script_hash: Hash = await godwoken.getScriptHash(to_id);
+  const message = _generateTransactionMessageToSign(
+    raw_l2tx,
+    getRollupTypeHash(),
+    sender_script_hash,
+    receiver_script_hash
   );
   console.log("message:", message);
 
