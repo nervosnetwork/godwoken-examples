@@ -151,6 +151,21 @@ async function createCreatorAccount(program: Command) {
   const script_args = numberToUInt32LE(sudtId);
   let validator_script_hash = getValidatorScriptHash();
 
+  const l2_script: Script = {
+    code_hash: validator_script_hash,
+    hash_type: "type",
+    args: getRollupTypeHash() + script_args.slice(2),
+  };
+  const l2_script_hash = utils.computeScriptHash(l2_script);
+  console.log("creator account l2 script hash:", l2_script_hash);
+
+  // check if the creator account is created
+  let accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
+  if (!!accountId) {
+    console.log("Your creator account id:", accountId);
+    // return;
+  }
+
   const raw_l2tx = _createAccountRawL2Transaction(
     fromId,
     nonce,
@@ -177,19 +192,11 @@ async function createCreatorAccount(program: Command) {
   // const new_account_id = UInt32LEToNumber(run_result.return_data);
   // console.log("Created account id:", new_account_id);
 
-  const l2_script: Script = {
-    code_hash: validator_script_hash,
-    hash_type: "type",
-    args: getRollupTypeHash() + script_args.slice(2),
-  };
-  const l2_script_hash = utils.computeScriptHash(l2_script);
-  console.log("creator account l2 script hash:", l2_script_hash);
-
   // wait for tx committed
   const loopInterval = 3;
   for (let i = 0; i < 300; i += loopInterval) {
     console.log(`waiting for account id created ... waiting for ${i} seconds`);
-    const accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
+    accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
     if (!!accountId) {
       console.log("Your creator account id:", accountId);
       break;
