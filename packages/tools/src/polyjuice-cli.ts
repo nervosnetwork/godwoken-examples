@@ -73,7 +73,7 @@ program
   )
   .requiredOption("-l, --gas-limit <gas limit>", "gas limit")
   .requiredOption("-p, --gas-price <gas price>", "gas price")
-  .requiredOption("-d, --data <contract data>", "data")
+  .requiredOption("-d, --data <contract data>", "contract bin data, should be HexString", "0x")
   .requiredOption("-p, --private-key <private key>", "private key")
   .option("-s, --sudt-id <sudt id>", "sudt id, default to CKB id (1)", "1")
   .option("-v, --value <value>", "value", "0")
