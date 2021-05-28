@@ -38,6 +38,7 @@ import {
   accountScriptHash,
   generateLockScript,
 } from "./common";
+import { privateKeyToAccountId } from "./modules/godwoken";
 
 const program = new Command();
 program
@@ -92,6 +93,10 @@ program
   .command("getAccountIdByScriptHash <script_hash>")
   .description("Get account id by script hash")
   .action(getAccountIdByScriptHash);
+program
+  .command("getAccountId <privkey>")
+  .description("Get account id by private key")
+  .action(getAccountIdByPrivKey);
 program
   .command("getScriptHash <account_id>")
   .description("Get script hash by account id")
@@ -257,11 +262,18 @@ async function getAccountIdByScriptHash(script_hash: string) {
   console.log("Account id:", account_id);
 }
 
+async function getAccountIdByPrivKey(privkey: string) {
+  const godwoken = new Godwoken(program.rpc);
+  const accountId = await privateKeyToAccountId(godwoken, privkey);  
+  console.log("Account id:", accountId);
+}
+
 async function getScriptHash(account_id: string) {
   const godwoken = new Godwoken(program.rpc);
   const script_hash = await godwoken.getScriptHash(parseInt(account_id));
   console.log("script hash:", script_hash);
 }
+
 async function getScript(script_hash: string) {
   const godwoken = new Godwoken(program.rpc);
   const script = await godwoken.getScript(script_hash);
