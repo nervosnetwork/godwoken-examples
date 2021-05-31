@@ -9,7 +9,7 @@
       "dep_type": "code"
     }
   },
-  "deposition_lock": {
+  "deposit_lock": {
     "script_type_hash": "0xea71353be5e3f86604cf6a4cc3486e537e8a817a2bf30629e7af75368f7d960d",
     "cell_dep": {
       "out_point": {

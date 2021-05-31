@@ -39,6 +39,7 @@ import {
   generateLockScript,
 } from "./common";
 import { privateKeyToAccountId } from "./modules/godwoken";
+import { asyncSleep } from "./modules/utils";
 
 const program = new Command();
 program
@@ -114,8 +115,27 @@ program
     "Unlock one finalized withdrawal locked cell (NOTE: need lumos-config path)"
   )
   .action(unlockWithdraw);
+program
+  .command("getTransactionReceipt <l2TxHash>")
+  .description("Returns the receipt of a transaction by transaction hash.")
+  .action(getTransactionReceipt)
 
 program.parse(argv);
+
+async function getTransactionReceipt(l2TxHash: HexString) {
+  const godwoken = new Godwoken(program.rpc);
+  // wait for transaction receipt
+  const loopInterval = 3;
+  for (let i = 0; i < 300; i += loopInterval) {
+    console.log(`waiting for transaction receipt ... waiting for ${i} seconds`);
+    const receipt = await godwoken.getTransactionReceipt(l2TxHash);
+    if (receipt) {
+      console.log("transaction receipt:", receipt);
+      break;
+    }
+    await asyncSleep(loopInterval * 1000);
+  }
+}
 
 async function getNonce(account_id: string) {
   const godwoken = new Godwoken(program.rpc);
