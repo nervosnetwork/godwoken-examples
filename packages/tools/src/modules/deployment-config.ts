@@ -3,7 +3,7 @@ const deployResult = require("../../configs/scripts-deploy-result.json");
 
 export interface DeploymentConfig {
   custodian_lock: Script;
-  deposition_lock: Script;
+  deposit_lock: Script;
   withdrawal_lock: Script;
   challenge_lock: Script;
   stake_lock: Script;
@@ -16,7 +16,7 @@ export interface DeploymentConfig {
   poa_state: Script;
 
   custodian_lock_dep: CellDep;
-  deposition_lock_dep: CellDep;
+  deposit_lock_dep: CellDep;
   withdrawal_lock_dep: CellDep;
   challenge_lock_dep: CellDep;
   stake_lock_dep: CellDep;
@@ -34,9 +34,7 @@ export const deploymentConfig: DeploymentConfig = {
   custodian_lock: buildScriptFromCodeHash(
     config.custodian_lock.script_type_hash
   ),
-  deposition_lock: buildScriptFromCodeHash(
-    config.deposition_lock.script_type_hash
-  ),
+  deposit_lock: buildScriptFromCodeHash(config.deposit_lock.script_type_hash),
   withdrawal_lock: buildScriptFromCodeHash(
     config.withdrawal_lock.script_type_hash
   ),
@@ -64,7 +62,7 @@ export const deploymentConfig: DeploymentConfig = {
   ),
   poa_state: buildScriptFromCodeHash(config.poa_state.script_type_hash),
 
-  deposition_lock_dep: config.deposition_lock.cell_dep as CellDep,
+  deposit_lock_dep: config.deposit_lock.cell_dep as CellDep,
   custodian_lock_dep: config.custodian_lock.cell_dep as CellDep,
   withdrawal_lock_dep: config.withdrawal_lock.cell_dep as CellDep,
   challenge_lock_dep: config.challenge_lock.cell_dep as CellDep,

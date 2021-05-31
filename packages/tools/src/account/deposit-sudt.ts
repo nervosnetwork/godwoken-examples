@@ -11,12 +11,12 @@ import {
   generateAddress,
 } from "@ckb-lumos/helpers";
 import {
-  generateDepositionLock,
-  DepositionLockArgs,
-  getDepositionLockArgs,
+  generateDepositLock,
+  DepositLockArgs,
+  getDepositLockArgs,
   serializeArgs,
   getRollupTypeHash,
-} from "../modules/deposition";
+} from "../modules/deposit";
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
@@ -53,24 +53,24 @@ async function sendTx(
     hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
     args: getRollupTypeHash() + layer2LockArgs.slice(2),
   };
-  const depositionLockArgs: DepositionLockArgs = getDepositionLockArgs(
+  const depositLockArgs: DepositLockArgs = getDepositLockArgs(
     ownerLockHash,
     layer2Lock
   );
   console.log(
     `Layer 2 lock script hash: ${utils.computeScriptHash(
-      depositionLockArgs.layer2_lock
+      depositLockArgs.layer2_lock
     )}`
   );
   console.log("↑ Using this script hash to get user account id ↑");
 
-  const serializedArgs: HexString = serializeArgs(depositionLockArgs);
-  const depositionLock: Script = generateDepositionLock(
+  const serializedArgs: HexString = serializeArgs(depositLockArgs);
+  const depositLock: Script = generateDepositLock(
     deploymentConfig,
     serializedArgs
   );
 
-  const toAddress: string = generateAddress(depositionLock);
+  const toAddress: string = generateAddress(depositLock);
 
   txSkeleton = await sudt.transfer(
     txSkeleton,
@@ -159,7 +159,7 @@ export const run = async (program: commander.Command) => {
 
     console.log("txHash:", txHash);
 
-    console.log("--------- wait for tx deposition ----------");
+    console.log("--------- wait for tx deposit ----------");
 
     await waitTxCommitted(txHash, ckbRpc);
     const accountScriptHash = ethAddressToScriptHash(ethAddress);
