@@ -16,7 +16,7 @@ import {
   getDepositLockArgs,
   serializeArgs,
   getRollupTypeHash,
-} from "../modules/deposition";
+} from "../modules/deposit";
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";

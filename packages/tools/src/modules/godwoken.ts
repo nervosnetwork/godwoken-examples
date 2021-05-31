@@ -15,7 +15,7 @@ import {
 } from "@godwoken-examples/godwoken/lib/normalizer";
 import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/schemas";
 import { Reader } from "ckb-js-toolkit";
-import { getRollupTypeHash } from "./deposition";
+import { getRollupTypeHash } from "./deposit";
 
 import * as secp256k1 from "secp256k1";
 import { privateKeyToEthAddress } from "./utils";
