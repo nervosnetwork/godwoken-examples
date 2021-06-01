@@ -4,17 +4,17 @@ import { HexString, Hash } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
   TransactionSkeleton,
-  sealTransaction,
-  generateAddress,
+  sealTransaction
 } from "@ckb-lumos/helpers";
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
 import path from "path";
-import { getConfig, initializeConfig } from "@ckb-lumos/config-manager";
+import { initializeConfig } from "@ckb-lumos/config-manager";
+import { privateKeyToCkbAddress } from "./modules/utils";
 
 const program = new Command();
-program.version("0.0.1");
+program.version("0.0.2");
 
 /**
  * Useage:
@@ -34,19 +34,6 @@ program
 
 program.parse(process.argv);
 
-function privateKeyToCkbAddress(privateKey: HexString): string {
-  const publicKey = key.privateToPublic(privateKey);
-  const publicKeyHash = key.publicKeyToBlake160(publicKey);
-  const scriptConfig = getConfig().SCRIPTS.SECP256K1_BLAKE160!;
-  const script = {
-    code_hash: scriptConfig.CODE_HASH,
-    hash_type: scriptConfig.HASH_TYPE,
-    args: publicKeyHash,
-  };
-  const address = generateAddress(script);
-  return address;
-}
-
 async function issueToken(
   amount: string,
   indexer: Indexer,
@@ -57,7 +44,6 @@ async function issueToken(
   let txSkeleton = TransactionSkeleton({ cellProvider: indexer });
 
   const address: string = privateKeyToCkbAddress(privateKey);
-
   const sudtScriptArgs: HexString = sudt.ownerForSudt(address);
   console.log("sudt script args:", sudtScriptArgs);
 

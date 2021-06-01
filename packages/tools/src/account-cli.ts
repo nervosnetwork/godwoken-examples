@@ -1,13 +1,13 @@
 import { Command } from "commander";
-
 import { run as depositRun } from "./account/deposit-ckb";
 import { run as depositSudtRun } from "./account/deposit-sudt";
 import { getBalance } from "./account/get-balance";
 import { run as transferRun } from "./account/transfer";
 import { run as withdrawRun } from "./account/withdraw";
+import { getSudtScriptArgs } from "./modules/utils";
 
 const program = new Command();
-program.version("0.0.1");
+program.version("0.1.0");
 
 let defaultGodwokenRpc = "http://127.0.0.1:8119";
 let defaultPrefixWithGw = false;
@@ -98,5 +98,10 @@ program
   .requiredOption("-a, --account-id <account id>", "account id")
   .option("-s, --sudt-id <sudt id>", "sudt id", "1")
   .action(getBalance);
+
+program
+  .command("get-sudt-script-args <privateKey>")
+  .description("Compute sudt token by owner from info(privateKey), return SUDT script args")
+  .action(getSudtScriptArgs)
 
 program.parse(process.argv);

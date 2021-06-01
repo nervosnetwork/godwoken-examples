@@ -1,10 +1,11 @@
 import { HexString, utils } from "@ckb-lumos/base";
+import { sudt } from "@ckb-lumos/common-scripts";
+import { Address } from "@ckb-lumos/base";
 import { generateAddress, parseAddress } from "@ckb-lumos/helpers";
 import { key } from "@ckb-lumos/hd";
 import { getConfig } from "@ckb-lumos/config-manager";
 import crypto from "crypto";
 import keccak256 from "keccak256";
-import { Address } from "@ckb-lumos/base";
 
 export function privateKeyToCkbAddress(privateKey: HexString): Address {
   const publicKey = key.privateToPublic(privateKey);
@@ -40,4 +41,10 @@ export function ckbAddressToLockHash(address: Address): HexString {
 
 export async function asyncSleep(ms = 0) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+export function getSudtScriptArgs(privateKey: HexString) {
+  const address: Address = privateKeyToCkbAddress(privateKey);
+  const sudtScriptArgs: HexString = sudt.ownerForSudt(address);
+  console.log("sudt script args:", sudtScriptArgs);
 }
