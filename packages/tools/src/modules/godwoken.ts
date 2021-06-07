@@ -72,18 +72,23 @@ export async function withdrawCLI(
 
   console.log("withdrawalRequest:", withdrawalRequest);
 
-  const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
-  console.log("result:", result);
+  try {
+    const result = await godwoken.submitWithdrawalRequest(withdrawalRequest);
+    console.log("result:", result);
 
-  if (result !== null) {
-    const errorMessage = (result as any).message;
-    if (errorMessage !== undefined && errorMessage !== null) {
-      throw new Error(errorMessage);
+    if (result !== null) {
+      const errorMessage = (result as any).message;
+      if (errorMessage !== undefined && errorMessage !== null) {
+        throw new Error(errorMessage);
+      }
     }
-  }
 
-  console.log("--- godwoken withdraw finished ---");
-  return result;
+    console.log("--- godwoken withdraw finished ---");
+    return result;
+  } catch (e) {
+    console.error(e);
+    throw new Error("submit withdrawal request failed");
+  }
 }
 
 export async function transferCLI(
