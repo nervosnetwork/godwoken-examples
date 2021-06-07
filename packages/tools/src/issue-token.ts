@@ -12,9 +12,10 @@ import { RPC } from "ckb-js-toolkit";
 import path from "path";
 import { initializeConfig } from "@ckb-lumos/config-manager";
 import { privateKeyToCkbAddress } from "./modules/utils";
+import { waitTxCommitted } from "./account/common";
 
 const program = new Command();
-program.version("0.0.2");
+program.version("0.1.0");
 
 /**
  * Useage:
@@ -69,7 +70,9 @@ async function issueToken(
 
   const rpc = new RPC(ckbUrl);
   const txHash: Hash = await rpc.send_transaction(tx);
-
+  await waitTxCommitted(txHash, rpc);
+  console.log("SUDT issued successfully!");
+  
   return txHash;
 }
 
