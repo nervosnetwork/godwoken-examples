@@ -120,7 +120,21 @@ program
   .description("Returns the receipt of a transaction by transaction hash.")
   .action(getTransactionReceipt)
 
+program
+  .command("getL1Transaction <txHash>")
+  .description("Returns the transaction info")
+  .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
+  .action(getL1Transaction);
+
 program.parse(argv);
+
+async function getL1Transaction(txHash: HexString) {
+  console.log("l1TxHash:", txHash);
+  
+  const ckbRpc = new RPC(program.ckbRpc);
+  const txWithStatus = await ckbRpc.get_transaction(txHash);
+  console.log("transaction with status:", JSON.stringify(txWithStatus));
+}
 
 async function getTransactionReceipt(l2TxHash: HexString) {
   const godwoken = new Godwoken(program.rpc);
