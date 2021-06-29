@@ -6,8 +6,7 @@ export async function getBalance(program: Command) {
   const sudtId = +program.sudtId;
 
   const godwoken = new Godwoken(
-    program.parent.godwokenRpc,
-    program.parent.prefixWithGw !== false
+    program.parent.godwokenRpc
   );
 
   const balance = await godwoken.getBalance(sudtId, accountId);

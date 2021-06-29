@@ -190,7 +190,7 @@ async function createAccount(
   const sender_script_hash = await godwoken.getScriptHash(from_id);
   const receiver_script_hash = await godwoken.getScriptHash(0);
 
-  const message = _generateTransactionMessageToSign(
+  const message = await _generateTransactionMessageToSign(
     raw_l2tx,
     rollup_type_hash,
     sender_script_hash,
@@ -332,8 +332,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   }
   const globalState = new core.GlobalState(new Reader(rollup_cell.data));
   const last_finalized_block_number = globalState
-    .getLastFinalizedBlockNumber()
-    .toLittleEndianBigUint64();
+    .getLastFinalizedBlockNumber();
   console.log("last_finalized_block_number", last_finalized_block_number);
 
   // * use rollup cell's out point as cell_deps
@@ -380,8 +379,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
     }
 
     const withdrawal_block_number = withdrawal_lock_args
-      .getWithdrawalBlockNumber()
-      .toLittleEndianBigUint64();
+      .getWithdrawalBlockNumber();
     console.log("withdrawal_block_number", withdrawal_block_number);
     if (withdrawal_block_number > last_finalized_block_number) {
       console.log("[INFO]: withdrawal cell not finalized");

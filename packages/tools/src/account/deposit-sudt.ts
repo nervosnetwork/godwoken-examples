@@ -46,8 +46,15 @@ async function sendTx(
 ): Promise<[Hash, Hash]> {
   let txSkeleton = TransactionSkeleton({ cellProvider: indexer });
 
+  
   const ownerLock: Script = parseAddress(fromAddress);
   const ownerLockHash: Hash = utils.computeScriptHash(ownerLock);
+  console.log(`from address: ${fromAddress}`, {
+    ownerLock,
+    ownerLockHash
+  });
+
+
   const layer2Lock: Script = {
     code_hash: deploymentConfig.eth_account_lock.code_hash,
     hash_type: deploymentConfig.eth_account_lock.hash_type as "data" | "type",
@@ -139,8 +146,7 @@ export const run = async (program: commander.Command) => {
 
   const godwokenRpc = program.parent.godwokenRpc;
   const godwoken = new Godwoken(
-    godwokenRpc,
-    program.parent.prefixWithGw !== false
+    godwokenRpc
   );
 
   try {

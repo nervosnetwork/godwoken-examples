@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "target": "es2020",
     "module": "commonjs",
     "declaration": true,
@@ -7,11 +8,12 @@
     "types": ["node"],
     "lib": ["es2020"],
     "moduleResolution": "node",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "rootDir": "./"
   },
-  "include": ["src"],
-  "exclude": ["**/node_modules", "**/tests", "**/lib"]
+  "include": ["a.ts", "./schemas/*.json", "./schemas/*.js", "./index.js", "./normalizer.ts"],
+  "exclude": ["**/node_modules", "**/tests", "./lib/**/*", "./schemas/*.esm.js"]
 }

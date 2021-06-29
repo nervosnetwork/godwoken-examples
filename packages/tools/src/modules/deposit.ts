@@ -1,10 +1,12 @@
 import { Reader } from "ckb-js-toolkit";
-import { SerializeDepositLockArgs } from "@godwoken-examples/godwoken/schemas";
 import { DeploymentConfig } from "./deployment-config";
 import { Script, HexString, Hash, PackedSince, utils } from "@ckb-lumos/base";
 import { NormalizeDepositLockArgs } from "@godwoken-examples/godwoken/lib/normalizer";
+import { SerializeDepositLockArgs } from "@godwoken-examples/godwoken/lib/schemas/godwoken";
+
 const godwokenConfig = require("../../configs/godwoken-config.json");
 
+SerializeDepositLockArgs
 export interface DepositLockArgs {
   owner_lock_hash: Hash;
   layer2_lock: Script;

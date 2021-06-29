@@ -15,7 +15,7 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "build-godwoken": "yarn workspace @godwoken-examples/godwoken tsc",
+    "build-godwoken": "yarn workspace @godwoken-examples/godwoken tsc && cp ./packages/godwoken/index.d.ts ./packages/godwoken/lib/index.d.ts",
     "build-polyjuice": "yarn workspace @godwoken-examples/polyjuice tsc",
     "build-tools": "yarn workspace @godwoken-examples/tools tsc",
     "build-all": "yarn run build-godwoken && yarn run build-polyjuice && yarn run build-tools",

@@ -13,7 +13,7 @@ import {
   SUDTTransfer,
   UnoinType,
 } from "@godwoken-examples/godwoken/lib/normalizer";
-import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/schemas";
+import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/lib/schemas/godwoken";
 import { Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./deposit";
 
@@ -132,7 +132,7 @@ export async function transferCLI(
   console.log("receiver script hash:", receiverScriptHash);
 
   const godwokenUtils = new GodwokenUtils(rollupTypeHash);
-  const message = godwokenUtils.generateTransactionMessageToSign(
+  const message = await godwokenUtils.generateTransactionMessageToSign(
     rawL2Transaction,
     senderScriptHash,
     receiverScriptHash

@@ -40,8 +40,7 @@ export const run = async (program: Command) => {
   const godwokenURL = program.parent.godwokenRpc;
 
   const godwoken = new Godwoken(
-    godwokenURL,
-    program.parent.prefixWithGw !== false
+    godwokenURL
   );
 
   const privateKey = program.privateKey;

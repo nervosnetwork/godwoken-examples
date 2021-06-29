@@ -6,6 +6,7 @@ import {
   _signMessage,
   _generateTransactionMessageToSign,
   _createAccountRawL2Transaction,
+  accountScriptHash,
 } from "./common";
 
 import {
@@ -122,6 +123,16 @@ function getValidatorScriptHash(): string {
   return script_hash;
 }
 
+function getValidatorCodeHash(): string {
+  const hash = deploymentConfig.polyjuice_validator.code_hash;
+  if (hash === undefined || !hash || hash.length != 66) {
+    throw new Error(
+      `invalid polyjuice validator code hash: '${hash}', check your 'scripts-deploy-result.json'.`
+    );
+  }
+  return hash;
+}
+
 function getRollupTypeHash(): string {
   const script_hash = ROLLUP_TYPE_HASH;
   if (script_hash === undefined || !script_hash || script_hash.length != 66) {
@@ -161,7 +172,7 @@ async function createCreatorAccount(program: Command) {
   const sender_script_hash = await godwoken.getScriptHash(fromId);
   const receiver_script_hash = await godwoken.getScriptHash(0);
 
-  const message = _generateTransactionMessageToSign(
+  const message = await _generateTransactionMessageToSign(
     raw_l2tx,
     getRollupTypeHash(),
     sender_script_hash,
@@ -247,6 +258,94 @@ async function sendTx(program: Command) {
   );
 }
 
+async function _call(
+  method: Function,
+  to_id_str: string,
+  input_data: string,
+  rollup_type_hash: string,
+  privkey: string,
+  polyjuice: Polyjuice,
+  godwoken: Godwoken
+) {
+  if (!polyjuice)
+    throw new Error(
+      `Can not find polyjuice instance, please call deploy contract first.`
+    );
+
+  const script_hash = accountScriptHash(privkey);
+  const from_id = await godwoken.getAccountIdByScriptHash(script_hash);
+  if (!from_id) {
+    console.log("Can not find account id by script_hash:", script_hash);
+    throw new Error(`Can not find account id by script_hash: ${script_hash}`);
+  }
+  const nonce = await godwoken.getNonce(from_id);
+  const raw_l2tx = polyjuice.generateTransaction(
+    from_id,
+    parseInt(to_id_str),
+    21000n, //todo remove hard-code
+    50n, //todo remove hard-code
+    0n,
+    input_data,
+    nonce,
+    getRollupTypeHash()
+  );
+
+  const sender_script_hash = await godwoken.getScriptHash(from_id);
+  const receiver_script_hash = await godwoken.getScriptHash(0);
+  
+  const message = await _generateTransactionMessageToSign(
+    raw_l2tx,
+    rollup_type_hash,
+    sender_script_hash,
+    receiver_script_hash,
+  );
+  const signature = _signMessage(message, privkey);
+  const l2tx: L2Transaction = { raw: raw_l2tx, signature };
+  console.log("L2Transaction", l2tx);
+  const run_result = await method(l2tx);
+  console.log("RunResult", run_result);
+  console.log("return data", run_result.return_data);
+  return run_result;
+}
+
+async function call(
+  to_id_str: string,
+  input_data: string,
+  rollup_type_hash: string,
+  privkey: string,
+  polyjuice: Polyjuice,
+  godwoken: Godwoken
+) {
+  _call(
+    godwoken.submitL2Transaction.bind(godwoken),
+    to_id_str,
+    input_data,
+    rollup_type_hash,
+    privkey,
+    polyjuice,
+    godwoken
+  );
+}
+
+async function _staticCall(
+  to_id_str: string,
+  input_data: string,
+  rollup_type_hash: string,
+  privkey: string,
+  polyjuice: Polyjuice,
+  godwoken: Godwoken
+) {
+  return _call(
+    godwoken.executeL2Transaction.bind(godwoken),
+    to_id_str,
+    input_data,
+    rollup_type_hash,
+    privkey,
+    polyjuice,
+    godwoken
+  );
+}
+
 async function staticCall(program: Command) {
   const gas_limit = BigInt(program.gasLimit);
   const gas_price = BigInt(program.gasPrice);
@@ -257,30 +356,44 @@ async function staticCall(program: Command) {
 
   const godwoken = new Godwoken(program.parent.godwokenRpc);
 
-  let validator_script_hash = getValidatorScriptHash();
-
   const polyjuice = new Polyjuice(godwoken, {
-    validator_script_hash: validator_script_hash,
+    validator_code_hash: getValidatorCodeHash(),
     sudt_id: 1,
     creator_account_id: 0,
   });
-  const nonce = 0;
-  const to_id_le = "0x" + to_address.slice(-8);
-  const to_id = UInt32LEToNumber(to_id_le);
-  const raw_l2tx = polyjuice.generateTransaction(
-    from_id,
-    to_id,
-    gas_limit,
-    gas_price,
-    value,
-    data,
-    nonce
-  );
-  console.log("raw l2 transaction:", raw_l2tx);
 
-  const run_result = await godwoken.executeRawL2Transaction(raw_l2tx);
-  console.log("run result:", run_result);
-  console.log("return data", run_result.return_data);
+  const call = _staticCall(
+    to_address,
+    data,
+    getRollupTypeHash(),
+    '0x0',
+    polyjuice,
+    godwoken
+  );
+
+  console.log('call done');
+  console.log(call);
+
+  /** 
+  // const nonce = 0;
+  // const to_id_le = "0x" + to_address.slice(-8);
+  // const to_id = UInt32LEToNumber(to_id_le);
+  // const raw_l2tx = polyjuice.generateTransaction(
+  //   from_id,
+  //   to_id,
+  //   gas_limit,
+  //   gas_price,
+  //   value,
+  //   data,
+  //   nonce,
+  //   getRollupTypeHash()
+  // );
+  // console.log("raw l2 transaction:", raw_l2tx);
+
+  // const run_result = await godwoken.executeL2Transaction(raw_l2tx);
+  // console.log("run result:", run_result);
+  // console.log("return data", run_result.return_data);
+  */
 }
 
 async function send(
@@ -298,10 +411,8 @@ async function send(
     to_address = "0x";
   }
 
-  const validator_script_hash = getValidatorScriptHash();
-
   const polyjuice = new Polyjuice(godwoken, {
-    validator_script_hash: validator_script_hash,
+    validator_code_hash: getValidatorCodeHash(),
     sudt_id: sudt_id,
     creator_account_id,
   });
@@ -329,17 +440,20 @@ async function send(
     gas_price,
     value,
     data,
-    nonce
+    nonce,
+    getRollupTypeHash()
   );
 
-  const message = polyjuice.calcMessage(
-    to_address,
-    gas_limit,
-    gas_price,
-    value,
-    data,
-    nonce
+  const sender_script_hash = await godwoken.getScriptHash(from_id);
+  const receiver_script_hash = await godwoken.getScriptHash(to_id);
+
+  const message = await _generateTransactionMessageToSign(
+    raw_l2tx,
+    getRollupTypeHash(),
+    sender_script_hash,
+    receiver_script_hash,
   );
+
   console.log("message:", message);
 
   const signature = _signMessage(message, private_key);
@@ -348,17 +462,6 @@ async function send(
   const l2TxHash = await godwoken.submitL2Transaction(l2tx);
   // const run_result = await godwoken.executeL2Transaction(l2tx)
   console.log("l2 tx hash:", l2TxHash);
-
-  const eth_tx_hash = polyjuice.calcEthTxHash(
-    to_address,
-    gas_limit,
-    gas_price,
-    value,
-    data,
-    nonce,
-    signature
-  );
-  console.log("eth tx hash:", eth_tx_hash);
 
   // wait for transaction receipt
   const loopInterval = 3;
@@ -375,9 +478,9 @@ async function send(
   // for deploy contract
   if (to_address === "0x") {
     const new_script_hash = polyjuice.calculateScriptHash(
-      getRollupTypeHash(),
       from_id,
-      nonce
+      nonce,
+      getRollupTypeHash()
     );
     console.log("new script hash:", new_script_hash);
     const new_account_id = await godwoken.getAccountIdByScriptHash(
