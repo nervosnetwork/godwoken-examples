@@ -28,8 +28,7 @@ import {
 import { initConfigAndSync, waitForDeposit, waitTxCommitted } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
 import {
-  getBalanceByScriptHash,
-  ethAddressToScriptHash,
+  ethAddressToScriptHash, getBalanceByScriptHash,
 } from "../modules/godwoken";
 
 async function sendTx(

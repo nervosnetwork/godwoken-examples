@@ -89,6 +89,14 @@ export async function waitForDeposit(
     console.log(`ckb balance in godwoken is: ${godwokenCkbBalance}`);
     if (originBalance !== godwokenCkbBalance) {
       if (sudtId !== 1) {
+        if (typeof(sudtId) === 'string') {
+          sudtId = parseInt(sudtId, 16);
+        }
+
+        if (typeof(accountId) === 'string') {
+          accountId = parseInt(accountId, 16);
+        }
+
         const godwokenSudtBalance = await godwoken.getBalance(
           sudtId!,
           accountId

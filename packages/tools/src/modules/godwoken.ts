@@ -1,4 +1,4 @@
-import { Hash, HexString, utils } from "@ckb-lumos/base";
+import { core, Hash, HexString, utils } from "@ckb-lumos/base";
 import {
   Godwoken,
   Uint32,
@@ -14,7 +14,7 @@ import {
   UnoinType,
 } from "@godwoken-examples/godwoken/lib/normalizer";
 import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/lib/schemas/godwoken";
-import { Reader } from "ckb-js-toolkit";
+import { normalizers, Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./deposit";
 
 import * as secp256k1 from "secp256k1";
@@ -234,16 +234,28 @@ export function ethAddressToScriptHash(ethAddress: HexString): Hash {
   return scriptHash;
 }
 
+export function caculateLayer2LockScriptHash(layer2LockArgs: string) {
+  const rollup_type_hash = getRollupTypeHash();
+  const script = {
+    code_hash: deploymentConfig.eth_account_lock.code_hash,
+    hash_type: deploymentConfig.eth_account_lock.hash_type,
+    args: rollup_type_hash + layer2LockArgs.slice(2),
+  };
+  return utils
+    .ckbHash(core.SerializeScript(normalizers.NormalizeScript(script)))
+    .serializeJson();
+}
+
 export async function getBalanceByScriptHash(
   godwoken: Godwoken,
   sudtId: number,
-  scriptHash: Hash
+  scriptHash: string
 ): Promise<bigint> {
-  const accountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  let accountId = await godwoken.getAccountIdByScriptHash(scriptHash);
+  accountId = parseInt(accountId+'');
   if (!accountId) {
     return BigInt(0);
   }
 
-  const balance = await godwoken.getBalance(sudtId, accountId);
-  return balance;
+  return godwoken.getBalance(sudtId, accountId);
 }

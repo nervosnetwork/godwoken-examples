@@ -63,3 +63,28 @@ Run `node ./packages/tools/lib/polyjuice-cli.js --help` to see how to `creator c
 node ./packages/tools/lib/polyjuice-cli.js --help # for devnet
 ENABLE_TESTNET_MODE=true node ./packages/tools/lib/polyjuice-cli.js --help # for testnet
 ```
+
+## Working devnet commands examples
+
+How it works with godwoken-kicker config:
+
+Deposit CKB:
+```
+LUMOS_CONFIG_FILE=/home/USERNAME/projects/godwoken-kicker/godwoken/deploy/lumos-config.json node ./packages/tools/lib/account-cli.js deposit -c 40000000000 -p 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf -l 0xD173313A51f8fc37BcF67569b463abd89d81844f
+```
+
+Deposit SUDT:
+```
+LUMOS_CONFIG_FILE=/home/USERNAME/projects/godwoken-kicker/godwoken/deploy/lumos-config.json node ./packages/tools/lib/account-cli.js deposit-sudt -m 100 -s 0x6f33df7e3fffb47794f9ca37643118ba79207ac92596a0555e9038828e547357 -p 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf -l 0xD173313A51f8fc37BcF67569b463abd89d81844f
+LUMOS_CONFIG_FILE: /home/USERNAME/projects/godwoken-kicker/godwoken/deploy/lumos-config.json
+```
+
+### Copy configs from godwoken-kicker
+
+```
+cp /home/USERNAME/projects/godwoken-kicker/godwoken/deploy/scripts-deploy-result.json ./packages/tools/configs/scripts-deploy-result.json
+```
+
+### Tips
+
+1. Each time you recreate godwoken-kicker deployment you need to remove `godwoken-examples/indexer-data` directory.

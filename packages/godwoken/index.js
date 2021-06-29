@@ -115,10 +115,7 @@ class Godwoken {
     return await this.rpc.get_script(script_hash);
   }
   async getScriptHash(account_id) {
-    console.log('before script hash', '0x' + account_id.toString(16));
-    const scriptHash = await this.rpc.get_script_hash('0x' + account_id.toString(16));
-    console.log('after script hash', scriptHash);
-    return scriptHash;
+    return this.rpc.get_script_hash('0x' + account_id.toString(16));
   }
   async getData(data_hash) {
     return await this.rpc.get_data(data_hash);

@@ -2,7 +2,7 @@ import {
   DeploymentConfig,
   deploymentConfig,
 } from "../modules/deployment-config";
-import { HexString, Cell, Script, Hash, utils, core } from "@ckb-lumos/base";
+import { HexString, Cell, Script, Hash, utils } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
   TransactionSkeleton,
@@ -18,7 +18,7 @@ import {
 } from "../modules/deposit";
 import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
-import { RPC, normalizers } from "ckb-js-toolkit";
+import { RPC } from "ckb-js-toolkit";
 import commander from "commander";
 import {
   privateKeyToCkbAddress,
@@ -27,8 +27,7 @@ import {
 import { initConfigAndSync, waitForDeposit, waitTxCommitted } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
 import {
-  getBalanceByScriptHash,
-  ethAddressToScriptHash,
+  ethAddressToScriptHash, getBalanceByScriptHash,
 } from "../modules/godwoken";
 
 async function sendTx(
@@ -104,17 +103,6 @@ async function sendTx(
   return txHash;
 }
 
-export function caculateLayer2LockScriptHash(layer2LockArgs: string) {
-  const rollup_type_hash = getRollupTypeHash();
-  const script = {
-    code_hash: deploymentConfig.eth_account_lock.code_hash,
-    hash_type: deploymentConfig.eth_account_lock.hash_type,
-    args: rollup_type_hash + layer2LockArgs.slice(2),
-  };
-  return utils
-    .ckbHash(core.SerializeScript(normalizers.NormalizeScript(script)))
-    .serializeJson();
-}
 
 export const run = async (program: commander.Command) => {
   const ckbRpc = new RPC(program.rpc);
@@ -148,20 +136,8 @@ export const run = async (program: commander.Command) => {
     await waitTxCommitted(txHash, ckbRpc);
 
     const accountScriptHash = ethAddressToScriptHash(ethAddress);
+    const currentBalance = await getBalanceByScriptHash(godwoken, 1, accountScriptHash);
 
-    const _account_id = await godwoken.getAccountIdByScriptHash(caculateLayer2LockScriptHash(ethAddress));
-    const account_id = parseInt(_account_id+'');
-    if(!account_id)
-        throw new Error(`account not exits. deposit first.`); 
-
-      // console.lo
-    const currentBalance = await godwoken.getBalance(1, account_id);
-
-    // const currentBalance = await getBalanceByScriptHash(
-    //   godwoken,
-    //   1,
-    //   accountScriptHash
-    // );
     await waitForDeposit(godwoken, accountScriptHash, currentBalance);
 
     process.exit(0);

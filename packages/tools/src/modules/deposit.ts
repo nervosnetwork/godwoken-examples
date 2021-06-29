@@ -6,7 +6,6 @@ import { SerializeDepositLockArgs } from "@godwoken-examples/godwoken/lib/schema
 
 const godwokenConfig = require("../../configs/godwoken-config.json");
 
-SerializeDepositLockArgs
 export interface DepositLockArgs {
   owner_lock_hash: Hash;
   layer2_lock: Script;
