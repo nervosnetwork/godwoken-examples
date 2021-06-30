@@ -54,6 +54,9 @@ program
     "Eth address (layer2 lock args, using --private-key value to calculate if not provided)"
   )
   .option("-c, --capacity <capacity>", "capacity in shannons", "40000000000")
+  .option("-b, --bip44", 'whether to use BIP44 wallet address', false)
+  .option("-bp, --bip-path <bipPath>", 'BIP44 address path to use', `m/44'/309'/0'/0/0`)
+  .option("-cc, --chain-code <chainCode>", 'BIP44 chain code to use with the private key')
   .action(depositSudtRun);
 
 program

@@ -18,7 +18,7 @@ import {
   getRollupTypeHash,
 } from "../modules/deposit";
 import { common, sudt } from "@ckb-lumos/common-scripts";
-import { key } from "@ckb-lumos/hd";
+import { key, Keychain } from "@ckb-lumos/hd";
 import { RPC } from "ckb-js-toolkit";
 import commander from "commander";
 import {
@@ -133,8 +133,30 @@ export const run = async (program: commander.Command) => {
   const indexerPath = program.indexerPath;
   const indexer = await initConfigAndSync(program.rpc, indexerPath);
 
-  const privateKey = program.privateKey;
-  const ckbAddress = privateKeyToCkbAddress(privateKey);
+  let privateKey: string = program.privateKey;
+  let ckbAddress = privateKeyToCkbAddress(privateKey);
+  let ckbAddressDescription = '';
+  const useBip44 = program.bip44;
+
+  if (useBip44) {
+    if (!program.chainCode) {
+      throw new Error('BIP44 chain code is required. Please supply -cc <chainCode> option.');
+    }
+
+    const chainCode = Buffer.from(program.chainCode.slice(2), 'hex');
+    const path = program.bipPath;
+
+    const keychain = new Keychain(Buffer.from(privateKey.slice(2), "hex"), chainCode);
+    const derived = keychain.derivePath(path);
+
+    const childPrivateKey = '0x' + derived.privateKey.toString('hex');
+
+    ckbAddress = privateKeyToCkbAddress(childPrivateKey);
+    ckbAddressDescription = ` (BIP44 path ${path})`;
+  }
+
+  console.log(`using ckb address: ${ckbAddress}${ckbAddressDescription}`)
+
   const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
   console.log("using eth address:", ethAddress);
 
