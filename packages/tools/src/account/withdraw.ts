@@ -16,7 +16,9 @@ async function withdrawal(
   capacity: string,
   amount: string,
   sudtScriptHash: string,
-  ownerLockHash: string
+  ownerLockHash: string,
+  feeSudtId: number,
+  feeAmount: bigint
 ) {
   const fromId = await privateKeyToAccountId(godwoken, privateKey);
   if (!fromId) {
@@ -33,7 +35,9 @@ async function withdrawal(
     sudtScriptHash,
     l2LockHash,
     ownerLockHash,
-    privateKey
+    privateKey,
+    feeSudtId,
+    feeAmount
   );
 }
 
@@ -41,6 +45,9 @@ export const run = async (program: Command) => {
   const ckbRpc = program.rpc;
   const indexerPath = program.indexerPath;
   const _indexer = await initConfigAndSync(ckbRpc, indexerPath);
+
+  const feeSudtId = +program.feeSudtId;
+  const feeAmount = BigInt(program.fee);
 
   const capacity = program.capacity;
   const amount = program.amount;
@@ -69,7 +76,9 @@ export const run = async (program: Command) => {
       capacity,
       amount,
       sudtScriptHash,
-      ownerLockHash
+      ownerLockHash,
+      feeSudtId,
+      feeAmount
     );
 
     const currentBalance = await getBalanceByScriptHash(

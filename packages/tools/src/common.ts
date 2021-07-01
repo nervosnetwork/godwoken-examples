@@ -89,12 +89,20 @@ export function _createAccountRawL2Transaction(
   from_id: number,
   nonce: number,
   script_code_hash: string,
-  script_args: string
+  script_args: string,
+  sudt_id: number = 1,
+  fee_amount: bigint = BigInt(0)
 ) {
   const script: Script = {
     code_hash: script_code_hash,
     hash_type: "type",
     args: script_args,
   };
-  return GodwokenUtils.createAccountRawL2Transaction(from_id, nonce, script);
+  return GodwokenUtils.createAccountRawL2Transaction(
+    from_id,
+    nonce,
+    script,
+    sudt_id,
+    fee_amount
+  );
 }

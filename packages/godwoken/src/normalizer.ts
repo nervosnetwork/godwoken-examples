@@ -1,4 +1,4 @@
-import { Hash, HexNumber, Script } from "@ckb-lumos/base";
+import { Hash, HexNumber, HexString, Script } from "@ckb-lumos/base";
 import { normalizers, Reader } from "ckb-js-toolkit";
 import { L2Transaction, WithdrawalRequest } from "./types";
 
@@ -51,7 +51,7 @@ function normalizeObject(debugPath: string, obj: any, keys: object) {
 
   for (const [key, f] of Object.entries(keys)) {
     const value = obj[key];
-    if (!value) {
+    if (value === undefined || value === null) {
       throw new Error(`${debugPath} is missing ${key}!`);
     }
     result[key] = f(`${debugPath}.${key}`, value);
@@ -147,7 +147,7 @@ export function NormalizeL2Transaction(
 ) {
   return normalizeObject(debugPath, l2Transaction, {
     raw: toNormalize(NormalizeRawL2Transaction),
-    signature: normalizeRawData(65),
+    signature: normalizeRawData(-1),
   });
 }
 
@@ -165,6 +165,7 @@ export function NormalizeRawWithdrawalRequest(
     sell_capacity: normalizeHexNumber(8),
     owner_lock_hash: normalizeRawData(32),
     payment_lock_hash: normalizeRawData(32),
+    fee: toNormalize(NormalizeFee),
   });
 }
 
@@ -183,17 +184,25 @@ export interface UnoinType {
   value: any;
 }
 
+export function NormalizeFee(fee: object, { debugPath = "fee" } = {}) {
+  return normalizeObject(debugPath, fee, {
+    sudt_id: normalizeHexNumber(4),
+    amount: normalizeHexNumber(16),
+  });
+}
+
 export function NormalizeCreateAccount(
   createAccount: object,
   { debugPath = "create_account" } = {}
 ) {
   return normalizeObject(debugPath, createAccount, {
     script: toNormalize(normalizers.NormalizeScript),
+    fee: toNormalize(NormalizeFee),
   });
 }
 
 export interface SUDTQuery {
-  account_id: HexNumber;
+  short_address: HexString;
 }
 
 export function NormalizeSUDTQuery(
@@ -201,12 +210,12 @@ export function NormalizeSUDTQuery(
   { debugPath = "sudt_query" } = {}
 ) {
   return normalizeObject(debugPath, sudt_query, {
-    account_id: normalizeHexNumber(4),
+    short_address: normalizeRawData(20),
   });
 }
 
 export interface SUDTTransfer {
-  to: HexNumber;
+  to: HexString;
   amount: HexNumber;
   fee: HexNumber;
 }
@@ -216,7 +225,7 @@ export function NormalizeSUDTTransfer(
   { debugPath = "sudt_transfer" } = {}
 ) {
   return normalizeObject(debugPath, sudt_transfer, {
-    to: normalizeHexNumber(4),
+    to: normalizeRawData(20),
     amount: normalizeHexNumber(16),
     fee: normalizeHexNumber(16),
   });
