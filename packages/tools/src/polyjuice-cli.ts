@@ -72,7 +72,7 @@ program
   )
   .requiredOption("-l, --gas-limit <gas limit>", "gas limit")
   .requiredOption("-p, --gas-price <gas price>", "gas price")
-  .requiredOption("-d, --data <contract data>", "data")
+  .requiredOption("-d, --data <contract data>", "contract bin data, should be HexString", "0x")
   .requiredOption("-p, --private-key <private key>", "private key")
   .option("-s, --sudt-id <sudt id>", "sudt id, default to CKB id (1)", "1")
   .option("-v, --value <value>", "value", "0")
@@ -151,6 +151,21 @@ async function createCreatorAccount(program: Command) {
   const script_args = numberToUInt32LE(sudtId);
   let validator_script_hash = getValidatorScriptHash();
 
+  const l2_script: Script = {
+    code_hash: validator_script_hash,
+    hash_type: "type",
+    args: getRollupTypeHash() + script_args.slice(2),
+  };
+  const l2_script_hash = utils.computeScriptHash(l2_script);
+  console.log("creator account l2 script hash:", l2_script_hash);
+
+  // check if the creator account is created
+  let accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
+  if (!!accountId) {
+    console.log("Your creator account id:", accountId);
+    // return;
+  }
+
   const raw_l2tx = _createAccountRawL2Transaction(
     fromId,
     nonce,
@@ -179,19 +194,11 @@ async function createCreatorAccount(program: Command) {
   // const new_account_id = UInt32LEToNumber(run_result.return_data);
   // console.log("Created account id:", new_account_id);
 
-  const l2_script: Script = {
-    code_hash: validator_script_hash,
-    hash_type: "type",
-    args: getRollupTypeHash() + script_args.slice(2),
-  };
-  const l2_script_hash = utils.computeScriptHash(l2_script);
-  console.log("creator account l2 script hash:", l2_script_hash);
-
   // wait for tx committed
   const loopInterval = 3;
   for (let i = 0; i < 300; i += loopInterval) {
     console.log(`waiting for account id created ... waiting for ${i} seconds`);
-    const accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
+    accountId = await godwoken.getAccountIdByScriptHash(l2_script_hash);
     if (!!accountId) {
       console.log("Your creator account id:", accountId);
       break;
@@ -354,7 +361,11 @@ async function send(
   const signature = _signMessage(message, private_key);
   const l2tx: L2Transaction = { raw: raw_l2tx, signature };
   console.log("L2Transaction:", l2tx);
-  const l2TxHash = await godwoken.submitL2Transaction(l2tx);
+  const l2TxHash = await godwoken.submitL2Transaction(l2tx)
+    .catch(e => {
+      console.error(e);
+      throw e;
+    });
   // const run_result = await godwoken.executeL2Transaction(l2tx)
   console.log("l2 tx hash:", l2TxHash);
 

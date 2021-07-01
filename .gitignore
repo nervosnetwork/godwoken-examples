@@ -116,3 +116,5 @@ config.json
 lumos-config.json
 
 packages/polyjuice/lib
+
+cmd-example-*.sh
