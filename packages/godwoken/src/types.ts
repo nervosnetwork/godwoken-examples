@@ -29,6 +29,11 @@ export interface CreateAccount {
   script: Script;
 }
 
+export interface Fee {
+  sudt_id: Uint32;
+  amount: Uint128;
+}
+
 export interface RawWithdrawalRequest {
   nonce: HexNumber;
   // CKB amount
@@ -45,6 +50,7 @@ export interface RawWithdrawalRequest {
   owner_lock_hash: Hash;
   // layer1 lock to receive the payment, must exists on the chain
   payment_lock_hash: Hash;
+  fee: Fee;
 }
 export interface WithdrawalRequest {
   raw: RawWithdrawalRequest;

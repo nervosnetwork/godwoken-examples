@@ -30,7 +30,9 @@ export async function withdrawCLI(
   sudtScriptHash: Hash,
   accountScriptHash: Hash,
   ownerLockHash: Hash,
-  privateKey: string
+  privateKey: string,
+  feeSudtId: number,
+  feeAmount: bigint
 ) {
   console.log("--- godwoken withdraw ---");
 
@@ -46,7 +48,11 @@ export async function withdrawCLI(
     BigInt(0),
     BigInt(100 * 10 ** 8),
     ownerLockHash,
-    "0x" + "0".repeat(64)
+    "0x" + "0".repeat(64),
+    {
+      sudt_id: feeSudtId,
+      amount: feeAmount,
+    }
   );
 
   // console.log("rawWithdrawalRequest:", rawWithdrawalRequest);
@@ -98,8 +104,10 @@ export async function transferCLI(
   console.log("--- godwoken sudt transfer ---");
   const nonce = await godwoken.getNonce(fromId);
 
+  const toScriptHash = await godwoken.getScriptHash(toId);
+  const toAddress = toScriptHash.slice(0, 42);
   const sudtTransfer: SUDTTransfer = {
-    to: "0x" + toId.toString(16),
+    to: toAddress,
     amount: "0x" + amount.toString(16),
     fee: "0x" + fee.toString(16),
   };

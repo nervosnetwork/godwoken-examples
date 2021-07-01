@@ -16,6 +16,7 @@ import {
   Uint128,
   Uint32,
   Uint64,
+  Fee,
 } from "./types";
 import keccak256 from "keccak256";
 
@@ -112,14 +113,30 @@ export class Godwoken {
     return await this.rpc.submit_withdrawal_request(data);
   }
 
+  async getScriptHashByShortAddress(address: HexString): Promise<Hash> {
+    if (this.prefixGw) {
+      return await this.rpc.gw_get_script_hash_by_short_address(address);
+    }
+    return await this.rpc.get_script_hash_by_short_address(address);
+  }
+
+  async getBalanceByAddress(
+    sudt_id: Uint32,
+    address: HexString
+  ): Promise<Uint128> {
+    const sudt_id_hex = `0x${(+sudt_id).toString(16)}`;
+    const balance = this.prefixGw
+      ? await this.rpc.gw_get_balance(address, sudt_id_hex)
+      : await this.rpc.get_balance(address, sudt_id_hex);
+    return BigInt(balance);
+  }
+
   async getBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128> {
     // TODO: maybe swap params later?
-    const sudt_id_hex = `0x${(+sudt_id).toString(16)}`;
-    const account_id_hex = `0x${(+account_id).toString(16)}`;
-    const hex = this.prefixGw
-      ? await this.rpc.gw_get_balance(account_id_hex, sudt_id_hex)
-      : await this.rpc.get_balance(account_id_hex, sudt_id_hex);
-    return BigInt(hex);
+    const scriptHash = await this.getScriptHash(account_id);
+    const address = scriptHash.slice(0, 42);
+    const balance = await this.getBalanceByAddress(sudt_id, address);
+    return balance;
   }
 
   async getStorageAt(account_id: Uint32, key: Hash): Promise<Hash> {
@@ -264,9 +281,17 @@ export class GodwokenUtils {
   static createAccountRawL2Transaction(
     from_id: Uint32,
     nonce: Uint32,
-    script: Script
+    script: Script,
+    sudt_id: Uint32 = 1,
+    fee_amount: Uint128 = BigInt(0)
   ): RawL2Transaction {
-    const create_account = { script };
+    const create_account = {
+      script,
+      fee: {
+        sudt_id: "0x" + (+sudt_id).toString(16),
+        amount: "0x" + BigInt(fee_amount).toString(16),
+      },
+    };
     const enum_tag = "0x00000000";
     const create_account_part = new Reader(
       core.SerializeCreateAccount(NormalizeCreateAccount(create_account))
@@ -289,7 +314,8 @@ export class GodwokenUtils {
     sell_amount: Uint128,
     sell_capacity: Uint64,
     owner_lock_hash: Hash,
-    payment_lock_hash: Hash
+    payment_lock_hash: Hash,
+    fee: Fee
   ): RawWithdrawalRequest {
     return {
       nonce: "0x" + BigInt(nonce).toString(16),
@@ -301,6 +327,7 @@ export class GodwokenUtils {
       sell_capacity: "0x" + BigInt(sell_capacity).toString(16),
       owner_lock_hash: owner_lock_hash,
       payment_lock_hash: payment_lock_hash,
+      fee,
     };
   }
 }

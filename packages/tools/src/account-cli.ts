@@ -85,7 +85,9 @@ program
     "l1 sudt script hash, default for withdrawal CKB",
     "0x0000000000000000000000000000000000000000000000000000000000000000"
   )
-  .option("-m --amount <amount>", "amount of sudt", "0")
+  .option("-m, --amount <amount>", "amount of sudt", "0")
+  .option("-s, --fee-sudt-id <fee sudt id>", "fee sudt id", "1")
+  .option("-f, --fee <fee>", "fee in current sudt", "0")
   .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
   .action(withdrawRun);

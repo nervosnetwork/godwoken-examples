@@ -12,7 +12,6 @@ import {
   Godwoken,
   L2Transaction,
   numberToUInt32LE,
-  UInt32LEToNumber,
 } from "@godwoken-examples/godwoken";
 import { ETHAddress, Polyjuice } from "@godwoken-examples/polyjuice";
 import {
@@ -24,7 +23,6 @@ import {
   privateKeyToAccountId,
   privateKeyToScriptHash,
 } from "./modules/godwoken";
-import { deploymentConfig } from "./modules/deployment-config";
 
 const EMPTY_ETH_ADDRESS = "0x" + "00".repeat(20);
 
@@ -61,6 +59,7 @@ program
     "your private key to create creator account id"
   )
   .option("-s, --sudt-id <sudt id>", "sudt id, default to CKB id (1)", "1")
+  .option("-f, --fee <fee>", "fee in sudt-id", "0")
   .action(createCreatorAccount);
 
 program
@@ -137,6 +136,7 @@ async function createCreatorAccount(program: Command) {
   // const fromId = +program.fromId;
   const sudtId = +program.sudtId;
   const privateKey = program.privateKey;
+  const feeAmount = BigInt(program.fee);
 
   const godwoken = new Godwoken(godwokenUrl);
 
@@ -155,7 +155,9 @@ async function createCreatorAccount(program: Command) {
     fromId,
     nonce,
     validator_script_hash,
-    getRollupTypeHash() + script_args.slice(2)
+    getRollupTypeHash() + script_args.slice(2),
+    sudtId,
+    feeAmount
   );
 
   const sender_script_hash = await godwoken.getScriptHash(fromId);
@@ -265,8 +267,14 @@ async function staticCall(program: Command) {
     creator_account_id: 0,
   });
   const nonce = 0;
-  const to_id_le = "0x" + to_address.slice(-8);
-  const to_id = UInt32LEToNumber(to_id_le);
+
+  const to_script_hash = await godwoken.getScriptHashByShortAddress(to_address);
+  const to_id = await godwoken.getAccountIdByScriptHash(to_script_hash);
+  if (to_id == null) {
+    console.error("to id not found!");
+    exit(-1);
+  }
+
   const raw_l2tx = polyjuice.generateTransaction(
     from_id,
     to_id,
@@ -313,10 +321,11 @@ async function send(
     exit(-1);
   }
   const nonce = await godwoken.getNonce(from_id);
-  let to_id = 0;
+  let to_id = creator_account_id;
   if (to_address !== "0x") {
-    const id = await allTypeEthAddressToAccountId(godwoken, to_address);
-    if (!id) {
+    const scriptHash = await godwoken.getScriptHashByShortAddress(to_address);
+    const id = await godwoken.getAccountIdByScriptHash(scriptHash);
+    if (id == null) {
       console.error("to id not found!");
       exit(-1);
     }
@@ -362,9 +371,10 @@ async function send(
 
   // wait for transaction receipt
   const loopInterval = 3;
+  let receipt;
   for (let i = 0; i < 300; i += loopInterval) {
     console.log(`waiting for transaction receipt ... waiting for ${i} seconds`);
-    const receipt = await godwoken.getTransactionReceipt(l2TxHash);
+    receipt = await godwoken.getTransactionReceipt(l2TxHash);
     if (receipt) {
       console.log("transaction receipt:", receipt);
       break;
@@ -374,75 +384,14 @@ async function send(
 
   // for deploy contract
   if (to_address === "0x") {
-    const new_script_hash = polyjuice.calculateScriptHash(
-      getRollupTypeHash(),
-      from_id,
-      nonce
+    // get polyjuice system log
+    const polyjuice_system_log = receipt.logs.find(
+      (log: any) => log.service_flag === "0x2"
     );
-    console.log("new script hash:", new_script_hash);
-    const new_account_id = await godwoken.getAccountIdByScriptHash(
-      new_script_hash
-    );
-    console.log("new account id:", new_account_id);
-
-    // script_hash first 16 bytes and to id le bytes(u32)
-    const contract_address =
-      new_script_hash.slice(0, 34) + numberToUInt32LE(new_account_id!).slice(2);
-    console.log("contract address:", contract_address);
+    const data: HexString = polyjuice_system_log.data;
+    const dataBuffer = Buffer.from(data.slice(2), "hex");
+    const addressBuffer = dataBuffer.slice(16, 36);
+    const address = "0x" + addressBuffer.toString("hex");
+    console.log("contract address:", address);
   }
-}
-
-async function allTypeEthAddressToAccountId(
-  godwoken: Godwoken,
-  address: string
-): Promise<number | undefined> {
-  const scriptHash = ethAddressToScriptHash(address);
-  let accountId: number | undefined = await godwoken.getAccountIdByScriptHash(
-    scriptHash
-  );
-  if (accountId === null || accountId === undefined) {
-    accountId = await ethContractAddressToAccountId(address, godwoken);
-  }
-  return accountId;
-}
-
-function ethAddressToScriptHash(address: string): HexString {
-  const script: Script = {
-    code_hash: deploymentConfig.eth_account_lock.code_hash,
-    hash_type: deploymentConfig.eth_account_lock.hash_type,
-    args: ROLLUP_TYPE_HASH + address.slice(2),
-  };
-  const scriptHash = utils.computeScriptHash(script);
-  return scriptHash;
-}
-
-// https://github.com/nervosnetwork/godwoken-polyjuice/blob/7a04c9274c559e91b677ff3ea2198b58ba0003e7/polyjuice-tests/src/helper.rs#L239
-async function ethContractAddressToAccountId(
-  ethAddress: string,
-  godwoken: Godwoken
-): Promise<number | undefined> {
-  if (ethAddress.length != 42) {
-    throw new Error(`Invalid eth address length: ${ethAddress.length}`);
-  }
-  if (ethAddress === "0x0000000000000000000000000000000000000000") {
-    return undefined;
-  }
-  const accountIdBuf = Buffer.from(ethAddress.slice(-8), "hex");
-  const accountId = accountIdBuf.readUInt32LE();
-  const scriptHash = await godwoken.getScriptHash(accountId);
-
-  if (scriptHash === "0x" + "00".repeat(32)) {
-    return undefined;
-  }
-
-  if (scriptHash.slice(0, 34) !== ethAddress.slice(0, 34)) {
-    throw new Error(
-      `eth address first 16 bytes not match account script hash: expected=${ethAddress.slice(
-        0,
-        34
-      )}, got=${scriptHash.slice(0, 34)}`
-    );
-  }
-  console.log(`eth contract address: ${ethAddress}, account id: ${accountId}`);
-  return accountId;
 }
