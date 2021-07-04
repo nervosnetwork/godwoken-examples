@@ -96,7 +96,7 @@ export async function transferCLI(
   godwoken: Godwoken,
   privateKey: string,
   fromId: Uint32,
-  toId: Uint32,
+  toAddress: HexString,
   sudtId: Uint32,
   amount: Uint128,
   fee: Uint128
@@ -104,8 +104,6 @@ export async function transferCLI(
   console.log("--- godwoken sudt transfer ---");
   const nonce = await godwoken.getNonce(fromId);
 
-  const toScriptHash = await godwoken.getScriptHash(toId);
-  const toAddress = toScriptHash.slice(0, 42);
   const sudtTransfer: SUDTTransfer = {
     to: toAddress,
     amount: "0x" + amount.toString(16),
@@ -205,6 +203,19 @@ export async function privateKeyToAccountId(
   return id;
 }
 
+export function privateKeyToShortAddress(
+  privateKey: HexString
+): HexString | undefined {
+  const ethAddress = privateKeyToEthAddress(privateKey);
+  const script = {
+    ...deploymentConfig.eth_account_lock,
+    args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
+  };
+  const scriptHash = utils.computeScriptHash(script);
+  const shortAddress = scriptHash.slice(0, 42);
+  return shortAddress;
+}
+
 export function privateKeyToScriptHash(privateKey: HexString): Hash {
   const ethAddress = privateKeyToEthAddress(privateKey);
   const script = {
@@ -216,20 +227,6 @@ export function privateKeyToScriptHash(privateKey: HexString): Hash {
 
   return scriptHash;
 }
-
-// export function privateKeyToScriptHash(
-//   privateKey: HexString
-// ): Hash {
-//   const ethAddress = privateKeyToEthAddress(privateKey);
-//   const script = {
-//     ...deploymentConfig.eth_account_lock,
-//     args: ROLLUP_TYPE_HASH + ethAddress.slice(2),
-//   };
-
-//   const scriptHash = utils.computeScriptHash(script);
-
-//   return scriptHash;
-// }
 
 export function ethAddressToScriptHash(ethAddress: HexString): Hash {
   const script = {
@@ -254,4 +251,34 @@ export async function getBalanceByScriptHash(
 
   const balance = await godwoken.getBalance(sudtId, accountId);
   return balance;
+}
+
+export async function parseAccountToShortAddress(
+  godwoken: Godwoken,
+  account: string
+): Promise<HexString> {
+  // account is an address
+  if (account.startsWith("0x") && account.length === 42) {
+    return account;
+  }
+
+  const accountId: number = +account;
+  const scriptHash: Hash = await godwoken.getScriptHash(accountId);
+  const shortAddress: HexString = scriptHash.slice(0, 42);
+  return shortAddress;
+}
+
+export async function parseAccountToId(
+  godwoken: Godwoken,
+  account: string
+): Promise<number | undefined> {
+  // if account is an address
+  if (account.startsWith("0x") && account.length === 42) {
+    const scriptHash = await godwoken.getScriptHashByShortAddress(account);
+    const id = await godwoken.getAccountIdByScriptHash(scriptHash);
+    return id;
+  }
+
+  // if account is id
+  return +account;
 }

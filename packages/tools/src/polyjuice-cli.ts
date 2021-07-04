@@ -20,6 +20,7 @@ import {
 } from "./modules/godwoken-config";
 import { asyncSleep } from "./modules/utils";
 import {
+  parseAccountToId,
   privateKeyToAccountId,
   privateKeyToScriptHash,
 } from "./modules/godwoken";
@@ -97,7 +98,7 @@ program
 program
   .command("call")
   .description("Static Call a EVM contract by `eth_call`")
-  .requiredOption("-t, --from-id <from id>", "from id")
+  .requiredOption("-t, --from <from>", "from address OR from id")
   .option("-t, --to-address <contract address>", "contract address", "0x")
   .option(
     "-l, --gas-limit <gas limit>",
@@ -255,9 +256,15 @@ async function staticCall(program: Command) {
   const data = program.data;
   const value = BigInt(program.value);
   const to_address = program.toAddress;
-  const from_id = +program.fromId;
+  const from = program.from;
 
   const godwoken = new Godwoken(program.parent.godwokenRpc);
+  const from_id = await parseAccountToId(godwoken, from);
+
+  if (from_id == null) {
+    console.error("from account not exists!");
+    exit(-1);
+  }
 
   let validator_script_hash = getValidatorScriptHash();
 
