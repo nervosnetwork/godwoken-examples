@@ -5,7 +5,7 @@ import {
   transferCLI,
 } from "../modules/godwoken";
 import { privateKeyToEthAddress } from "../modules/utils";
-import { initConfigAndSync } from "./common";
+import { initConfigAndSync, waitForTransfer } from "./common";
 import { Godwoken } from "@godwoken-examples/godwoken";
 import { HexString } from "@ckb-lumos/base";
 
@@ -56,7 +56,7 @@ export const run = async (program: Command) => {
   const toAddress = await parseAccountToShortAddress(godwoken, toAccount);
 
   try {
-    await transfer(
+    const txHash = await transfer(
       godwoken,
       privateKey,
       toAddress,
@@ -64,6 +64,8 @@ export const run = async (program: Command) => {
       BigInt(amount),
       BigInt(fee)
     );
+
+    await waitForTransfer(godwoken, txHash);
 
     process.exit(0);
   } catch (e) {

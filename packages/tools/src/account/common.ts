@@ -141,3 +141,29 @@ export async function waitForWithdraw(
     `timeout for waiting withdraw success in godwoken, please check with account id: ${accountId} by your self.`
   );
 }
+
+export async function waitForTransfer(
+  godwoken: Godwoken,
+  txHash: Hash,
+  timeout: number = 300,
+  loopInterval = 5
+) {
+  let receipt: any;
+  for (let i = 0; i < timeout; i += loopInterval) {
+    console.log(`waiting for layer 2 block producer transfer ... ${i} seconds`);
+
+    if (!receipt) {
+      receipt = await godwoken.getTransactionReceipt(txHash);
+      if (receipt) {
+        console.log("Transaction receipt:", receipt);
+        return;
+      }
+    }
+
+    await asyncSleep(loopInterval * 1000);
+  }
+
+  console.log(
+    `timeout for waiting transfer success in godwoken, please check with tx hash: ${txHash} by your self.`
+  );
+}

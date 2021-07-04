@@ -100,7 +100,7 @@ export async function transferCLI(
   sudtId: Uint32,
   amount: Uint128,
   fee: Uint128
-) {
+): Promise<Hash> {
   console.log("--- godwoken sudt transfer ---");
   const nonce = await godwoken.getNonce(fromId);
 
@@ -160,18 +160,11 @@ export async function transferCLI(
 
   console.log("l2 transaction:", l2Transaction);
 
-  const runResult = await godwoken.submitL2Transaction(l2Transaction);
-  console.log("l2 tx hash:", runResult);
-
-  if (runResult !== null) {
-    const errorMessage: string | undefined = (runResult as any).message;
-    if (errorMessage) {
-      throw new Error(errorMessage);
-    }
-  }
+  const txHash = await godwoken.submitL2Transaction(l2Transaction);
+  console.log("l2 tx hash:", txHash);
 
   console.log("--- godwoken sudt transfer finished ---");
-  return;
+  return txHash;
 }
 
 function signMessage(message: string, privkey: string) {
