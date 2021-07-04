@@ -87,7 +87,7 @@ export class Polyjuice {
   }
 
   async getBalance(account_id: Uint32): Promise<Uint128> {
-    return await this.client.getBalance(this.sudt_id, account_id);
+    return await this.client.getBalanceById(this.sudt_id, account_id);
   }
 
   async getTransactionCount(account_id: Uint32): Promise<Uint32> {

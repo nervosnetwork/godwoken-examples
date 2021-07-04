@@ -13,7 +13,7 @@ export async function getBalance(program: Command) {
 
   const address = await parseAccountToShortAddress(godwoken, account);
 
-  const balance = await godwoken.getBalanceByAddress(sudtId, address);
+  const balance = await godwoken.getBalance(sudtId, address);
 
   console.log(`Your balance: ${balance}`);
   console.log("Easy to read:", balance.toLocaleString());

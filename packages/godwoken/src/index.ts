@@ -120,10 +120,7 @@ export class Godwoken {
     return await this.rpc.get_script_hash_by_short_address(address);
   }
 
-  async getBalanceByAddress(
-    sudt_id: Uint32,
-    address: HexString
-  ): Promise<Uint128> {
+  async getBalance(sudt_id: Uint32, address: HexString): Promise<Uint128> {
     const sudt_id_hex = `0x${(+sudt_id).toString(16)}`;
     const balance = this.prefixGw
       ? await this.rpc.gw_get_balance(address, sudt_id_hex)
@@ -131,11 +128,11 @@ export class Godwoken {
     return BigInt(balance);
   }
 
-  async getBalance(sudt_id: Uint32, account_id: Uint32): Promise<Uint128> {
+  async getBalanceById(sudt_id: Uint32, account_id: Uint32): Promise<Uint128> {
     // TODO: maybe swap params later?
     const scriptHash = await this.getScriptHash(account_id);
     const address = scriptHash.slice(0, 42);
-    const balance = await this.getBalanceByAddress(sudt_id, address);
+    const balance = await this.getBalance(sudt_id, address);
     return balance;
   }
 

@@ -237,12 +237,8 @@ export async function getBalanceByScriptHash(
   sudtId: number,
   scriptHash: Hash
 ): Promise<bigint> {
-  const accountId = await godwoken.getAccountIdByScriptHash(scriptHash);
-  if (!accountId) {
-    return BigInt(0);
-  }
-
-  const balance = await godwoken.getBalance(sudtId, accountId);
+  const address = scriptHash.slice(0, 42);
+  const balance = await godwoken.getBalance(sudtId, address);
   return balance;
 }
 
