@@ -65,7 +65,7 @@ program
     "capacity in shannons OR amount in sudt"
   )
   .requiredOption("-e, --fee <fee>", "fee")
-  .requiredOption("-t, --to-id <to id>", "to id")
+  .requiredOption("-t, --to <to>", "to short address OR to id")
   .requiredOption("-s, --sudt-id <sudt id>", "sudt id")
   .option("-r, --rpc <rpc>", "ckb rpc path", "http://127.0.0.1:8114")
   .option("-d, --indexer-path <path>", "indexer path", "./indexer-data")
@@ -97,7 +97,10 @@ program
   .description(
     "get CKB / sUDT balance from godwoken, default sudt-id is 1 (for CKB)"
   )
-  .requiredOption("-a, --account-id <account id>", "account id")
+  .requiredOption(
+    "-a, --account <account>",
+    "account short address OR account id"
+  )
   .option("-s, --sudt-id <sudt id>", "sudt id", "1")
   .action(getBalance);
 
