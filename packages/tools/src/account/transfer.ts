@@ -44,10 +44,7 @@ export const run = async (program: Command) => {
   const sudtId = program.sudtId;
   const godwokenURL = program.parent.godwokenRpc;
 
-  const godwoken = new Godwoken(
-    godwokenURL,
-    program.parent.prefixWithGw !== false
-  );
+  const godwoken = new Godwoken(godwokenURL);
 
   const privateKey = program.privateKey;
 

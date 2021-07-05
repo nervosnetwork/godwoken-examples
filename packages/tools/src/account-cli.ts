@@ -10,23 +10,15 @@ const program = new Command();
 program.version("0.0.1");
 
 let defaultGodwokenRpc = "http://127.0.0.1:8119";
-let defaultPrefixWithGw = false;
 if (!process.env.LUMOS_CONFIG_FILE) {
   defaultGodwokenRpc = "http://godwoken-testnet-web3-rpc.ckbapp.dev";
-  defaultPrefixWithGw = true;
 }
 
-program
-  .option(
-    "-g, --godwoken-rpc <rpc>",
-    "godwoken rpc path, defualt to http://127.0.0.1:8119, and LUMOS_CONFIG_FILE not provided, default to http://godwoken-testnet-web3-rpc.ckbapp.dev",
-    defaultGodwokenRpc
-  )
-  .option(
-    "-w, --prefix-with-gw",
-    "prefix with `gw_` or not, , defualt to false, and LUMOS_CONFIG_FILE not provided, default to true",
-    defaultPrefixWithGw
-  );
+program.option(
+  "-g, --godwoken-rpc <rpc>",
+  "godwoken rpc path, defualt to http://127.0.0.1:8119, and LUMOS_CONFIG_FILE not provided, default to http://godwoken-testnet-web3-rpc.ckbapp.dev",
+  defaultGodwokenRpc
+);
 
 program
   .command("deposit")

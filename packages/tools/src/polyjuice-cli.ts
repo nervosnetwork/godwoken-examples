@@ -30,25 +30,17 @@ const EMPTY_ETH_ADDRESS = "0x" + "00".repeat(20);
 const program = new Command();
 
 let defaultGodwokenRpc = "http://127.0.0.1:8119";
-let defaultPrefixWithGw = false;
 let defaultCreatorAccountId = undefined;
 if (process.env.ENABLE_TESTNET_MODE) {
   defaultGodwokenRpc = "http://godwoken-testnet-web3-rpc.ckbapp.dev";
-  defaultPrefixWithGw = true;
   defaultCreatorAccountId = "3";
 }
 
-program
-  .option(
-    "-g, --godwoken-rpc <rpc>",
-    "godwoken rpc path, defualt to http://127.0.0.1:8119, default to http://godwoken-testnet-web3-rpc.ckbapp.dev if ENABLE_TESTNET_MODE=true",
-    defaultGodwokenRpc
-  )
-  .option(
-    "-w, --prefix-with-gw",
-    "prefix with `gw_` or not, , default to false, default to true if ENABLE_TESTNET_MODE=true",
-    defaultPrefixWithGw
-  );
+program.option(
+  "-g, --godwoken-rpc <rpc>",
+  "godwoken rpc path, defualt to http://127.0.0.1:8119, default to http://godwoken-testnet-web3-rpc.ckbapp.dev if ENABLE_TESTNET_MODE=true",
+  defaultGodwokenRpc
+);
 
 program
   .command("create-creator-account")
