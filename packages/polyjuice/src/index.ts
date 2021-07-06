@@ -14,7 +14,6 @@ import {
 import { UInt128ToLeBytes, UInt32ToLeBytes, UInt64ToLeBytes } from "./types";
 import { rlp } from "ethereumjs-util";
 import keccak256 from "keccak256";
-import { genesis as GENESIS_CONFIG } from "@godwoken-examples/tools/configs/godwoken-config.json";
 
 export type U256 = HexString;
 export type ETHAddress = HexString;
@@ -183,13 +182,9 @@ export class Polyjuice {
     data: HexString,
     nonce: Uint32
   ): Hash {
-    const compatibleChainId = parseInt(GENESIS_CONFIG?.rollup_config?.compatible_chain_id) || 0;
-
     const r = "0x";
     const s = "0x";
-    const v = numberToRlpEncode(toHex(
-      compatibleChainId * Math.pow(2, 32) + this.creator_account_id
-    ));
+    const v = numberToRlpEncode(toHex(this.creator_account_id));
 
     if (to === EMPTY_ETH_ADDRESS) {
       to = "0x";
