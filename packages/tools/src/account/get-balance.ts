@@ -6,10 +6,7 @@ export async function getBalance(program: Command) {
   const account = program.account;
   const sudtId = +program.sudtId;
 
-  const godwoken = new Godwoken(
-    program.parent.godwokenRpc,
-    program.parent.prefixWithGw !== false
-  );
+  const godwoken = new Godwoken(program.parent.godwokenRpc);
 
   const address = await parseAccountToShortAddress(godwoken, account);
 

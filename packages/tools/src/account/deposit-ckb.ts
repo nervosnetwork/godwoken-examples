@@ -113,10 +113,7 @@ export const run = async (program: commander.Command) => {
   const ckbAddress = privateKeyToCkbAddress(privateKey);
   const ethAddress = program.ethAddress || privateKeyToEthAddress(privateKey);
 
-  const godwoken = new Godwoken(
-    program.parent.godwokenRpc,
-    program.parent.prefixWithGw !== false
-  );
+  const godwoken = new Godwoken(program.parent.godwokenRpc);
 
   console.log("using eth address:", ethAddress);
   try {

@@ -53,7 +53,7 @@ program
   .description("Get nonce from account")
   .action(getNonce);
 program
-  .command("getBalance <sudt_id> <account_id>")
+  .command("getBalance <short_address> <sudt_id>")
   .description("Get balance from account")
   .action(getBalance);
 program
@@ -117,12 +117,10 @@ async function getNonce(account_id: string) {
   const nonce = await godwoken.getNonce(parseInt(account_id));
   console.log("nonce:", nonce);
 }
-async function getBalance(sudt_id: string, account_id: string) {
+
+async function getBalance(short_address: string, sudt_id: string) {
   const godwoken = new Godwoken(program.rpc);
-  const balance = await godwoken.getBalanceById(
-    parseInt(sudt_id),
-    parseInt(account_id)
-  );
+  const balance = await godwoken.getBalance(+sudt_id, short_address);
   console.log("balance:", balance);
 }
 

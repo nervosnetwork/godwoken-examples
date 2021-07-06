@@ -65,10 +65,7 @@ export const run = async (program: Command) => {
   console.log("eth address:", ethAddress);
   const accountScriptHash = ethAddressToScriptHash(ethAddress);
 
-  const godwoken = new Godwoken(
-    program.parent.godwokenRpc,
-    program.parent.prefixWithGw !== false
-  );
+  const godwoken = new Godwoken(program.parent.godwokenRpc);
   try {
     await withdrawal(
       godwoken,

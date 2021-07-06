@@ -138,10 +138,7 @@ export const run = async (program: commander.Command) => {
   }
 
   const godwokenRpc = program.parent.godwokenRpc;
-  const godwoken = new Godwoken(
-    godwokenRpc,
-    program.parent.prefixWithGw !== false
-  );
+  const godwoken = new Godwoken(godwokenRpc);
 
   try {
     const [txHash, layer2SudtScriptHash] = await sendTx(
