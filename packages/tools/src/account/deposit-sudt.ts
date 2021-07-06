@@ -57,12 +57,10 @@ async function sendTx(
     ownerLockHash,
     layer2Lock
   );
-  console.log(
-    `Layer 2 lock script hash: ${utils.computeScriptHash(
-      depositLockArgs.layer2_lock
-    )}`
-  );
-  console.log("↑ Using this script hash to get user account id ↑");
+  const l2ScriptHash = utils.computeScriptHash(depositLockArgs.layer2_lock);
+  console.log(`Layer 2 lock script hash: ${l2ScriptHash}`);
+
+  console.log("Your address:", l2ScriptHash.slice(0, 42));
 
   const serializedArgs: HexString = serializeArgs(depositLockArgs);
   const depositLock: Script = generateDepositLock(
