@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { toEthAddress, toShortAddress } from "./account/address";
 
 import { run as depositRun } from "./account/deposit-ckb";
 import { run as depositSudtRun } from "./account/deposit-sudt";
@@ -95,5 +96,20 @@ program
   )
   .option("-s, --sudt-id <sudt id>", "sudt id", "1")
   .action(getBalance);
+
+program
+  .command("to-short-address")
+  .description("eth eoa address to godwoken short address")
+  .requiredOption("-a, --eth-address <eth address>", "eth eoa address")
+  .action(toShortAddress);
+
+program
+  .command("to-eth-address")
+  .description("godwoken short address to eth eoa address")
+  .requiredOption(
+    "-a, --short-address <short address>",
+    "godwoken short address"
+  )
+  .action(toEthAddress);
 
 program.parse(process.argv);
