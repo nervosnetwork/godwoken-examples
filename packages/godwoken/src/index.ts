@@ -71,15 +71,9 @@ export class Godwoken {
   }
 
   private async rpcCall(method_name: string, ...args: any[]): Promise<any> {
-    try {
-      const result = await this.rpc[method_name](...args);
-      return result;
-    } catch {
-      // console.debug(`Failed to request /${method_name}, retry /gw_${method_name}`)
-      const name = "gw_" + method_name;
-      const result = await this.rpc[name](...args);
-      return result;
-    }
+    const name = "gw_" + method_name;
+    const result = await this.rpc[name](...args);
+    return result;
   }
 
   async _send(l2tx: L2Transaction, method_name: string) {
