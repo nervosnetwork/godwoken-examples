@@ -106,6 +106,7 @@ dist
 /docs/
 
 indexer-data/
+indexer-data-path/
 script/
 cli-run/
 packages/tools/configs/godwoken-config.json
