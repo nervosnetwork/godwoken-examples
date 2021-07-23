@@ -259,7 +259,5 @@ export function NormalizeUnlockWithdrawalViaFinalize(
   unlock_withdrawal_finalize: object,
   { debugPath = "unlock_withdrawal_finalize" } = {}
 ) {
-  return normalizeObject(debugPath, unlock_withdrawal_finalize, {
-    block_proof: normalizeRawData(-1),
-  });
+  return normalizeObject(debugPath, unlock_withdrawal_finalize, {});
 }
