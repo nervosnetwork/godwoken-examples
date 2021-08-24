@@ -32,13 +32,13 @@ const program = new Command();
 let defaultGodwokenRpc = "http://127.0.0.1:8119";
 let defaultCreatorAccountId = undefined;
 if (process.env.ENABLE_TESTNET_MODE) {
-  defaultGodwokenRpc = "http://godwoken-testnet-web3-rpc.ckbapp.dev";
+  defaultGodwokenRpc = "https://godwoken-testnet-web3-rpc.ckbapp.dev";
   defaultCreatorAccountId = "3";
 }
 
 program.option(
   "-g, --godwoken-rpc <rpc>",
-  "godwoken rpc path, defualt to http://127.0.0.1:8119, default to http://godwoken-testnet-web3-rpc.ckbapp.dev if ENABLE_TESTNET_MODE=true",
+  "godwoken rpc path, defualt to http://127.0.0.1:8119, default to https://godwoken-testnet-web3-rpc.ckbapp.dev if ENABLE_TESTNET_MODE=true",
   defaultGodwokenRpc
 );
 
