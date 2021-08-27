@@ -54,9 +54,9 @@ async function sendTx(
     layer2Lock
   );
   const l2ScriptHash = utils.computeScriptHash(depositLockArgs.layer2_lock);
-  console.log(`Layer 2 lock script hash: ${l2ScriptHash}`);
+  console.log(`Godwoken script hash: ${l2ScriptHash}`);
 
-  console.log("Your address:", l2ScriptHash.slice(0, 42));
+  console.log("Godwoken script hash(160):", l2ScriptHash.slice(0, 42));
 
   const serializedArgs: HexString = serializeArgs(depositLockArgs);
   const depositLock: Script = generateDepositLock(
