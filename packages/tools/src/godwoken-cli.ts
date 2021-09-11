@@ -466,7 +466,7 @@ async function unlockWithdraw(privkey: string, runner_config_path: string) {
   const tx = sealTransaction(txSkeleton, [content]);
   const rpc = new RPC(program.ckbRpc);
   try {
-    const txHash: Hash = await rpc.send_transaction(tx);
+    const txHash: Hash = await rpc.send_transaction(tx, "passthrough");
     console.log("txHash:", txHash);
     process.exit(0);
   } catch (e) {
