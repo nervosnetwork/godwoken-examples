@@ -98,7 +98,7 @@ async function sendTx(
   const tx = sealTransaction(txSkeleton, [content]);
 
   const rpc = new RPC(ckbUrl);
-  const txHash: Hash = await rpc.send_transaction(tx);
+  const txHash: Hash = await rpc.send_transaction(tx, "passthrough");
 
   return txHash;
 }

@@ -12,7 +12,7 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\""
   },
   "dependencies": {
-    "@ckb-lumos/base": "^0.16.0",
+    "@ckb-lumos/base": "^0.18.0-rc1",
     "@godwoken-examples/godwoken": "^0.0.1",
     "ckb-js-toolkit": "^0.10.2",
     "ethereumjs-util": "^7.0.10",

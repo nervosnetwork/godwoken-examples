@@ -240,7 +240,7 @@ async function unlockInner(
 
   let txHash: Hash | undefined;
   try {
-    txHash = await rpc.send_transaction(tx);
+    txHash = await rpc.send_transaction(tx, "passthrough");
     console.log("txHash:", txHash);
   } catch (err) {
     console.error("error when send transaction:", err);
