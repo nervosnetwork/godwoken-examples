@@ -49,6 +49,16 @@ export async function withdrawCLI(
 ) {
   console.log("--- godwoken withdraw ---");
 
+  const isSudt =
+    sudtScriptHash !==
+    "0x0000000000000000000000000000000000000000000000000000000000000000";
+  let minCapacity = minimalWithdrawalCapacity(isSudt);
+  if (capacity < minCapacity) {
+    throw new Error(
+      `Withdrawal required ${minCapacity} shannons at least, provided ${capacity}.`
+    );
+  }
+
   const nonce: Uint32 = await godwoken.getNonce(fromId);
   console.log("nonce:", nonce);
 
