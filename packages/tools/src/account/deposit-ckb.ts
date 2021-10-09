@@ -15,6 +15,7 @@ import {
   getDepositLockArgs,
   serializeArgs,
   getRollupTypeHash,
+  minimalDepositCapacity,
 } from "../modules/deposit";
 import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
@@ -73,6 +74,13 @@ async function sendTx(
     },
     data: "0x",
   };
+
+  const minCapacity = minimalDepositCapacity(outputCell, depositLockArgs);
+  if (BigInt(amount) < minCapacity) {
+    throw new Error(
+      `Deposit CKB required ${minCapacity} shannons at least, provided ${amount}.`
+    );
+  }
 
   txSkeleton = txSkeleton.update("outputs", (outputs) => {
     return outputs.push(outputCell);

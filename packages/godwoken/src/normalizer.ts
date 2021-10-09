@@ -1,4 +1,10 @@
-import { Hash, HexNumber, HexString, Script } from "@ckb-lumos/base";
+import {
+  Hash,
+  HexNumber,
+  HexString,
+  PackedSince,
+  Script,
+} from "@ckb-lumos/base";
 import { normalizers, Reader } from "ckb-js-toolkit";
 import { L2Transaction, WithdrawalRequest } from "./types";
 
@@ -86,6 +92,12 @@ export function NormalizeDepositRequest(
   });
 }
 
+export interface DepositLockArgs {
+  owner_lock_hash: Hash;
+  layer2_lock: Script;
+  cancel_timeout: PackedSince;
+}
+
 export function NormalizeDepositLockArgs(
   args: object,
   { debugPath = "deposit_lock_args" } = {}
@@ -113,9 +125,9 @@ export function NormalizeHeaderInfo(
 }
 
 export interface CustodianLockArgs {
-  owner_lock_hash: Hash;
   deposit_block_hash: Hash;
   deposit_block_number: HexNumber;
+  deposit_lock_args: DepositLockArgs;
 }
 
 export function NormalizeCustodianLockArgs(
@@ -123,9 +135,9 @@ export function NormalizeCustodianLockArgs(
   { debugPath = "custondian_lock_args" } = {}
 ) {
   return normalizeObject(debugPath, args, {
-    owner_lock_hash: normalizeRawData(32),
     deposit_block_hash: normalizeRawData(32),
     deposit_block_number: normalizeHexNumber(8),
+    deposit_lock_args: toNormalize(NormalizeDepositLockArgs),
   });
 }
 

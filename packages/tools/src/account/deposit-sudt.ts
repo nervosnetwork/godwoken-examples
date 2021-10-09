@@ -2,7 +2,7 @@ import {
   DeploymentConfig,
   deploymentConfig,
 } from "../modules/deployment-config";
-import { HexString, Script, Hash, utils } from "@ckb-lumos/base";
+import { HexString, Script, Hash, utils, Cell } from "@ckb-lumos/base";
 import { Indexer } from "@ckb-lumos/indexer";
 import {
   TransactionSkeleton,
@@ -16,6 +16,7 @@ import {
   getDepositLockArgs,
   serializeArgs,
   getRollupTypeHash,
+  minimalDepositCapacity,
 } from "../modules/deposit";
 import { common, sudt } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
@@ -84,6 +85,14 @@ async function sendTx(
     }
   );
 
+  const outputCell: Cell = txSkeleton.get("outputs").get(0)!;
+  const minCapacity = minimalDepositCapacity(outputCell, depositLockArgs);
+  if (capacity != null && BigInt(capacity) < minCapacity) {
+    throw new Error(
+      `Deposit sUDT required ${minCapacity} shannons at least, provided ${capacity}.`
+    );
+  }
+
   const sudtScriptHash = utils.computeScriptHash(
     txSkeleton.get("outputs").get(0)!.cell_output.type!
   );
@@ -131,9 +140,6 @@ export const run = async (program: commander.Command) => {
   console.log("using eth address:", ethAddress);
 
   const capacity: bigint = BigInt(program.capacity);
-  if (capacity < BigInt(40000000000)) {
-    throw new Error("capacity can't less than 400 CKB");
-  }
 
   const godwokenRpc = program.parent.godwokenRpc;
   const godwoken = new Godwoken(godwokenRpc);

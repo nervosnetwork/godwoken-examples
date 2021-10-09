@@ -1,8 +1,24 @@
 import { Reader } from "ckb-js-toolkit";
-import { SerializeDepositLockArgs } from "@godwoken-examples/godwoken/schemas";
+import {
+  SerializeCustodianLockArgs,
+  SerializeDepositLockArgs,
+} from "@godwoken-examples/godwoken/schemas";
 import { DeploymentConfig } from "./deployment-config";
-import { Script, HexString, Hash, PackedSince, utils } from "@ckb-lumos/base";
-import { NormalizeDepositLockArgs } from "@godwoken-examples/godwoken/lib/normalizer";
+import {
+  Script,
+  HexString,
+  Hash,
+  PackedSince,
+  utils,
+  Cell,
+  HexNumber,
+} from "@ckb-lumos/base";
+import {
+  NormalizeDepositLockArgs,
+  CustodianLockArgs,
+  NormalizeCustodianLockArgs,
+} from "@godwoken-examples/godwoken/lib/normalizer";
+import { minimalCellCapacity } from "@ckb-lumos/helpers";
 const godwokenConfig = require("../../configs/godwoken-config.json");
 
 export interface DepositLockArgs {
@@ -57,4 +73,37 @@ export function getRollupTypeHash(): HexString {
   console.log("rollupTypeHash:", hash);
 
   return hash;
+}
+
+export function minimalDepositCapacity(
+  output: Cell,
+  depositLockArgs: DepositLockArgs
+): bigint {
+  // fixed size, the specific value is not important.
+  const dummyHash: Hash = "0x" + "00".repeat(32);
+  const dummyHexNumber: HexNumber = "0x0";
+  const rollupTypeHash: Hash = dummyHash;
+
+  const custodianLockArgs: CustodianLockArgs = {
+    deposit_block_hash: dummyHash,
+    deposit_block_number: dummyHexNumber,
+    deposit_lock_args: depositLockArgs,
+  };
+
+  const serializedCustodianLockArgs: HexString = new Reader(
+    SerializeCustodianLockArgs(NormalizeCustodianLockArgs(custodianLockArgs))
+  ).serializeJson();
+
+  const args = rollupTypeHash + serializedCustodianLockArgs.slice(2);
+
+  const lock: Script = {
+    code_hash: dummyHash,
+    hash_type: "data",
+    args,
+  };
+
+  const cell = Object.assign(output, { lock });
+  const capacity: bigint = minimalCellCapacity(cell);
+
+  return capacity;
 }
