@@ -102,7 +102,13 @@ export function minimalDepositCapacity(
     args,
   };
 
-  const cell = Object.assign(output, { lock });
+  const cell: Cell = {
+    ...output,
+    cell_output: {
+      ...output.cell_output,
+      lock,
+    },
+  };
   const capacity: bigint = minimalCellCapacity(cell);
 
   return capacity;
