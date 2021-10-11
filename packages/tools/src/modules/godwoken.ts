@@ -1,4 +1,11 @@
-import { Hash, HexString, utils } from "@ckb-lumos/base";
+import {
+  Hash,
+  HexNumber,
+  HexString,
+  Script,
+  utils,
+  Cell,
+} from "@ckb-lumos/base";
 import {
   Godwoken,
   Uint32,
@@ -7,13 +14,18 @@ import {
   GodwokenUtils,
   L2Transaction,
   WithdrawalRequest,
+  WithdrawalLockArgs,
 } from "@godwoken-examples/godwoken";
 import {
   NormalizeSUDTTransfer,
+  NormalizeWithdrawalLockArgs,
   SUDTTransfer,
   UnoinType,
 } from "@godwoken-examples/godwoken/lib/normalizer";
-import { SerializeSUDTArgs } from "@godwoken-examples/godwoken/schemas";
+import {
+  SerializeSUDTArgs,
+  SerializeWithdrawalLockArgs,
+} from "@godwoken-examples/godwoken/schemas";
 import { Reader } from "ckb-js-toolkit";
 import { getRollupTypeHash } from "./deposit";
 
@@ -21,6 +33,7 @@ import * as secp256k1 from "secp256k1";
 import { privateKeyToEthAddress } from "./utils";
 import { deploymentConfig } from "./deployment-config";
 import { ROLLUP_TYPE_HASH } from "./godwoken-config";
+import { minimalCellCapacity } from "@ckb-lumos/helpers";
 
 export async function withdrawCLI(
   godwoken: Godwoken,
@@ -35,6 +48,16 @@ export async function withdrawCLI(
   feeAmount: bigint
 ) {
   console.log("--- godwoken withdraw ---");
+
+  const isSudt =
+    sudtScriptHash !==
+    "0x0000000000000000000000000000000000000000000000000000000000000000";
+  let minCapacity = minimalWithdrawalCapacity(isSudt);
+  if (capacity < minCapacity) {
+    throw new Error(
+      `Withdrawal required ${minCapacity} shannons at least, provided ${capacity}.`
+    );
+  }
 
   const nonce: Uint32 = await godwoken.getNonce(fromId);
   console.log("nonce:", nonce);
@@ -270,4 +293,60 @@ export async function parseAccountToId(
 
   // if account is id
   return +account;
+}
+
+export function minimalWithdrawalCapacity(isSudt: boolean): bigint {
+  // fixed size, the specific value is not important.
+  const dummyHash: Hash = "0x" + "00".repeat(32);
+  const dummyHexNumber: HexNumber = "0x0";
+  const dummyRollupTypeHash: Hash = dummyHash;
+
+  const dummyWithdrawalLockArgs: WithdrawalLockArgs = {
+    account_script_hash: dummyHash,
+    withdrawal_block_hash: dummyHash,
+    withdrawal_block_number: dummyHexNumber,
+    sudt_script_hash: dummyHash,
+    sell_amount: dummyHexNumber,
+    sell_capacity: dummyHexNumber,
+    owner_lock_hash: dummyHash,
+    payment_lock_hash: dummyHash,
+  };
+
+  const serialized: HexString = new Reader(
+    SerializeWithdrawalLockArgs(
+      NormalizeWithdrawalLockArgs(dummyWithdrawalLockArgs)
+    )
+  ).serializeJson();
+
+  const args = dummyRollupTypeHash + serialized.slice(2);
+
+  const lock: Script = {
+    code_hash: dummyHash,
+    hash_type: "data",
+    args,
+  };
+
+  let type: Script | undefined = undefined;
+  let data = "0x";
+  if (isSudt) {
+    type = {
+      code_hash: dummyHash,
+      hash_type: "data",
+      args: dummyHash,
+    };
+    data = "0x" + "00".repeat(16);
+  }
+
+  const cell: Cell = {
+    cell_output: {
+      lock,
+      type,
+      capacity: dummyHexNumber,
+    },
+    data,
+  };
+
+  const capacity: bigint = minimalCellCapacity(cell);
+
+  return capacity;
 }
