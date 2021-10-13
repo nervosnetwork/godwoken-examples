@@ -124,6 +124,13 @@ export const run = async (program: commander.Command) => {
 
   console.log("using eth address:", ethAddress);
   try {
+    const accountScriptHash = ethAddressToScriptHash(ethAddress);
+    const currentBalance = await getBalanceByScriptHash(
+      godwoken,
+      1,
+      accountScriptHash
+    );
+
     const txHash: Hash = await sendTx(
       deploymentConfig,
       ckbAddress,
@@ -133,18 +140,10 @@ export const run = async (program: commander.Command) => {
       privateKey,
       program.rpc
     );
-
-    console.log("txHash:", txHash);
-
-    console.log("--------- wait for tx deposit ----------");
+    console.log("Transaction hash:", txHash);
+    console.log("--------- wait for deposit transaction ----------");
 
     await waitTxCommitted(txHash, ckbRpc);
-    const accountScriptHash = ethAddressToScriptHash(ethAddress);
-    const currentBalance = await getBalanceByScriptHash(
-      godwoken,
-      1,
-      accountScriptHash
-    );
     await waitForDeposit(godwoken, accountScriptHash, currentBalance);
 
     process.exit(0);

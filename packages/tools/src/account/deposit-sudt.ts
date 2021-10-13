@@ -145,6 +145,13 @@ export const run = async (program: commander.Command) => {
   const godwoken = new Godwoken(godwokenRpc);
 
   try {
+    const accountScriptHash = ethAddressToScriptHash(ethAddress);
+    const currentBalance = await getBalanceByScriptHash(
+      godwoken,
+      1,
+      accountScriptHash
+    );
+
     const [txHash, layer2SudtScriptHash] = await sendTx(
       godwoken,
       deploymentConfig,
@@ -158,17 +165,10 @@ export const run = async (program: commander.Command) => {
       capacity
     );
 
-    console.log("txHash:", txHash);
-
-    console.log("--------- wait for tx deposit ----------");
+    console.log("Transaction hash:", txHash);
+    console.log("--------- wait for token deposit transaction ----------");
 
     await waitTxCommitted(txHash, ckbRpc);
-    const accountScriptHash = ethAddressToScriptHash(ethAddress);
-    const currentBalance = await getBalanceByScriptHash(
-      godwoken,
-      1,
-      accountScriptHash
-    );
     await waitForDeposit(
       godwoken,
       accountScriptHash,
