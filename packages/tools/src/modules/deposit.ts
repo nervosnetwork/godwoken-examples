@@ -55,7 +55,7 @@ export function generateDepositLock(
 export function getDepositLockArgs(
   ownerLockHash: Hash,
   layer2_lock: Script,
-  cancelTimeout: PackedSince = "0xc00000000002a300"
+  cancelTimeout: PackedSince = "0xc0000000000004b0"
 ): DepositLockArgs {
   const depositLockArgs: DepositLockArgs = {
     owner_lock_hash: ownerLockHash,
