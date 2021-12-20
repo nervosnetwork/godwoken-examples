@@ -86,3 +86,7 @@ export enum Status {
   Running = "running",
   Halting = "halting",
 }
+
+export interface LastL2BlockCommittedInfo {
+  transaction_hash: Hash;
+}
