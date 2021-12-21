@@ -9,6 +9,7 @@ import {
   Transaction,
   OutPoint,
   Script,
+  TransactionWithStatus,
 } from "@ckb-lumos/base";
 import {
   parseAddress,
@@ -347,6 +348,23 @@ function getSudtCellDep(): CellDep {
   };
 }
 
+async function getPendingTransaction(
+  txHash: Hash,
+  ckbRpc: RPC
+): Promise<TransactionWithStatus | null> {
+  let tx: TransactionWithStatus | null = null;
+
+  // retry 10 times, and sleep 1s
+  for (let i = 0; i < 10; i++) {
+    tx = await ckbRpc.get_transaction(txHash);
+    if (tx != null) {
+      return tx;
+    }
+    await asyncSleep(1000);
+  }
+  return null;
+}
+
 async function getRollupCell(
   godwokenClient: Godwoken,
   ckbRpc: RPC,
@@ -354,7 +372,7 @@ async function getRollupCell(
 ): Promise<Cell> {
   const result = await godwokenClient.getLastSubmittedInfo();
   const txHash = result.transaction_hash;
-  const tx = await ckbRpc.get_transaction(txHash);
+  const tx = await getPendingTransaction(txHash, ckbRpc);
 
   if (tx == null) {
     throw new Error("Last submitted tx not found!");
