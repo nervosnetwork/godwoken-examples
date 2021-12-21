@@ -17,6 +17,7 @@ import {
   Uint32,
   Uint64,
   Fee,
+  LastL2BlockCommittedInfo,
 } from "./types";
 import keccak256 from "keccak256";
 
@@ -160,6 +161,10 @@ export class Godwoken {
 
   async getTransactionReceipt(l2_tx_hash: Hash) {
     return await this.rpcCall("get_transaction_receipt", l2_tx_hash);
+  }
+
+  async getLastSubmittedInfo(): Promise<LastL2BlockCommittedInfo> {
+    return await this.rpcCall("get_last_submitted_info");
   }
 }
 

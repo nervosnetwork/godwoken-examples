@@ -9,6 +9,7 @@ import {
   Transaction,
   OutPoint,
   Script,
+  TransactionWithStatus,
 } from "@ckb-lumos/base";
 import {
   parseAddress,
@@ -17,13 +18,10 @@ import {
 } from "@ckb-lumos/helpers";
 import { CellCollector, Indexer } from "@ckb-lumos/indexer";
 import { deploymentConfig } from "../modules/deployment-config";
-import {
-  ROLLUP_TYPE_HASH,
-  ROLLUP_TYPE_SCRIPT,
-} from "../modules/godwoken-config";
+import { ROLLUP_TYPE_HASH } from "../modules/godwoken-config";
 import { asyncSleep, privateKeyToCkbAddress } from "../modules/utils";
 import { exit } from "process";
-import { core, normalizer } from "@godwoken-examples/godwoken";
+import { core, Godwoken, normalizer } from "@godwoken-examples/godwoken";
 import { normalizers, Reader } from "ckb-js-toolkit";
 import { common } from "@ckb-lumos/common-scripts";
 import { key } from "@ckb-lumos/hd";
@@ -36,6 +34,7 @@ async function unlock(
   privateKey: HexString,
   indexer: Indexer,
   rpc: RPC,
+  godwokenClient: Godwoken,
   sudtScript?: Script,
   retryTime = 10
 ) {
@@ -45,7 +44,13 @@ async function unlock(
         console.log("-".repeat(15) + ` Retry ${i} ` + "-".repeat(15));
       }
 
-      const isRetry = await unlockInner(privateKey, indexer, rpc, sudtScript);
+      const isRetry = await unlockInner(
+        privateKey,
+        indexer,
+        rpc,
+        godwokenClient,
+        sudtScript
+      );
       if (!isRetry) {
         break;
       }
@@ -70,9 +75,10 @@ async function unlockInner(
   privateKey: HexString,
   indexer: Indexer,
   rpc: RPC,
+  godwokenClient: Godwoken,
   sudtScript?: Script
 ): Promise<boolean> {
-  const rollup_type_script = ROLLUP_TYPE_SCRIPT;
+  // const rollup_type_script = ROLLUP_TYPE_SCRIPT;
   const rollup_type_hash: Hash = ROLLUP_TYPE_HASH;
   console.log("rollup_type_hash:", rollup_type_hash);
 
@@ -87,31 +93,30 @@ async function unlockInner(
   // Ready to build L1 CKB transaction
 
   // * search rollup cell then get last_finalized_block_number from cell data (GlobalState)
-  const rollupCollector = new CellCollector(indexer, {
-    type: rollup_type_script,
-  });
-  let rollup_cell: Cell | undefined = undefined;
-  for await (const cell of rollupCollector.collect()) {
-    rollup_cell = cell;
-    break;
-  }
+  // const rollupCollector = new CellCollector(indexer, {
+  //   type: rollup_type_script,
+  // });
+  // let rollup_cell: Cell | undefined = undefined;
+  // for await (const cell of rollupCollector.collect()) {
+  //   rollup_cell = cell;
+  //   break;
+  // }
+  let rollup_cell: Cell = await getRollupCell(
+    godwokenClient,
+    rpc,
+    rollup_type_hash
+  );
 
-  if (rollup_cell == null) {
-    console.error("[ERROR]: rollup_cell not found");
-    exit(-1);
-  }
+  // if (rollup_cell == null) {
+  //   console.error("[ERROR]: rollup_cell not found");
+  //   exit(-1);
+  // }
   const globalState = new core.GlobalState(new Reader(rollup_cell.data));
   const last_finalized_block_number = globalState
     .getLastFinalizedBlockNumber()
     .toLittleEndianBigUint64();
 
   console.log("last_finalized_block_number", last_finalized_block_number);
-
-  // * use rollup cell's out point as cell_deps
-  const rollup_cell_dep: CellDep = {
-    out_point: rollup_cell.out_point!,
-    dep_type: "code",
-  };
 
   // * search withdrawal locked cell by:
   //   - withdrawal lock code hash
@@ -195,6 +200,15 @@ async function unlockInner(
       normalizers.NormalizeWitnessArgs(new_witness_args)
     )
   ).serializeJson();
+
+  // Get rollup cell again;
+  rollup_cell = await getRollupCell(godwokenClient, rpc, rollup_type_hash);
+
+  // * use rollup cell's out point as cell_deps
+  const rollup_cell_dep: CellDep = {
+    out_point: rollup_cell.out_point!,
+    dep_type: "code",
+  };
 
   let txSkeleton = TransactionSkeleton({ cellProvider: indexer });
   txSkeleton = txSkeleton
@@ -334,6 +348,58 @@ function getSudtCellDep(): CellDep {
   };
 }
 
+async function getPendingTransaction(
+  txHash: Hash,
+  ckbRpc: RPC
+): Promise<TransactionWithStatus | null> {
+  let tx: TransactionWithStatus | null = null;
+
+  // retry 10 times, and sleep 1s
+  for (let i = 0; i < 10; i++) {
+    tx = await ckbRpc.get_transaction(txHash);
+    if (tx != null) {
+      return tx;
+    }
+    await asyncSleep(1000);
+  }
+  return null;
+}
+
+async function getRollupCell(
+  godwokenClient: Godwoken,
+  ckbRpc: RPC,
+  rollupTypeHash: Hash
+): Promise<Cell> {
+  const result = await godwokenClient.getLastSubmittedInfo();
+  const txHash = result.transaction_hash;
+  const tx = await getPendingTransaction(txHash, ckbRpc);
+
+  if (tx == null) {
+    throw new Error("Last submitted tx not found!");
+  }
+
+  let rollupIndex = tx.transaction.outputs.findIndex((o) => {
+    return o.type && utils.computeScriptHash(o.type) === rollupTypeHash;
+  });
+  const rollupOutput = tx.transaction.outputs[rollupIndex];
+  const rollupOutputData = tx.transaction.outputs_data[rollupIndex];
+
+  if (rollupOutput == null) {
+    throw new Error(`Rollup cell not found in last submitted tx!`);
+  }
+
+  const cell: Cell = {
+    out_point: {
+      tx_hash: txHash,
+      index: "0x" + rollupIndex.toString(16),
+    },
+    cell_output: rollupOutput,
+    data: rollupOutputData,
+  };
+
+  return cell;
+}
+
 export const run = async (program: Command) => {
   const ckbUrl = program.rpc;
   const ckbRpc = new RPC(ckbUrl);
@@ -344,13 +410,15 @@ export const run = async (program: Command) => {
 
   const sudtScriptArgs = program.sudtScriptArgs;
 
+  const godwokenClient = new Godwoken(program.parent.godwokenRpc);
+
   let sudtScript = undefined;
   if (!!sudtScriptArgs) {
     sudtScript = getSudtScript(sudtScriptArgs);
   }
 
   try {
-    await unlock(privateKey, indexer, ckbRpc, sudtScript);
+    await unlock(privateKey, indexer, ckbRpc, godwokenClient, sudtScript);
 
     process.exit(0);
   } catch (e) {
